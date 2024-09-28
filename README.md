@@ -40,34 +40,34 @@ Ověření dobrovolníci mohou tyto zvířata vyhledávat a provádět rezervace
 - Dle vlastní fantazie, popište v dokumentaci…
 
 ## Rozjetí projektu
-Vyzkoušeno na Windows 11, jelikož na WSLku nelze rozjet Apache (ani jiný) web server.
+Platforma (téměř) libovolná, WSLka by ale mohla mít potíže se spouštěním web serverů...
 
 ### Postup
-1. Stažení XAMPP: https://sourceforge.net/projects/xampp/files/XAMPP%20Windows/8.1.25/xampp-windows-x64-8.1.25-0-VS16-installer.exe
-2. Stažení Composer: https://getcomposer.org/Composer-Setup.exe
-
-3. Naklonování repa:
+1. Stažení [Python 3.12.5](https://www.python.org/downloads/release/python-3125/)
+2. Naklonování repa:
 ```
 git clone https://github.com/Dandys3900/IIS-Project.git .
 ```
-4. Vlézt do adresáře `./code`
-5. Instalace projektových závislostí:
+3. Instalace projektových závislostí:
 ```
-composer install
-npm install
+pip install -r requirements.txt
 ```
-6. Spuštění serveru:
-```
-php artisan serve
+4. Spuštění serveru (**v adresáři `code/`**):
 ```
 python manage.py runserver
+```
 
+---
+### Testovací uživatel
+Pro účely vývoje jsem vytvořil mock uživatele, přes registrační formulář na webu jde udělat libovolně jiných.
+- Username: devUser
+- Password: mock123456
 ---
 
 ### Hosting projektu
-Projekt je hostován na platformě InfinityFree.
+Projekt je hostován na platformě **pythonanywhere.com**
 
-#### URL: `http://vutfitissproject.kesug.com`
+#### URL: `TBD`
 
 MySQL databáze je hostována na platformě Aiven, konfigurační detaily a přihlašovací údaje jsou uloženy v `/code/.env`:
 
