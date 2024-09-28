@@ -19,7 +19,7 @@ def home(request):
         )
         # Check if successful
         if user is not None:
-            login(user)
+            login(request, user)
             messages.success(request, mark_safe(f"Welcome back <strong>{username}</strong>!"))
         else:
             messages.error(request, mark_safe(f"Error with Your login <strong>{username}</strong>, please try again..."))
@@ -44,7 +44,7 @@ def client_register(request):
             form.save()
             # Load given credentials
             username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
+            password = form.cleaned_data["password1"]
             # Authenticate new user
             user = authenticate(
                 request,
