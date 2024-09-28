@@ -1,1 +1,4 @@
 /virtenv
+/code/project/__pycache__
+/code/project/migrations/__pycache__
+/code/source/__pycache__
