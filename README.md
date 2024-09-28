@@ -60,6 +60,7 @@ npm install
 ```
 php artisan serve
 ```
+python manage.py runserver
 
 ---
 
