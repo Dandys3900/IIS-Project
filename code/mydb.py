@@ -27,11 +27,11 @@ try:
     # Connect to database
     database = pymysql.connect(
         charset         = "utf8mb4",
-        connect_timeout = 10,
-        cursorclass     = pymysql.cursors.DictCursor,
+        connect_timeout = timeout,
         read_timeout    = timeout,
-        port            = 17370,
         write_timeout   = timeout,
+        cursorclass     = pymysql.cursors.DictCursor,
+        port            = 17370,
         db              = "defaultdb",
         host            = "mysql-1eeb8483-iisproject2024.g.aivencloud.com",
         user            = "avnadmin",
