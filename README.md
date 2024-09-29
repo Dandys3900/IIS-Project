@@ -65,9 +65,9 @@ Pro účely vývoje jsem vytvořil mock uživatele, přes registrační formulá
 ---
 
 ### Hosting projektu
-Projekt je hostován na platformě **pythonanywhere.com**
+Projekt je hostován na platformě **Koyeb.com**
 
-#### URL: `TBD`
+#### URL: `https://principal-thomasina-vut-fit-0029f885.koyeb.app/`
 
 MySQL databáze je hostována na platformě Aiven, konfigurační detaily a přihlašovací údaje jsou uloženy v `/code/.env`:
 
