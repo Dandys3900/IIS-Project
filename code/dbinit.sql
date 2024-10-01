@@ -3,8 +3,6 @@
 -- pozn.    VARCHAR2 a NVARCHAR/NVARCHAR2 ve v MySQL nepoužívají
 --          používám VARCHAR(255) - VARCHAR může mít proměnlivou délku
 
-
--- TODO: Udělení přístupových práv
 -----------------------------------------------------------------------------------------------
 ----------------------------------------- DROP TABLE ------------------------------------------
 -----------------------------------------------------------------------------------------------
@@ -54,7 +52,7 @@ CREATE TABLE Plemeno (
 CREATE TABLE Zdravotni_zaznam (
     ID_zaznamu INT AUTO_INCREMENT not NULL,
     Nazev VARCHAR(255) not NULL,
-    Detail VARCHAR(1000) not NULL,
+    Detail TEXT not NULL,
 
     PRIMARY KEY(ID_zaznamu),
 
@@ -170,3 +168,5 @@ CREATE TABLE Prohlidka (
     FOREIGN KEY(ID_veterinare) REFERENCES Uzivatel(ID_uzivatele) ON DELETE CASCADE
     -- při smazání veterináře se smaže i rezervace
 );
+
+-- TODO: naplnit to datama
