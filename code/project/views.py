@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm
+from .forms import SignUpForm, CreateUserForm
 
 # Home view
 def home(request):
@@ -57,8 +57,37 @@ def client_register(request):
                 messages.success(request, mark_safe(f"Welcome onboard <strong>{username}</strong> :-)"))
             # Redirect back to homepage
             return redirect('home')
-    else:
-        form = SignUpForm()
+    form = SignUpForm()
+    return render(request, 'register.html', {
+        'form' : form
+    })
+
+# Create new user by currently logged user
+def client_create_new(request):
+    # User is trying to register
+    if request.method == "POST":
+        form = CreateUserForm(request.POST)
+        # Check given data validity
+        if form.is_valid():
+            form.save()
+            # Load given credentials
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password1"]
+            # Load role set for new user
+            role = form.cleaned_data["role"]
+            # Authenticate new user
+            user = authenticate(
+                request,
+                username=username,
+                password=password,
+                role=role
+            )
+            # Check if successful
+            if user is not None:
+                messages.success(request, mark_safe(f"User <strong>{username}</strong> succesfully created :-)"))
+            # Redirect back to homepage
+            return redirect('home')
+    form = CreateUserForm()
     return render(request, 'register.html', {
         'form' : form
     })
