@@ -4,8 +4,11 @@ from django.contrib import messages
 from django.utils.safestring import mark_safe
 from .forms import SignUpForm
 
-# Home view
 def home(request):
+    return render(request, 'home.html', {})
+
+# Perform client login
+def client_login(request):
     # If POST request, user tries to log in, otherwise would be GET
     if request.method == "POST":
         # Store given credentials
@@ -25,7 +28,7 @@ def home(request):
             messages.error(request, mark_safe(f"Error with Your login <strong>{username}</strong>, please try again..."))
         # Redirect back to homepage
         return redirect('home')
-    return render(request, 'home.html', {})
+    return render(request, 'login.html', {})
 
 # Perform current user logout
 def client_logout(request):
