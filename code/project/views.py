@@ -24,15 +24,15 @@ def home(request):
         else:
             messages.error(request, mark_safe(f"Error with Your login <strong>{username}</strong>, please try again..."))
         # Redirect back to homepage
-        return redirect('home')
-    return render(request, 'home.html', {})
+        return redirect("home")
+    return render(request, "home.html", {})
 
 # Perform current user logout
 def client_logout(request):
     logout(request)
     messages.info(request, "Logout successful, see You soon")
     # Redirect back to homepage
-    return redirect('home')
+    return redirect("home")
 
 # Register new user
 def client_register(request):
@@ -45,21 +45,29 @@ def client_register(request):
             # Load given credentials
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
+            extra_fields = {
+                "first_name"   : form.cleaned_data.get("first_name"),
+                "last_name"    : form.cleaned_data.get("last_name"),
+                "email"        : form.cleaned_data.get("email"),
+                "phone_number" : form.cleaned_data.get("phone_number"),
+                "userrole"     : "volunteer" # Default when
+            }
             # Authenticate new user
             user = authenticate(
                 request,
                 username=username,
-                password=password
+                password=password,
+                **extra_fields
             )
             # Check if successful
             if user is not None:
                 login(request, user)
                 messages.success(request, mark_safe(f"Welcome onboard <strong>{username}</strong> :-)"))
             # Redirect back to homepage
-            return redirect('home')
+            return redirect("home")
     form = SignUpForm()
-    return render(request, 'register.html', {
-        'form' : form
+    return render(request, "register.html", {
+        "form" : form
     })
 
 # Create new user by currently logged user
@@ -73,21 +81,26 @@ def client_create_new(request):
             # Load given credentials
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
-            # Load role set for new user
-            role = form.cleaned_data["role"]
+            extra_fields = {
+                "first_name"   : form.cleaned_data.get("first_name"),
+                "last_name"    : form.cleaned_data.get("last_name"),
+                "email"        : form.cleaned_data.get("email"),
+                "phone_number" : form.cleaned_data.get("phone_number"),
+                "userrole"     : form.cleaned_data.get("userrole")
+            }
             # Authenticate new user
             user = authenticate(
                 request,
                 username=username,
                 password=password,
-                role=role
+                **extra_fields
             )
             # Check if successful
             if user is not None:
                 messages.success(request, mark_safe(f"User <strong>{username}</strong> succesfully created :-)"))
             # Redirect back to homepage
-            return redirect('home')
+            return redirect("home")
     form = CreateUserForm()
-    return render(request, 'register.html', {
-        'form' : form
+    return render(request, "register.html", {
+        "form" : form
     })

@@ -13,10 +13,10 @@ def getTextWidget(elementName, placeholderText):
 # Singup form class
 class SignUpForm(UserCreationForm):
     # Get new user information
-    firstname = forms.CharField(widget=getTextWidget("firstname", "Enter Your firstname"))
-    lastname  = forms.CharField(widget=getTextWidget("lastname", "Enter Your lastname"))
-    email     = forms.EmailField(widget=getTextWidget("email", "Enter Your email"))
-    phone     = forms.NumberInput(widget=getTextWidget("phonenumber", "Enter Your phone number"))
+    first_name   = forms.CharField(widget=getTextWidget("first_name", "Enter Your firstname"))
+    last_name    = forms.CharField(widget=getTextWidget("last_name", "Enter Your lastname"))
+    email        = forms.CharField(widget=getTextWidget("email", "Enter Your email"))
+    phone_number = forms.CharField(widget=getTextWidget("phone_number", "Enter Your phone number"))
 
     # New user model class
     class NewUser:
@@ -24,10 +24,10 @@ class SignUpForm(UserCreationForm):
         # List user attributes
         fields = (
             "username",
-            "firstname",
-            "lastname",
+            "first_name",
+            "last_name",
             "email",
-            "phonenumber",
+            "phone_number",
             "password1",
             "password2"
         )
@@ -38,18 +38,18 @@ class SignUpForm(UserCreationForm):
 
         self.fields["username"].widget.attrs["class"] = "form-control"
         self.fields["username"].widget.attrs["placeholder"] = "Enter Your username"
-        self.fields['username'].label     = ""
-        self.fields['username'].help_text = ""
+        self.fields["username"].label     = ""
+        self.fields["username"].help_text = ""
 
         self.fields["password1"].widget.attrs["class"] = "form-control"
         self.fields["password1"].widget.attrs["placeholder"] = "Enter Your password"
-        self.fields['password1'].label     = ""
-        self.fields['password1'].help_text = ""
+        self.fields["password1"].label     = ""
+        self.fields["password1"].help_text = ""
 
         self.fields["password2"].widget.attrs["class"] = "form-control"
         self.fields["password2"].widget.attrs["placeholder"] = "Enter Your password"
-        self.fields['password2'].label     = ""
-        self.fields['password2'].help_text = ""
+        self.fields["password2"].label     = ""
+        self.fields["password2"].help_text = ""
 
 class CreateUserForm(SignUpForm):
     # Array of possible new roles
@@ -63,7 +63,8 @@ class CreateUserForm(SignUpForm):
 
     class NewUser(SignUpForm.NewUser):
         # Inherit fields from SignUpForm and add own role dropdown element
-        fields = SignUpForm.NewUser.fields + ["role"]
+        fields = SignUpForm.NewUser.fields + ("userrole",)
 
+    # Setup rest of form fields
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
