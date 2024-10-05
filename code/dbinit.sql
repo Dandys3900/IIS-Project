@@ -1,192 +1,189 @@
--- MySQL databáze pro IIS projekt, jehož zadáním je "Zvířecí útulek"
-
--- pozn.    VARCHAR2 a NVARCHAR/NVARCHAR2 ve v MySQL nepoužívají
---          používám VARCHAR(255) - VARCHAR může mít proměnlivou délku
+-- MySQL database for IIS project, titled "Animal Shelter"
 
 -- ----------------------------------------------------------------------------------------- --
 -- --------------------------------------- DROP TABLE -------------------------------------- --
 -- ----------------------------------------------------------------------------------------- --
 
--- Důležité je zachování správného pořadí DROP TABLE (dependency)
+-- It is important to maintain correct order of DROP TABLE (dependencies)
 
-DROP TABLE IF EXISTS Venceni;
-DROP TABLE IF EXISTS Prohlidka;
-DROP TABLE IF EXISTS Rezervace;
+DROP TABLE IF EXISTS Walking;
+DROP TABLE IF EXISTS CheckUp;
+DROP TABLE IF EXISTS Reservation;
 
-DROP TABLE IF EXISTS Zdravotni_zaznam;
-DROP TABLE IF EXISTS Fotka_zvirete;
-DROP TABLE IF EXISTS Zvire;
+DROP TABLE IF EXISTS HealthRecord;
+DROP TABLE IF EXISTS AnimalPhoto;
+DROP TABLE IF EXISTS Animal;
 
-DROP TABLE IF EXISTS Dobrovolnik;
+DROP TABLE IF EXISTS Volunteer;
 DROP TABLE IF EXISTS Administrator;
-DROP TABLE IF EXISTS Veterinar;
-DROP TABLE IF EXISTS Pecovatel;
-DROP TABLE IF EXISTS Uzivatel;
+DROP TABLE IF EXISTS Veterinarian;
+DROP TABLE IF EXISTS Caregiver;
+DROP TABLE IF EXISTS User;
 
-DROP TABLE IF EXISTS Plemeno;
+DROP TABLE IF EXISTS Breed;
 
 -- ----------------------------------------------------------------------------------------- --
 -- -------------------------------------- CREATE TABLE ------------------------------------- --
 -- ----------------------------------------------------------------------------------------- --
 
--- ---------------------------------- VYTVOŘENÍ UŽIVATELE ---------------------------------- --
-CREATE TABLE Uzivatel (
-    ID_uzivatele INT AUTO_INCREMENT not NULL,
-    Jmeno VARCHAR(255) not NULL,
-    Prijmeni VARCHAR(255) not NULL,
-    Uzivatelske_jmeno VARCHAR(255) not NULL, -- Username
-    Heslo VARCHAR(24) not NULL,
-    Email VARCHAR(255) not NULL,
-    Telefon VARCHAR(9) not NULL, -- tel. předvolba nebude
+-- -------------------------------------- CREATE USER -------------------------------------- --
+CREATE TABLE User (
+    userID INT AUTO_INCREMENT not NULL,
+    firstName VARCHAR(255) not NULL,
+    lastName VARCHAR(255) not NULL,
+    username VARCHAR(255) not NULL,
+    userPassword VARCHAR(24) not NULL,
+    email VARCHAR(255) not NULL,
+    phoneNumber VARCHAR(9) not NULL, -- phoneNumber prefix not included
 
-    PRIMARY KEY(ID_uzivatele),
+    PRIMARY KEY(userID),
 
-    CHECK (REGEXP_LIKE(Uzivatelske_jmeno, '^[a-zA-Z0-9._]{3,}$')),
-        -- Username musí mít alespoň 3 znaky
-    CHECK (REGEXP_LIKE(Heslo, '^[a-zA-Z0-9@#$%!*_.]{8,}$')),
-        -- Heslo má jen některé povolené znaky a musí být alespoň 8 znaků dlouhé
-    CHECK (REGEXP_LIKE(Email, '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')),
-    CHECK (REGEXP_LIKE(Telefon, '^[0-9]{9}$'))
+    CHECK (REGEXP_LIKE(username, '^[a-zA-Z0-9._]{3,}$')),
+        -- Username must contain at least 3 characters
+    CHECK (REGEXP_LIKE(userPassword, '^[a-zA-Z0-9@#$%!*_.]{8,}$')),
+        -- userPassword can contain specific characters and must be at least 8 characters long
+    CHECK (REGEXP_LIKE(email, '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')),
+    CHECK (REGEXP_LIKE(phoneNumber, '^[0-9]{9}$'))
 );
 
--- (specializace/generalizace -> Uzivatel) --
-CREATE TABLE Pecovatel (
-    ID_uzivatele INT not NULL,
+-- (specialization/generalization -> User) --
+CREATE TABLE Caregiver (
+    userID INT not NULL,
 
-    PRIMARY KEY(ID_uzivatele),
-    FOREIGN KEY(ID_uzivatele) REFERENCES Uzivatel(ID_uzivatele) ON DELETE CASCADE
+    PRIMARY KEY(userID),
+    FOREIGN KEY(userID) REFERENCES User(userID) ON DELETE CASCADE
 );
 
--- (specializace/generalizace -> Uzivatel) --
-CREATE TABLE Dobrovolnik (
-    ID_uzivatele INT not NULL,
-    Overenost BOOLEAN not NULL, -- false = není ověřen, true = je ověřen
+-- (specialization/generalization -> User) --
+CREATE TABLE Volunteer (
+    userID INT not NULL,
+    verified BOOLEAN not NULL, -- false = not verified, true = verified
 
-    PRIMARY KEY(ID_uzivatele),
-    FOREIGN KEY(ID_uzivatele) REFERENCES Uzivatel(ID_uzivatele) ON DELETE CASCADE
+    PRIMARY KEY(userID),
+    FOREIGN KEY(userID) REFERENCES User(userID) ON DELETE CASCADE
 );
 
--- (specializace/generalizace -> Uzivatel) --
+-- (specialization/generalization -> User) --
 CREATE TABLE Administrator (
-    ID_uzivatele INT not NULL,
+    userID INT not NULL,
 
-    PRIMARY KEY(ID_uzivatele),
-    FOREIGN KEY(ID_uzivatele) REFERENCES Uzivatel(ID_uzivatele) ON DELETE CASCADE
+    PRIMARY KEY(userID),
+    FOREIGN KEY(userID) REFERENCES User(userID) ON DELETE CASCADE
 );
 
--- (specializace/generalizace -> Uzivatel) --
-CREATE TABLE Veterinar (
-    ID_uzivatele INT not NULL,
+-- (specialization/generalization -> User) --
+CREATE TABLE Veterinarian (
+    userID INT not NULL,
 
-    PRIMARY KEY(ID_uzivatele),
-    FOREIGN KEY(ID_uzivatele) REFERENCES Uzivatel(ID_uzivatele) ON DELETE CASCADE
+    PRIMARY KEY(userID),
+    FOREIGN KEY(userID) REFERENCES User(userID) ON DELETE CASCADE
 );
 
--- ----------------------------------- VYTVOŘENÍ ZVÍŘETE ----------------------------------- --
+-- ------------------------------------- CREATE ANIMAL ------------------------------------- --
 
-CREATE TABLE Plemeno (
-    ID_plemene INT AUTO_INCREMENT not NULL,
-    Nazev VARCHAR(255) not NULL,
+CREATE TABLE Breed (
+    breedID INT AUTO_INCREMENT not NULL,
+    name VARCHAR(255) not NULL,
 
-    PRIMARY KEY(ID_plemene)
+    PRIMARY KEY(breedID)
 );
 
-CREATE TABLE Zvire (
-    ID_zvirete INT AUTO_INCREMENT not NULL,
-    Druh VARCHAR(255) not NULL,
-    Jmeno VARCHAR(255) not NULL,
-    Pohlavi TINYINT not NULL, -- 0 = samec(muž), 1 = samice(žena)
-    Datum_narozeni DATE, -- může být NULL, nevíme kdy se zvíře narodilo a jeho věk
-    Datum_prichodu DATE not NULL,
-    Aktivni BOOLEAN not NULL, -- false = není v útulku, true = je v útulku
-    Popis TEXT not NULL,
+CREATE TABLE Animal (
+    animalID INT AUTO_INCREMENT not NULL,
+    species VARCHAR(255) not NULL,
+    name VARCHAR(255) not NULL,
+    gender TINYINT not NULL, -- 0 = male, 1 = female
+    birthDate DATE, -- can be NULL if the animal's birth date or age is unknown
+    arrivalDate DATE not NULL,
+    isActive BOOLEAN not NULL, -- false = not in shelter, true = in shelter
+    description TEXT not NULL,
 
-    PRIMARY KEY(ID_zvirete),
+    PRIMARY KEY(animalID),
 
-    ID_plemene INT, -- cizí klíč na tabulku Plemeno
-    FOREIGN KEY(ID_plemene) REFERENCES Plemeno(ID_plemene) -- Vazba na Plemeno
+    breedID INT, -- foreign key to Breed table
+    FOREIGN KEY(breedID) REFERENCES Breed(breedID) -- Link to Breed
 );
 
--- <<week>> entita --
-CREATE TABLE Fotka_zvirete (
-    ID_fotky INT AUTO_INCREMENT not NULL,
-    Cesta_k_obrazku VARCHAR(255) not NULL,
+-- <<week>> entity --
+CREATE TABLE AnimalPhoto (
+    photoID INT AUTO_INCREMENT not NULL,
+    imagePath VARCHAR(255) not NULL,
 
-    PRIMARY KEY(ID_fotky),
+    PRIMARY KEY(photoID),
 
-    ID_zvirete INT not NULL, -- cizí klíč na zvíře
-    FOREIGN KEY(ID_zvirete) REFERENCES Zvire(ID_zvirete) ON DELETE CASCADE
-        -- odstranění fotek, pokud je zvíře odstraněno
+    animalID INT not NULL, -- foreign key to Animal
+    FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE
+        -- delete photos if the animal is deleted
 );
 
-CREATE TABLE Zdravotni_zaznam (
-    ID_zaznamu INT AUTO_INCREMENT not NULL,
-    Nazev VARCHAR(255) not NULL,
-    Detail TEXT not NULL,
+CREATE TABLE HealthRecord (
+    recordID INT AUTO_INCREMENT not NULL,
+    name VARCHAR(255) not NULL,
+    detail TEXT not NULL,
 
-    PRIMARY KEY(ID_zaznamu),
+    PRIMARY KEY(recordID),
 
-    ID_zvirete INT not NULL,
-    FOREIGN KEY(ID_zvirete) REFERENCES Zvire(ID_zvirete) ON DELETE CASCADE,
-        -- když se smaže zvíře, potom se smažou i jeho záznamy
+    animalID INT not NULL,
+    FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE,
+        -- when the animal is deleted, its health records are deleted too
 
-    ID_veterinare INT not NULL, -- odkazuje na ID_uzivatele z tabulky Uzivatel (Veterinar)
-    FOREIGN KEY(ID_veterinare) REFERENCES Uzivatel(ID_uzivatele)
-        -- při smazání veterináře nechceme aby se odstranily i záznamy
+    veterinarianID INT not NULL, -- references userID from User (Veterinarian)
+    FOREIGN KEY(veterinarianID) REFERENCES User(userID)
+        -- do not delete records if the veterinarian is deleted
 );
 
--- ---------------------------------- VYTVOŘENÍ REZERVACE ---------------------------------- --
+-- ---------------------------------- CREATE RESERVATION ----------------------------------- --
 
-CREATE TABLE Rezervace (
-    ID_rezervace INT AUTO_INCREMENT not NULL,
-    Zacatek DATETIME not NULL, -- datum + čas
-    Konec DATETIME not NULL, -- datum + čas
+CREATE TABLE Reservation (
+    reservationID INT AUTO_INCREMENT not NULL,
+    start DATETIME not NULL, -- date + time
+    end DATETIME not NULL, -- date + time
 
-    PRIMARY KEY(ID_rezervace),
+    PRIMARY KEY(reservationID),
 
-    ID_zvirete INT not NULL,
-    FOREIGN KEY(ID_zvirete) REFERENCES Zvire(ID_zvirete) ON DELETE CASCADE,
-     -- odkaz na Zvire, při smazání zvířete se smaže i rezervace
+    animalID INT not NULL,
+    FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE,
+     -- link to Animal, delete reservation if the animal is deleted
 
-    ID_pecovatele INT not NULL,
-    FOREIGN KEY(ID_pecovatele) REFERENCES Uzivatel(ID_uzivatele)
-    -- odkaz na Uzivatel, při smazání pečovatele se rezervace zachová
+    caregiverID INT not NULL,
+    FOREIGN KEY(caregiverID) REFERENCES User(userID)
+    -- link to User, reservation remains even if the caregiver is deleted
 );
 
--- (specializace/generalizace -> Rezervace) --
-CREATE TABLE Venceni (
-    ID_rezervace INT not NULL,
+-- (specialization/generalization -> Reservation) --
+CREATE TABLE Walking (
+    reservationID INT not NULL,
 
-    PRIMARY KEY(ID_rezervace),
-    FOREIGN KEY(ID_rezervace) REFERENCES Rezervace(ID_rezervace) ON DELETE CASCADE,
+    PRIMARY KEY(reservationID),
+    FOREIGN KEY(reservationID) REFERENCES Reservation(reservationID) ON DELETE CASCADE,
 
-    ID_dobrovolnika INT not NULL,
-    FOREIGN KEY(ID_dobrovolnika) REFERENCES Uzivatel(ID_uzivatele) ON DELETE CASCADE
-        -- při smazání dobrovolníka se smaže i rezervace
+    volunteerID INT not NULL,
+    FOREIGN KEY(volunteerID) REFERENCES User(userID) ON DELETE CASCADE
+        -- delete reservation if the volunteer is deleted
 );
 
--- (specializace/generalizace -> Rezervace) --
-CREATE TABLE Prohlidka (
-    ID_rezervace INT not NULL,
+-- (specialization/generalization -> Reservation) --
+CREATE TABLE CheckUp (
+    reservationID INT not NULL,
 
-    PRIMARY KEY(ID_rezervace),
-    FOREIGN KEY(ID_rezervace) REFERENCES Rezervace(ID_rezervace) ON DELETE CASCADE,
+    PRIMARY KEY(reservationID),
+    FOREIGN KEY(reservationID) REFERENCES Reservation(reservationID) ON DELETE CASCADE,
 
-    ID_veterinare INT not NULL,
-    FOREIGN KEY(ID_veterinare) REFERENCES Uzivatel(ID_uzivatele) ON DELETE CASCADE
-    -- při smazání veterináře se smaže i rezervace
+    veterinarianID INT not NULL,
+    FOREIGN KEY(veterinarianID) REFERENCES User(userID) ON DELETE CASCADE
+    -- delete reservation if the veterinarian is deleted
 );
 
 -- ----------------------------------------------------------------------------------------- --
 -- ----------------------------------- INSERT INTO TABLE ----------------------------------- --
 -- ----------------------------------------------------------------------------------------- --
 
--- Databáze se naplní ukázkovými daty, slouží pro usnadnění vývoje (snad)
+-- The database will be filled with sample data for easier development
 
--- ---------------------------------- INSERT PRO UŽIVATELE---------------------------------- --
+-- ---------------------------------- INSERT INTO USER---------------------------------- --
 
--- Vložení základních uživatelů do tabulky Uzivatel
-INSERT INTO Uzivatel (Jmeno, Prijmeni, Uzivatelske_jmeno, Heslo, Email, Telefon)
+-- Inserting basic users into User table
+INSERT INTO User (firstName, lastName, username, userPassword, email, phoneNumber)
 VALUES 
 ('Jan', 'Novák', 'jnovak', 'Heslo123', 'jan.novak@email.cz', '123456789'), -- ID 1
 ('Milan', 'Vrbas', 'Milisaurus', 'C!master7', 'milan.vrbas1@gmail.com', '731672979'), -- ID 2
@@ -196,27 +193,27 @@ VALUES
 ('Eva', 'Kralová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555'), -- ID 6
 ('Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413'); -- ID 7
 
--- Vložení specifických uživatelů (specializace)
-INSERT INTO Pecovatel (ID_uzivatele) VALUES (1);  -- Jan Novák
-INSERT INTO Pecovatel (ID_uzivatele) VALUES (2);  -- Milan Vrbas
-INSERT INTO Veterinar (ID_uzivatele) VALUES (3);  -- Petr Svoboda
-INSERT INTO Dobrovolnik (ID_uzivatele, Overenost) VALUES (4, TRUE); -- Tomáš Daniel
-INSERT INTO Dobrovolnik (ID_uzivatele, Overenost) VALUES (5, FALSE); -- Jakub Janšta
-INSERT INTO Dobrovolnik (ID_uzivatele, Overenost) VALUES (6, FALSE); -- Eva Králová
-INSERT INTO Administrator (ID_uzivatele) VALUES (7); -- Marie Novotná
+-- Inserting specific users (specialization)
+INSERT INTO Caregiver (userID) VALUES (1);  -- Jan Novák
+INSERT INTO Caregiver (userID) VALUES (2);  -- Milan Vrbas
+INSERT INTO Veterinarian (userID) VALUES (3);  -- Petr Svoboda
+INSERT INTO Volunteer (userID, verified) VALUES (4, TRUE); -- Tomáš Daniel
+INSERT INTO Volunteer (userID, verified) VALUES (5, FALSE); -- Jakub Janšta
+INSERT INTO Volunteer (userID, verified) VALUES (6, FALSE); -- Eva Králová
+INSERT INTO Administrator (userID) VALUES (7); -- Marie Novotná
 
--- ---------------------------------- INSERT PRO ZVÍŘÁTKA ---------------------------------- --
+-- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- --
 
--- Vložení plemen
-INSERT INTO Plemeno (Nazev) VALUES 
+-- Inserting breeds
+INSERT INTO Breed (name) VALUES 
 ('Labrador'),
 ('Německý ovčák'),
 ('Britská krátkosrstá kočka'),
 ('Kočka domácí'),
 ('Siamská kočka');
 
--- Vložení zvířat
-INSERT INTO Zvire (Druh, Jmeno, Pohlavi, Datum_narozeni, Datum_prichodu, Aktivni, Popis, ID_plemene)
+-- Inserting animals
+INSERT INTO Animal (species, name, gender, birthDate, arrivalDate, isActive, description, breedID)
 VALUES 
 ('Pes', 'Max', 0, '2017-04-15', '2022-10-01', TRUE, 
     'Max je přátelský labrador, miluje děti a dlouhé procházky. Váží 32kg.', 1), -- Labrador
@@ -233,8 +230,8 @@ VALUES
 ('Kočka', 'Simba', 0, '2021-01-30', '2023-04-25', TRUE, 
     'Simba je hravý a energický siamský kocour, rád se honí za hračkami.', 5);-- Siamská kočka
 
--- Vložení zdravotních záznamů pro zvířata
-INSERT INTO Zdravotni_zaznam (Nazev, Detail, ID_zvirete, ID_veterinare)
+-- Inserting health records for animals
+INSERT INTO HealthRecord (name, detail, animalID, veterinarianID)
 VALUES 
 -- Max
 ('Očkování', 'Max byl očkován proti vzteklině a psince.', 1, 3),
@@ -260,70 +257,70 @@ VALUES
 -- Simba
 ('Očkování', 'Simba byl očkován proti vzteklině.', 7, 3);
 
--- Vložení fotek zvířat (pouze pro ilustraci)
-INSERT INTO Fotka_zvirete (Cesta_k_obrazku, ID_zvirete)
+-- Inserting animal photos (for illustration only)
+INSERT INTO AnimalPhoto (imagePath, animalID)
 VALUES 
--- Fotky pro Maxe
+-- Photos for Max
 ('../images/max_1.jpg', 1),
 ('../images/max_2.jpg', 1),
 
--- Fotky pro Bellu
+-- Photos for Bella
 ('../images/bella_1.jpg', 2),
 
--- Fotky pro Rexe
+-- Photos for Rex
 ('../images/rex_1.jpg', 3),
 
--- Fotky pro Molly
+-- Photos for Molly
 ('../images/molly_1.jpg', 4),
 ('../images/molly_2.jpg', 4),
 
--- Fotky pro Jerryho
+-- Photos for Jerry
 ('../images/jerry_1.jpg', 5),
 
--- Fotky pro Kotěnku
-('../images/kotenka_1.jpg', 6),
+-- Photos for Kotěnka
+('../images/kittenka_1.jpg', 6),
 
--- Fotky pro Simbu
+-- Photos for Simba
 ('../images/simba_1.jpg', 7);
 
--- ---------------------------------- INSERT PRO REZERVACE---------------------------------- --
+-- -------------------------------- INSERT FOR RESERVATIONS -------------------------------- --
 
--- Vložení rezervací pro zvířata
-INSERT INTO Rezervace (Zacatek, Konec, ID_zvirete, ID_pecovatele)
+-- Inserting reservations for animals
+INSERT INTO Reservation (start, end, animalID, caregiverID)
 VALUES
--- Rezervace pro Maxe (Jan Novák - ID 1)
+-- Reservation for Max (Jan Novák - ID 1)
 ('2023-09-25 10:00:00', '2023-09-25 11:00:00', 1, 1),
 ('2023-09-26 14:00:00', '2023-09-26 15:00:00', 1, 1),
 
--- Rezervace pro Bellu (Milan Vrbas - ID 2)
+-- Reservation for Bella (Milan Vrbas - ID 2)
 ('2023-09-25 16:00:00', '2023-09-25 17:00:00', 2, 2),
 
--- Rezervace pro Rexe (Jan Novák - ID 1)
+-- Reservation for Rex (Jan Novák - ID 1)
 ('2023-09-27 09:00:00', '2023-09-27 10:00:00', 3, 1),
 
--- Rezervace pro Molly (Milan Vrbas - ID 2)
+-- Reservation for Molly (Milan Vrbas - ID 2)
 ('2023-09-26 09:00:00', '2023-09-26 10:00:00', 4, 2),
 
--- Rezervace pro Jerryho (Jan Novák - ID 1)
+-- Reservation for Jerry (Jan Novák - ID 1)
 ('2023-09-28 11:00:00', '2023-09-28 12:00:00', 5, 1);
 
--- Vložení venčení pro zvířata
-INSERT INTO Venceni (ID_rezervace, ID_dobrovolnika)
+-- Inserting walks for animals
+INSERT INTO Walking (reservationID, volunteerID)
 VALUES
--- Venčení pro Maxe (Tomáš Daniel - ID 4)
+-- Walk for Max (Tomáš Daniel - ID 4)
 (1, 4),
 
--- Venčení pro Bellu (Eva Králová - ID 6)
+-- Walk for Bella (Eva Králová - ID 6)
 (3, 6),
 
--- Venčení pro Rexe (Jakub Janšta - ID 5)
+-- Walk for Rex (Jakub Janšta - ID 5)
 (4, 5);
 
--- Vložení prohlídek pro zvířata
-INSERT INTO Prohlidka (ID_rezervace, ID_veterinare)
+-- Inserting CheckUps for animals
+INSERT INTO CheckUp (reservationID, veterinarianID)
 VALUES
--- Prohlídka pro Maxe (Petr Svoboda - ID 3)
+-- Checkup for Max (Petr Svoboda - ID 3)
 (2, 3),
 
--- Prohlídka pro Molly (Petr Svoboda - ID 3)
+-- Checkup for Molly (Petr Svoboda - ID 3)
 (5, 3);
