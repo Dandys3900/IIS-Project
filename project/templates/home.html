@@ -1,29 +1,63 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="row justify-content-center align-items-center">
-        <div class="col-md-5">
-            <!-- If user is logged in, dont show login form and vice versa-->
-            {% if not user.is_authenticated %}
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-center">Login</h3>
-                        <form method="POST" action="{% url 'home' %}">
-                            <!-- Django requires this token for enhanced security -->
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="username" placeholder="Enter Your username" required>
-                            </div>
-                            <br>
-                            <div class="form-group">
-                                <input type="password" class="form-control" name="password" placeholder="Enter Your password" required>
-                            </div>
-                            <br>
-                            <button type="submit" class="btn btn-primary btn-block">Login</button>
-                        </form>
-                    </div>
-                </div>
-            {% endif %}
+    <div class="row justify-content-center">
+        <h1 style="text-align: center; margin-top: 1em;">
+            Animal Shelter at VUT FIT
+        </h1>
+        <!-- Search bar -->
+        <div class="col-md-5" style="margin-top: 1em; margin-bottom: 2em;">
+            <form class="d-flex">
+                <input class="form-control me-2" type="search" placeholder="Search animal" aria-label="Search">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </form>
         </div>
     </div>
+    <!-- Main content container -->
+    <div class="container-fluid">
+        <div class="row" style="gap: 20px;">
+            <!-- Animal cards column -->
+            <div class="col">
+                <!-- Setup grid for cards -->
+                <div class="row">
+                    <!-- Example card -->
+                    <div class="col mb-3">
+                        <div class="card" style="width: 20em; height: 20em;" id="cards1" onclick="showDetails(this.id)">
+                            <img src="..." class="card-img-top" alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title">Animal 1</h5>
+                                <p class="card-text">Example text.</p>
+                                <a href="#" class="btn btn-primary">Take me for a walk</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Animal details column -->
+            <div class="col-3" id="details-container" style="display: none;">
+                <!-- Details section container -->
+                <div class="col-col-3">
+                    <!-- Card details widget -->
+                    <div class="card" style="height: 30em;">
+                        <button type="button" class="btn-close" aria-label="Close" style="position: absolute; right: 5px; top: 5px;" onclick="hideDetails()"></button>
+                        <div class="card-body">
+                            <h5 class="card-title">Details</h5>
+                            <p id="details-content" class="card-text"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDetails(cardId) {
+            document.getElementById('details-content').innerText = "Details for card " + cardId;
+            document.getElementById('details-container').style.display = 'block';
+        }
+
+        function hideDetails() {
+            document.getElementById('details-container').style.display = 'none';
+        }
+    </script>
 {% endblock %}
