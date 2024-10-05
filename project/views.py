@@ -36,6 +36,7 @@ def client_logout(request):
 
 # Register new user
 def client_register(request):
+    form = SignUpForm()
     # User is trying to register
     if request.method == "POST":
         form = SignUpForm(request.POST)
@@ -65,13 +66,14 @@ def client_register(request):
                 messages.success(request, mark_safe(f"Welcome onboard <strong>{username}</strong> :-)"))
             # Redirect back to homepage
             return redirect("home")
-    form = SignUpForm()
+    # Re-render form with eventual errors
     return render(request, "register.html", {
         "form" : form
     })
 
 # Create new user by currently logged user
 def client_create_new(request):
+    form = CreateUserForm()
     # User is trying to register
     if request.method == "POST":
         form = CreateUserForm(request.POST)
@@ -100,7 +102,11 @@ def client_create_new(request):
                 messages.success(request, mark_safe(f"User <strong>{username}</strong> succesfully created :-)"))
             # Redirect back to homepage
             return redirect("home")
-    form = CreateUserForm()
+    # Re-render form with eventual errors
     return render(request, "register.html", {
         "form" : form
     })
+
+# Show details for currently logged in user
+def client_details(request):
+    pass

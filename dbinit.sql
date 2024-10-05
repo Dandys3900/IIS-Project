@@ -18,7 +18,6 @@ DROP TABLE IF EXISTS Volunteer;
 DROP TABLE IF EXISTS Administrator;
 DROP TABLE IF EXISTS Veterinarian;
 DROP TABLE IF EXISTS Caregiver;
-DROP TABLE IF EXISTS User;
 
 DROP TABLE IF EXISTS Breed;
 
@@ -35,16 +34,9 @@ CREATE TABLE User (
     userPassword VARCHAR(24) not NULL,
     email VARCHAR(255) not NULL,
     phoneNumber VARCHAR(9) not NULL, -- phoneNumber prefix not included,
-    userRole VARCHAR(20) not NULL
+    userRole VARCHAR(20) not NULL,
 
-    PRIMARY KEY(userID),
-
-    CHECK (REGEXP_LIKE(username, '^[a-zA-Z0-9._]{3,}$')),
-        -- Username must contain at least 3 characters
-    CHECK (REGEXP_LIKE(userPassword, '^[a-zA-Z0-9@#$%!*_.]{8,}$')),
-        -- userPassword can contain specific characters and must be at least 8 characters long
-    CHECK (REGEXP_LIKE(email, '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')),
-    CHECK (REGEXP_LIKE(phoneNumber, '^[0-9]{9}$'))
+    PRIMARY KEY(userID)
 );
 
 -- (specialization/generalization -> User) --

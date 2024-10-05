@@ -33,6 +33,11 @@
                             Logout
                         </a>
                     </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link active" aria-current="page" href="{% url 'userdetails' %}" style="color: #FF0028;">
+                            {{ user.userName }} ({{ user.userRole }})
+                        </a>
+                    </li>
                 {% else %}
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{% url 'register' %}">

@@ -10,16 +10,25 @@ def getTextWidget(elementName, placeholderText):
         "placeholder" : placeholderText
     })
 
+# Function for constructing charFields
+def createField(max_length, elementName, placeholderText):
+    return forms.CharField(
+        required   = True,
+        max_length = max_length,
+        label      = "",
+        widget     = getTextWidget(elementName, placeholderText)
+    )
+
 # Singup form class
 class SignUpForm(UserCreationForm):
     # Get new user information
-    first_name   = forms.CharField(widget=getTextWidget("first_name", "Enter Your firstname"))
-    last_name    = forms.CharField(widget=getTextWidget("last_name", "Enter Your lastname"))
-    email        = forms.CharField(widget=getTextWidget("email", "Enter Your email"))
-    phone_number = forms.CharField(widget=getTextWidget("phone_number", "Enter Your phone number"))
+    first_name   = createField(255, "first_name", "Enter Your firstname")
+    last_name    = createField(255, "last_name", "Enter Your lastname")
+    email        = createField(255, "email", "Enter Your email")
+    phone_number = createField(9, "phone_number", "Enter Your phone number")
 
     # New user model class
-    class NewUser:
+    class Meta:
         model = CustomUser
         # List user attributes
         fields = (
@@ -47,7 +56,7 @@ class SignUpForm(UserCreationForm):
         self.fields["password1"].help_text = ""
 
         self.fields["password2"].widget.attrs["class"] = "form-control"
-        self.fields["password2"].widget.attrs["placeholder"] = "Enter Your password"
+        self.fields["password2"].widget.attrs["placeholder"] = "Enter Your password again"
         self.fields["password2"].label     = ""
         self.fields["password2"].help_text = ""
 
@@ -61,9 +70,9 @@ class CreateUserForm(SignUpForm):
     # Add dropdown menu to select role for new user
     role = forms.ChoiceField(choices=role_choices, required=True, label="Select role for new user")
 
-    class NewUser(SignUpForm.NewUser):
+    class Meta(SignUpForm.Meta):
         # Inherit fields from SignUpForm and add own role dropdown element
-        fields = SignUpForm.NewUser.fields + ("userrole",)
+        fields = SignUpForm.Meta.fields + ("role",)
 
     # Setup rest of form fields
     def __init__(self, *args, **kwargs):

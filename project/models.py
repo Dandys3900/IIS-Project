@@ -25,14 +25,6 @@ class CustomUserManager(BaseUserManager):
 
 # Custom user class
 class CustomUser(AbstractBaseUser):
-    # Specify roles for user
-    user_roles = (
-        "admin",     # Administrator
-        "carer",     # Pecovatel
-        "vet",       # Veterinar
-        "volunteer"  # Dobrovolnik
-        # Neregistrovany uzivatel je else case
-    )
     # Define fields for user
     user_id      = models.AutoField(primary_key=True, db_column="userID")
     first_name   = models.CharField(max_length=255,   db_column="firstName")
@@ -41,7 +33,7 @@ class CustomUser(AbstractBaseUser):
     password     = models.CharField(max_length=128,   db_column="userPassword")
     email        = models.CharField(max_length=255,   db_column="email", unique=True)
     phone_number = models.CharField(max_length=9,     db_column="phoneNumber")
-    userrole     = models.CharField(max_length=20,    db_column="userRole", choices=[(role, role) for role in user_roles])
+    userrole     = models.CharField(max_length=20,    db_column="userRole")
 
     objects = CustomUserManager()
 
@@ -63,6 +55,10 @@ class CustomUser(AbstractBaseUser):
         # Avoid passwords hashing when saving into DB
         super().save(*args, **kwargs)
 
-    # Methods for determining role of currently logged user
+    # Method for determining role of currently logged user
     def userRole(self):
         return self.userrole
+
+    # Model's username getter
+    def userName(self):
+        return self.username
