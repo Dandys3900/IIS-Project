@@ -26,6 +26,7 @@ class CustomUserManager(BaseUserManager):
 # Custom user class
 class CustomUser(AbstractBaseUser):
     # Define fields for user
+    last_login   = models.DateTimeField(blank=True, null=True, verbose_name='last login')
     user_id      = models.AutoField(primary_key=True, db_column="userID")
     first_name   = models.CharField(max_length=255,   db_column="firstName")
     last_name    = models.CharField(max_length=255,   db_column="lastName")

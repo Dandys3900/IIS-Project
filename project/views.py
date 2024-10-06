@@ -17,7 +17,7 @@ def client_login(request):
         password = request.POST["password"]
         # Authenticate user
         user = authenticate(
-            request,
+            request=request,
             username=username,
             password=password
         )
@@ -25,10 +25,10 @@ def client_login(request):
         if user is not None:
             login(request, user)
             messages.success(request, mark_safe(f"Welcome back <strong>{username}</strong>!"))
+            # Redirect back to homepage
+            return redirect("home")
         else:
             messages.error(request, mark_safe(f"Error with Your login <strong>{username}</strong>, please try again..."))
-        # Redirect back to homepage
-        return redirect("home")
     return render(request, "login.html", {})
 
 # Perform current user logout
@@ -46,7 +46,6 @@ def client_register(request):
         form = SignUpForm(request.POST)
         # Check given data validity
         if form.is_valid():
-            form.save()
             # Load given credentials
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
@@ -59,7 +58,7 @@ def client_register(request):
             }
             # Authenticate new user
             user = authenticate(
-                request,
+                request=request,
                 username=username,
                 password=password,
                 **extra_fields
@@ -83,7 +82,6 @@ def client_create_new(request):
         form = CreateUserForm(request.POST)
         # Check given data validity
         if form.is_valid():
-            form.save()
             # Load given credentials
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
@@ -96,7 +94,7 @@ def client_create_new(request):
             }
             # Authenticate new user
             user = authenticate(
-                request,
+                request=request,
                 username=username,
                 password=password,
                 **extra_fields

@@ -27,6 +27,7 @@ DROP TABLE IF EXISTS Breed;
 
 -- -------------------------------------- CREATE USER -------------------------------------- --
 CREATE TABLE User (
+    last_login DATETIME(6),
     userID INT AUTO_INCREMENT not NULL,
     firstName VARCHAR(255) not NULL,
     lastName VARCHAR(255) not NULL,
@@ -176,24 +177,15 @@ CREATE TABLE CheckUp (
 -- ---------------------------------- INSERT INTO USER---------------------------------- --
 
 -- Inserting basic users into User table
-INSERT INTO User (firstName, lastName, username, userPassword, email, phoneNumber, userRole)
+INSERT INTO User (last_login, firstName, lastName, username, userPassword, email, phoneNumber, userRole)
 VALUES
-('Jan', 'Novák', 'jnovak', 'Heslo123', 'jan.novak@email.cz', '123456789', 'volunteer'), -- ID 1
-('Milan', 'Vrbas', 'Milisaurus', 'C!master7', 'milan.vrbas1@gmail.com', '731672979', 'vet'), -- ID 2
-('Petr', 'Svoboda', 'psvoboda', 'Petr*Heslo', 'petr.svoboda@email.com', '987654321', 'carer'), -- ID 3
-('Tomáš', 'Daniel', 'xDandys', 'Gym_Monster', 'tomas.daniel@centrum.cz', '731572983', 'admin'), -- ID 4
-('Janšta', 'Jakub', 'Kubalabambula', 'Godot#Master', 'jakub.jansta@gmail.com', '732315134', 'admin'), -- ID 5
-('Eva', 'Kralová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555', 'volunteer'), -- ID 6
-('Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413', 'carer'); -- ID 7
-
--- Inserting specific users (specialization)
-INSERT INTO Caregiver (userID) VALUES (1);  -- Jan Novák
-INSERT INTO Caregiver (userID) VALUES (2);  -- Milan Vrbas
-INSERT INTO Veterinarian (userID) VALUES (3);  -- Petr Svoboda
-INSERT INTO Volunteer (userID, verified) VALUES (4, TRUE); -- Tomáš Daniel
-INSERT INTO Volunteer (userID, verified) VALUES (5, FALSE); -- Jakub Janšta
-INSERT INTO Volunteer (userID, verified) VALUES (6, FALSE); -- Eva Králová
-INSERT INTO Administrator (userID) VALUES (7); -- Marie Novotná
+(NULL, 'Jan', 'Novák', 'jnovak', 'Heslo123', 'jan.novak@email.cz', '123456789', 'volunteer'), -- ID 1
+(NULL, 'Milan', 'Vrbas', 'Milisaurus', 'C!master7', 'milan.vrbas1@gmail.com', '731672979', 'vet'), -- ID 2
+(NULL, 'Petr', 'Svoboda', 'psvoboda', 'Petr*Heslo', 'petr.svoboda@email.com', '987654321', 'carer'), -- ID 3
+(NULL, 'Tomáš', 'Daniel', 'xDandys', 'Gym_Monster', 'tomas.daniel@centrum.cz', '731572983', 'admin'), -- ID 4
+(NULL, 'Janšta', 'Jakub', 'Kubalabambula', 'Godot#Master', 'jakub.jansta@gmail.com', '732315134', 'admin'), -- ID 5
+(NULL, 'Eva', 'Kralová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555', 'volunteer'), -- ID 6
+(NULL, 'Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413', 'carer'); -- ID 7
 
 -- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- --
 

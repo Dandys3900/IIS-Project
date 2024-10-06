@@ -68,11 +68,11 @@ class CreateUserForm(SignUpForm):
         ("vet"  , "Veterinarian")
     ]
     # Add dropdown menu to select role for new user
-    role = forms.ChoiceField(choices=role_choices, required=True, label="Select role for new user")
+    userrole = forms.ChoiceField(choices=role_choices, required=True, label="Select role for new user")
 
     class Meta(SignUpForm.Meta):
         # Inherit fields from SignUpForm and add own role dropdown element
-        fields = SignUpForm.Meta.fields + ("role",)
+        fields = SignUpForm.Meta.fields + ("userrole",)
 
     # Setup rest of form fields
     def __init__(self, *args, **kwargs):

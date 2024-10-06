@@ -18,14 +18,16 @@ class CustomBackend(BaseBackend):
             return CustomUser.objects.create_user(
                 username = username,
                 password = password,
-                kwargs   = kwargs
+                **kwargs
             )
         except Exception as e:
             print(f"auth: {e}")
             return None
 
     def get_user(self, user_id):
+        # Get custom user
+        userModel = get_user_model()
         try:
-            return CustomUser.objects.get(pk=user_id)
+            return userModel.objects.get(pk=user_id)
         except CustomUser.DoesNotExist:
             return None

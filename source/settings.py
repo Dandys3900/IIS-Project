@@ -131,8 +131,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 AUTH_USER_MODEL = 'project.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-    'project.backends.CustomBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    'project.backends.CustomBackend'
 ]
 
 
