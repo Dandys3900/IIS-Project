@@ -22,10 +22,29 @@
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if user.is_authenticated %}
                     {% if user.userRole == "admin" %}
-                        <li class="nav-item me-2">
-                            <a class="nav-link active" aria-current="page" href="{% url 'createuser' %}">
-                                Add new user
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Manage users
                             </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'createuser' %}">
+                                    Add new user
+                                    </a>
+                                </li>
+                                <hr class="dropdown-divider">
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                    Delete user
+                                    </a>
+                                </li>
+                                <hr class="dropdown-divider">
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                    Edit user
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     {% endif %}
                     <li class="nav-item me-2">
