@@ -18,7 +18,6 @@ DROP TABLE IF EXISTS Volunteer;
 DROP TABLE IF EXISTS Administrator;
 DROP TABLE IF EXISTS Veterinarian;
 DROP TABLE IF EXISTS Caregiver;
-DROP TABLE IF EXISTS User;
 
 DROP TABLE IF EXISTS Breed;
 
@@ -28,6 +27,7 @@ DROP TABLE IF EXISTS Breed;
 
 -- -------------------------------------- CREATE USER -------------------------------------- --
 CREATE TABLE User (
+    last_login DATETIME(6),
     userID INT AUTO_INCREMENT not NULL,
     firstName VARCHAR(255) not NULL,
     lastName VARCHAR(255) not NULL,
@@ -35,15 +35,9 @@ CREATE TABLE User (
     userPassword VARCHAR(24) not NULL,
     email VARCHAR(255) not NULL,
     phoneNumber VARCHAR(9) not NULL, -- phoneNumber prefix not included
+    userRole VARCHAR(20) not NULL,
 
-    PRIMARY KEY(userID),
-
-    CHECK (REGEXP_LIKE(username, '^[a-zA-Z0-9._]{3,}$')),
-        -- Username must contain at least 3 characters
-    CHECK (REGEXP_LIKE(userPassword, '^[a-zA-Z0-9@#$%!*_.]{8,}$')),
-        -- userPassword can contain specific characters and must be at least 8 characters long
-    CHECK (REGEXP_LIKE(email, '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')),
-    CHECK (REGEXP_LIKE(phoneNumber, '^[0-9]{9}$'))
+    PRIMARY KEY(userID)
 );
 
 -- (specialization/generalization -> User) --
@@ -183,29 +177,20 @@ CREATE TABLE CheckUp (
 -- ---------------------------------- INSERT INTO USER---------------------------------- --
 
 -- Inserting basic users into User table
-INSERT INTO User (firstName, lastName, username, userPassword, email, phoneNumber)
-VALUES 
-('Jan', 'Novák', 'jnovak', 'Heslo123', 'jan.novak@email.cz', '123456789'), -- ID 1
-('Milan', 'Vrbas', 'Milisaurus', 'C!master7', 'milan.vrbas1@gmail.com', '731672979'), -- ID 2
-('Petr', 'Svoboda', 'psvoboda', 'Petr*Heslo', 'petr.svoboda@email.com', '987654321'), -- ID 3
-('Tomáš', 'Daniel', 'xDandys', 'Gym_Monster', 'tomas.daniel@centrum.cz', '731572983'), -- ID 4
-('Janšta', 'Jakub', 'Kubalabambula', 'Godot#Master', 'jakub.jansta@gmail.com', '732315134'), -- ID 5
-('Eva', 'Kralová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555'), -- ID 6
-('Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413'); -- ID 7
-
--- Inserting specific users (specialization)
-INSERT INTO Caregiver (userID) VALUES (1);  -- Jan Novák
-INSERT INTO Caregiver (userID) VALUES (2);  -- Milan Vrbas
-INSERT INTO Veterinarian (userID) VALUES (3);  -- Petr Svoboda
-INSERT INTO Volunteer (userID, verified) VALUES (4, TRUE); -- Tomáš Daniel
-INSERT INTO Volunteer (userID, verified) VALUES (5, FALSE); -- Jakub Janšta
-INSERT INTO Volunteer (userID, verified) VALUES (6, FALSE); -- Eva Králová
-INSERT INTO Administrator (userID) VALUES (7); -- Marie Novotná
+INSERT INTO User (last_login, firstName, lastName, username, userPassword, email, phoneNumber, userRole)
+VALUES
+(NULL, 'Jan', 'Novák', 'jnovak', 'Heslo123', 'jan.novak@email.cz', '123456789', 'volunteer'), -- ID 1
+(NULL, 'Milan', 'Vrbas', 'Milisaurus', 'C!master7', 'milan.vrbas1@gmail.com', '731672979', 'vet'), -- ID 2
+(NULL, 'Petr', 'Svoboda', 'psvoboda', 'Petr*Heslo', 'petr.svoboda@email.com', '987654321', 'carer'), -- ID 3
+(NULL, 'Tomáš', 'Daniel', 'xDandys', 'Gym_Monster', 'tomas.daniel@centrum.cz', '731572983', 'admin'), -- ID 4
+(NULL, 'Janšta', 'Jakub', 'Kubalabambula', 'Godot#Master', 'jakub.jansta@gmail.com', '732315134', 'admin'), -- ID 5
+(NULL, 'Eva', 'Kralová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555', 'volunteer'), -- ID 6
+(NULL, 'Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413', 'carer'); -- ID 7
 
 -- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- --
 
 -- Inserting breeds
-INSERT INTO Breed (name) VALUES 
+INSERT INTO Breed (name) VALUES
 ('Labrador'),
 ('Německý ovčák'),
 ('Britská krátkosrstá kočka'),
@@ -214,25 +199,25 @@ INSERT INTO Breed (name) VALUES
 
 -- Inserting animals
 INSERT INTO Animal (species, name, gender, birthDate, arrivalDate, isActive, description, breedID)
-VALUES 
-('Pes', 'Max', 0, '2017-04-15', '2022-10-01', TRUE, 
+VALUES
+('Pes', 'Max', 0, '2017-04-15', '2022-10-01', TRUE,
     'Max je přátelský labrador, miluje děti a dlouhé procházky. Váží 32kg.', 1), -- Labrador
-('Pes', 'Bella', 1, '2019-11-20', '2023-01-05', TRUE, 
+('Pes', 'Bella', 1, '2019-11-20', '2023-01-05', TRUE,
     'Hrava fenka, vhodná k aktivním majitelům. Váží 26kg.', 1), -- Labrador
-('Pes', 'Rex', 0, '2018-05-10', '2022-09-15', TRUE, 
+('Pes', 'Rex', 0, '2018-05-10', '2022-09-15', TRUE,
     'Velký přátelský pes, vhodný pro rodiny s dětmi. Váží 35kg.', 2), -- Německý ovčák
-('Kočka', 'Molly', 1, '2020-07-23', '2023-02-01', TRUE, 
+('Kočka', 'Molly', 1, '2020-07-23', '2023-02-01', TRUE,
     'Molly je klidná kočka, ráda se mazlí a sleduje okolí. Váží necelé 4kg.', 3), -- Britská krátkosrstá kočka
-('Kočka', 'Jerry', 0, '2019-06-03', '2023-03-05', TRUE, 
+('Kočka', 'Jerry', 0, '2019-06-03', '2023-03-05', TRUE,
     'Jerry je velký kocour, který rád spí. Váží okolo 5kg.', 3), -- Britská krátkosrstá kočka
-('Kočka', 'Kotěnka', 1, NULL, '2023-03-10', TRUE, 
+('Kočka', 'Kotěnka', 1, NULL, '2023-03-10', TRUE,
     'Klidná a přítulná kočka, ráda spí v teple. Váží 3kg.', 4), -- Kočka domácí
-('Kočka', 'Simba', 0, '2021-01-30', '2023-04-25', TRUE, 
+('Kočka', 'Simba', 0, '2021-01-30', '2023-04-25', TRUE,
     'Simba je hravý a energický siamský kocour, rád se honí za hračkami.', 5);-- Siamská kočka
 
 -- Inserting health records for animals
 INSERT INTO HealthRecord (name, detail, animalID, veterinarianID)
-VALUES 
+VALUES
 -- Max
 ('Očkování', 'Max byl očkován proti vzteklině a psince.', 1, 3),
 ('Prohlídka', 'Během kontroly byla zjištěna nadváha, doporučeno více pohybu.', 1, 3),
@@ -259,7 +244,7 @@ VALUES
 
 -- Inserting animal photos (for illustration only)
 INSERT INTO AnimalPhoto (imagePath, animalID)
-VALUES 
+VALUES
 -- Photos for Max
 ('../images/max_1.jpg', 1),
 ('../images/max_2.jpg', 1),

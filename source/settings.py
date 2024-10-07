@@ -116,14 +116,24 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
 # Set path for static files for local server
 STATICFILES_DIRS = [
     BASE_DIR / 'project' / 'static'
 ]
+
 # Set path for static files in production (can't be same as previous path)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+AUTH_USER_MODEL = 'project.CustomUser'
+
+AUTHENTICATION_BACKENDS = [
+    'project.backends.CustomBackend'
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

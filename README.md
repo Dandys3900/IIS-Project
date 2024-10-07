@@ -52,7 +52,7 @@ git clone https://github.com/Dandys3900/IIS-Project.git .
 ```
 pip install -r requirements.txt
 ```
-4. Spuštění serveru (**v adresáři `code/`**):
+4. Spuštění serveru (**v domovském adresáři projektu**):
 ```
 python manage.py runserver
 ```
@@ -69,7 +69,7 @@ Projekt je hostován na platformě **Koyeb.com**
 
 #### URL: `https://principal-thomasina-vut-fit-0029f885.koyeb.app/`
 
-MySQL databáze je hostována na platformě Aiven, konfigurační detaily a přihlašovací údaje jsou uloženy v `/code/.env`:
+MySQL databáze je hostována na platformě Aiven, konfigurační a přihlašovací detaily:
 
 * URL: `mysql://avnadmin:AVNS_nKlEyXmnpYpTucczgnZ@mysql-1eeb8483-iisproject2024.g.. aivencloud.com:17370/defaultdb?ssl-mode=REQUIRED`
 * DB name: `defaultdb`

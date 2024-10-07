@@ -2,13 +2,13 @@
 
 {% block content %}
     <div class="row justify-content-center align-items-center">
-        <div class="col-md-5">
+        <div class="col-md-4">
             <!-- If user is logged in, dont show login form and vice versa-->
             {% if not user.is_authenticated %}
                 <div class="card">
                     <div class="card-body">
                         <h3 class="card-title text-center">Login</h3>
-                        <form method="POST" action="{% url 'home' %}">
+                        <form method="POST" action="{% url 'login' %}">
                             <!-- Django requires this token for enhanced security -->
                             {% csrf_token %}
                             <div class="form-group">
