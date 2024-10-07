@@ -109,4 +109,5 @@ def handle_registration(request, form, doLogin):
                 messages.success(request, mark_safe(f"User <strong>{username}</strong> succesfully created :-)"))
             # Registration successful
             return True
+        messages.error(request, mark_safe(f"User <strong>{username}</strong> already exists!"))
     return False
