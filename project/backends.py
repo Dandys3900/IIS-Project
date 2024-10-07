@@ -4,7 +4,7 @@ from .models import CustomUser
 
 # Custom backend class for performing user authentication
 class CustomBackend(BaseBackend):
-    def authenticate(self, request, username=None, password=None, **kwargs):
+    def authenticate(self, request, username=None, password=None):
         try:
             # Get custom user
             userModel = get_user_model()
@@ -13,15 +13,8 @@ class CustomBackend(BaseBackend):
             # Check if passwords matches
             if foundUser.password == password:
                 return foundUser
+            return None
         except CustomUser.DoesNotExist:
-            # Create new user
-            return CustomUser.objects.create_user(
-                username = username,
-                password = password,
-                **kwargs
-            )
-        except Exception as e:
-            print(f"auth: {e}")
             return None
 
     def get_user(self, user_id):

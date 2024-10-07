@@ -34,7 +34,7 @@ CREATE TABLE User (
     username VARCHAR(255) not NULL,
     userPassword VARCHAR(24) not NULL,
     email VARCHAR(255) not NULL,
-    phoneNumber VARCHAR(9) not NULL, -- phoneNumber prefix not included,
+    phoneNumber VARCHAR(9) not NULL, -- phoneNumber prefix not included
     userRole VARCHAR(20) not NULL,
 
     PRIMARY KEY(userID)
