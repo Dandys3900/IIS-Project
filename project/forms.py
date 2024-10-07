@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from .models import CustomUser
+from .models import CustomUser, AnimalPhoto
 
 # Function for constructing textInput with given args
 def getTextWidget(elementName, placeholderText):
@@ -45,6 +45,7 @@ class SignUpForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
 
+        # Setup pre-defined fields of UserCreationForm class
         self.fields["username"].widget.attrs["class"] = "form-control"
         self.fields["username"].widget.attrs["placeholder"] = "Enter Your username"
         self.fields["username"].label     = ""
@@ -77,3 +78,10 @@ class CreateUserForm(SignUpForm):
     # Setup rest of form fields
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
+
+class UploadImageForm(forms.ModelForm):
+    class Meta():
+        model = AnimalPhoto
+        fields = (
+            "image",
+        )

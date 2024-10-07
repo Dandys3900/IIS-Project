@@ -43,6 +43,13 @@
                         <div class="card-body">
                             <h5 class="card-title">Details</h5>
                             <p id="details-content" class="card-text"></p>
+                            {% if user.is_authenticated %}
+                                <form method="POST">
+                                    <!-- Render form -->
+                                    {{ form.as_p }}
+                                    <button type="submit" class="btn btn-primary btn-block">Upload image</button>
+                                </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

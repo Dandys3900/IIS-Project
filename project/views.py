@@ -2,11 +2,19 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm, CreateUserForm
+from .forms import SignUpForm, CreateUserForm, UploadImageForm
 
 # Home view
 def home(request):
-    return render(request, 'home.html', {})
+    form = UploadImageForm()
+    # User is trying to upload (animal) image
+    if request.method == 'POST':
+        form = UploadImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            messages.success(request, mark_safe("Upload if Your image was succesful"))
+    return render(request, 'home.html', {
+        "form" : form
+    })
 
 # Perform client login
 def client_login(request):

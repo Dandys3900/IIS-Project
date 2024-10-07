@@ -127,6 +127,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = BASE_DIR / 'mediafiles'
+
 
 AUTH_USER_MODEL = 'project.CustomUser'
 
