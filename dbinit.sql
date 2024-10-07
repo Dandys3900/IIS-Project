@@ -40,39 +40,6 @@ CREATE TABLE User (
     PRIMARY KEY(userID)
 );
 
--- (specialization/generalization -> User) --
-CREATE TABLE Caregiver (
-    userID INT not NULL,
-
-    PRIMARY KEY(userID),
-    FOREIGN KEY(userID) REFERENCES User(userID) ON DELETE CASCADE
-);
-
--- (specialization/generalization -> User) --
-CREATE TABLE Volunteer (
-    userID INT not NULL,
-    verified BOOLEAN not NULL, -- false = not verified, true = verified
-
-    PRIMARY KEY(userID),
-    FOREIGN KEY(userID) REFERENCES User(userID) ON DELETE CASCADE
-);
-
--- (specialization/generalization -> User) --
-CREATE TABLE Administrator (
-    userID INT not NULL,
-
-    PRIMARY KEY(userID),
-    FOREIGN KEY(userID) REFERENCES User(userID) ON DELETE CASCADE
-);
-
--- (specialization/generalization -> User) --
-CREATE TABLE Veterinarian (
-    userID INT not NULL,
-
-    PRIMARY KEY(userID),
-    FOREIGN KEY(userID) REFERENCES User(userID) ON DELETE CASCADE
-);
-
 -- ------------------------------------- CREATE ANIMAL ------------------------------------- --
 
 CREATE TABLE Breed (
