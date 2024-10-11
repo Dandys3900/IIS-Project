@@ -86,6 +86,6 @@ class UploadImageForm(forms.ModelForm):
     class Meta():
         model = AnimalPhoto
         fields = (
-            "animal_id",
+            "card_id",
             "image",
         )
