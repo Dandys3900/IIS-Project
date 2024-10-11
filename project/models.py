@@ -66,7 +66,7 @@ class CustomUser(AbstractBaseUser):
 
 # Model for animal photos
 class AnimalPhoto(models.Model):
-    user_id   = models.AutoField(primary_key=True, db_column="photoID")
+    image_id  = models.AutoField(primary_key=True, db_column="photoID")
     animal_id = models.IntegerField(db_column="animalID")
     # Store image in MEDIA_ROOT folder
     image = models.ImageField(upload_to="", db_column="imagePath")

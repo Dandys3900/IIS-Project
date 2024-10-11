@@ -20,17 +20,18 @@
             <div class="col">
                 <!-- Setup grid for cards -->
                 <div class="row">
-                    <!-- Example card -->
-                    <div class="col mb-3">
-                        <div class="card" style="width: 20em; height: 20em;" id="cards1" onclick="showDetails(this.id)">
-                            <img src="..." class="card-img-top" alt="...">
-                            <div class="card-body">
-                                <h5 class="card-title">Animal 1</h5>
-                                <p class="card-text">Example text.</p>
-                                <a href="#" class="btn btn-primary">Take me for a walk</a>
+                    {% for image in images %}
+                        <div class="col mb-3">
+                            <div class="card" style="width: 20em; height: 20em;" id="{{ image.animal_id }}" onclick="showDetails(this.id)">
+                                <img src="{{ image.image.url }}" class="card-img-top" alt="Isn't it beautiful?">
+                                <div class="card-body">
+                                    <h5 class="card-title">Animal</h5>
+                                    <p class="card-text">Example text</p>
+                                    <a href="#" class="btn btn-primary">Take me for a walk!</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
             <!-- Animal details column -->
@@ -41,10 +42,13 @@
                     <div class="card" style="height: 30em;">
                         <button type="button" class="btn-close" aria-label="Close" style="position: absolute; right: 5px; top: 5px;" onclick="hideDetails()"></button>
                         <div class="card-body">
-                            <h5 class="card-title">Details</h5>
+                            <h5 class="card-title">Animal details</h5>
                             <p id="details-content" class="card-text"></p>
                             {% if user.is_authenticated %}
                                 <form method="POST">
+                                    {% csrf_token %}
+                                     <!-- Hidden input for card_id -->
+                                    <input type="hidden" id="cardIDValue">
                                     <!-- Render form -->
                                     {{ form.as_p }}
                                     <button type="submit" class="btn btn-primary btn-block">Upload image</button>
@@ -57,14 +61,21 @@
         </div>
     </div>
 
-    <script>
-        function showDetails(cardId) {
-            document.getElementById('details-content').innerText = "Details for card " + cardId;
-            document.getElementById('details-container').style.display = 'block';
-        }
+    {% block extra_js %}
+        <script>
+            function showDetails(cardID) {
+                document.getElementById('details-content').innerText = "Details for card " + cardID;
+                document.getElementById('details-container').style.display = 'block';
+                // Get hidden cardIDValue form input
+                cardIDElement = document.getElementById('cardIDValue')
+                // Null for not-loged user
+                if (cardIDElement)
+                    cardIDElement.value = cardID;
+            }
 
-        function hideDetails() {
-            document.getElementById('details-container').style.display = 'none';
-        }
-    </script>
+            function hideDetails() {
+                document.getElementById('details-container').style.display = 'none';
+            }
+        </script>
+    {% endblock extra_js %}
 {% endblock %}

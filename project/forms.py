@@ -80,8 +80,12 @@ class CreateUserForm(SignUpForm):
         super(CreateUserForm, self).__init__(*args, **kwargs)
 
 class UploadImageForm(forms.ModelForm):
+    # Card_id taken from home.html
+    card_id = forms.IntegerField(widget=forms.HiddenInput())
+
     class Meta():
         model = AnimalPhoto
         fields = (
+            "animal_id",
             "image",
         )

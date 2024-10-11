@@ -211,7 +211,6 @@ INSERT INTO AnimalPhoto (imagePath, animalID)
 VALUES
 -- Photos for Max
 ('../images/max_1.jpg', 1),
-('../images/max_2.jpg', 1),
 
 -- Photos for Bella
 ('../images/bella_1.jpg', 2),
@@ -221,7 +220,6 @@ VALUES
 
 -- Photos for Molly
 ('../images/molly_1.jpg', 4),
-('../images/molly_2.jpg', 4),
 
 -- Photos for Jerry
 ('../images/jerry_1.jpg', 5),

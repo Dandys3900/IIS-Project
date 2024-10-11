@@ -3,17 +3,32 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 from .forms import SignUpForm, CreateUserForm, UploadImageForm
+from .models import AnimalPhoto
 
 # Home view
 def home(request):
     form = UploadImageForm()
+    pictures = AnimalPhoto.objects.all().order_by('animal_id')
     # User is trying to upload (animal) image
     if request.method == 'POST':
         form = UploadImageForm(request.POST, request.FILES)
         if form.is_valid():
-            messages.success(request, mark_safe("Upload if Your image was succesful"))
+            # Extract image and cardID to check if already has image
+            image    = form.cleaned_data["image"]
+            animalID = form.cleaned_data["card_id"]
+            # Check if that image already exists
+            curImage = AnimalPhoto.objects.filter(animal_id=animalID).first()
+            if curImage:
+                # Override it
+                curImage.image = image
+                curImage.save()
+            else:
+                # Save new image
+                form.save()
+            messages.success(request, mark_safe("Upload of Your image was succesful"))
     return render(request, 'home.html', {
-        "form" : form
+        "form"   : form,
+        "images" : pictures
     })
 
 # Perform client login
