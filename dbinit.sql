@@ -59,6 +59,10 @@ CREATE TABLE AnimalPhoto (
     animalID INT not NULL,
 
     PRIMARY KEY(photoID)
+    -- NOTE: Wait for ability to create Animal first, then uncomment and use it
+        -- animalID INT not NULL, -- foreign key to Animal
+        -- FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE
+            -- delete photos if the animal is deleted
 );
 
 CREATE TABLE HealthRecord (
