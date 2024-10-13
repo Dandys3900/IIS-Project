@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm, CreateUserForm
+from .forms import SignUpForm, CreateUserForm, DeleteUserForm
 
 # Home view
 def home(request):
@@ -64,6 +64,26 @@ def client_create_new(request):
     return render(request, "register.html", {
         "form" : form
     })
+
+
+# Deleting user by admin
+def client_delete(request):
+    form = DeleteUserForm()
+    
+    if request.method == "POST":
+        form = DeleteUserForm(request.POST)
+        if form.is_valid():
+            if form.delete_user():
+                messages.success(request, "The user account has been successfully deleted.")
+            else:
+                messages.error(request, "Error occured while deleting the user account.")
+            return redirect("deleteuser")
+    
+    # Render form
+    return render(request, "delete_user.html", {
+        "form" : form
+    })
+
 
 # Show details for currently logged in user
 def client_details(request):
