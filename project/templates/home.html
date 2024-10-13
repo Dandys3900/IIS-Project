@@ -29,7 +29,7 @@
                         {% for image in images %}
                             <div class="col mb-3">
                                 <div class="card" style="width: 20em; height: 20em;" id="{{ image.animal_id }}" onclick="showDetails(this.id)">
-                                    <img src="{{ image.image.url }}" class="card-img-top" alt="Isn't it beautiful?">
+                                    <img src="{{ image.image.url }}" class="card-img-top" style="width: 100%; height: 50%; object-fit: cover;">
                                     <div class="card-body">
                                         <h5 class="card-title">Animal</h5>
                                         <p class="card-text">Example text</p>

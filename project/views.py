@@ -14,7 +14,7 @@ def home(request):
         form = UploadImageForm(request.POST, request.FILES)
         if form.is_valid():
             # Extract image and cardID to check if already has image
-            image    = form.cleaned_data["image"]
+            image    = form.cleaned_data["image"] or "generic_animal.png"
             animalID = form.cleaned_data["animal_id"]
             # Check if that image already exists
             curImage = AnimalPhoto.objects.filter(animal_id=animalID).first()

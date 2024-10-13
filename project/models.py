@@ -69,7 +69,7 @@ class AnimalPhoto(models.Model):
     image_id  = models.AutoField(primary_key=True, db_column="photoID")
     animal_id = models.IntegerField(db_column="animalID")
     # Store image in MEDIA_ROOT folder
-    image = models.ImageField(upload_to="", db_column="imagePath")
+    image = models.ImageField(db_column="imagePath")
 
     class Meta:
         # Specify table for storing images

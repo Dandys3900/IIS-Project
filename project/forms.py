@@ -82,7 +82,7 @@ class CreateUserForm(SignUpForm):
 class UploadImageForm(forms.ModelForm):
     # Card_id taken from home.html
     animal_id = forms.IntegerField(widget=forms.HiddenInput())
-    image     = forms.ImageField(widget=forms.FileInput())
+    image     = forms.ImageField(widget=forms.FileInput(), required=False)
 
     class Meta():
         model = AnimalPhoto
