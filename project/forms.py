@@ -81,11 +81,12 @@ class CreateUserForm(SignUpForm):
 
 class UploadImageForm(forms.ModelForm):
     # Card_id taken from home.html
-    card_id = forms.IntegerField(widget=forms.HiddenInput())
+    animal_id = forms.IntegerField(widget=forms.HiddenInput())
+    image     = forms.ImageField(widget=forms.FileInput())
 
     class Meta():
         model = AnimalPhoto
         fields = (
-            "card_id",
+            "animal_id",
             "image",
         )

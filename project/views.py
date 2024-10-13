@@ -15,7 +15,7 @@ def home(request):
         if form.is_valid():
             # Extract image and cardID to check if already has image
             image    = form.cleaned_data["image"]
-            animalID = form.cleaned_data["card_id"]
+            animalID = form.cleaned_data["animal_id"]
             # Check if that image already exists
             curImage = AnimalPhoto.objects.filter(animal_id=animalID).first()
             if curImage:
@@ -23,9 +23,14 @@ def home(request):
                 curImage.image = image
                 curImage.save()
             else:
-                # Save new image
-                form.save()
+                # Create new image
+                AnimalPhoto.objects.create(
+                    animal_id=animalID,
+                    image=image
+                )
             messages.success(request, mark_safe("Upload of Your image was succesful"))
+            # Redirect back to homepage
+            return redirect("home")
     return render(request, 'home.html', {
         "form"   : form,
         "images" : pictures
