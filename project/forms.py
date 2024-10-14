@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from .models import CustomUser
+from django.contrib.auth import get_user_model
 
 # Function for constructing textInput with given args
 def getTextWidget(elementName, placeholderText):
@@ -78,8 +79,6 @@ class CreateUserForm(SignUpForm):
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
 
-
-from django.contrib.auth import get_user_model
 
 class DeleteUserForm(forms.Form):
     user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True)
