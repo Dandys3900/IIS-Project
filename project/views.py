@@ -65,6 +65,25 @@ def client_create_new(request):
         "form" : form
     })
 
+
+def client_edit(request):
+    form = DeleteUserForm()
+    
+    if request.method == "POST":
+        form = DeleteUserForm(request.POST)
+        if form.is_valid():
+            if form.delete_user():
+                messages.success(request, "The user account has been successfully deleted.")
+            else:
+                messages.error(request, "Error occured while deleting the user account.")
+            return redirect("edituser")
+    
+    # Render form
+    return render(request, "edit_user.html", {
+        "form" : form
+    })
+
+
 # Show details for currently logged in user
 def client_details(request):
     pass
