@@ -1,7 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from .models import CustomUser
-from django.contrib.auth import get_user_model
 
 # Function for constructing textInput with given args
 def getTextWidget(elementName, placeholderText):
@@ -79,31 +78,6 @@ class CreateUserForm(SignUpForm):
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
 
-
 class DeleteUserForm(forms.Form):
     user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True)
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
-
-    def __init__(self, *args, **kwargs):
-        super(DeleteUserForm, self).__init__(*args, **kwargs)
-    
-    def delete_user(self):
-        if not self.is_valid():
-            return False
-
-        if not self.cleaned_data.get("confirm"):
-            return False
-
-        try:
-            userModel = get_user_model()
-            # Try to find requested user in database
-            user_to_delete = userModel.objects.get(username=self.cleaned_data.get("user_to_delete"))
-            user_to_delete.delete()
-        except CustomUser.DoesNotExist:
-            return False
-        except Exception as e:
-            print("Unexpected exception occured, while deleting user: ", e)
-            return False
-
-        return True
-    
