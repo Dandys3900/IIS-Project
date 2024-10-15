@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm, CreateUserForm
+from .forms import SignUpForm, CreateUserForm, EditUserSelectForm, EditUserForm
+from .models import CustomUser
 
 # Home view
 def home(request):
@@ -66,22 +67,61 @@ def client_create_new(request):
     })
 
 
-def client_edit(request):
-    form = DeleteUserForm()
+def client_edit_select(request):
+    if request.method == "GET":
+        form = EditUserSelectForm()
+        # Render form
+        return render(request, "edit_user.html", {
+            "form" : form
+        })
+
+    form = EditUserSelectForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("edituser")
+
+    user_to_edit_id = form.cleaned_data["user_to_edit"]
+
+    try:
+        # Try to find requested user in database
+        get_user_model().objects.get(username=user_to_edit_id)
+        return redirect('edituser', user_id=user_to_edit_id)
     
-    if request.method == "POST":
-        form = DeleteUserForm(request.POST)
-        if form.is_valid():
-            if form.delete_user():
-                messages.success(request, "The user account has been successfully deleted.")
-            else:
-                messages.error(request, "Error occured while deleting the user account.")
-            return redirect("edituser")
+    except CustomUser.DoesNotExist:
+        messages.error(request, f"Error occured while editing a user. Nonexistent user {user_to_edit_id} selected")
+
+    except Exception as e:
+        messages.error(request, f"Unexpected exception occured, while editing user: {e}")
+
+    return redirect('edituser')
+
+
+def client_edit(request, user_id):
+    try: # check user_to_edit_id validity
+        CustomUser.objects.get(username=user_id)
     
-    # Render form
-    return render(request, "edit_user.html", {
-        "form" : form
-    })
+    except CustomUser.DoesNotExist:
+        messages.error(request, f"Error occured while editing a user. Nonexistent user {user_id} selected")
+        return redirect('edituser')
+    
+    if request.method == "GET":
+        form = EditUserForm(user_to_edit_id=user_id)
+        # Render form
+        return render(request, "edit_user.html", {
+            "form" : form
+        })
+
+    form = EditUserForm(request.POST, user_to_edit_id=user_id)
+    if not form.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect('edituser', user_id=user_id)
+
+    form.save()
+
+    return redirect('edituser')
+
+
+
 
 
 # Show details for currently logged in user
