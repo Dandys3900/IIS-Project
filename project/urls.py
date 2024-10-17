@@ -14,6 +14,9 @@ urlpatterns = [
     path('register/', views.client_register, name='register'),
     # Creating new user by logged user
     path('createuser/', views.client_create_new, name='createuser'),
+    # Editing user by admin
+    path('edituser/', views.client_edit_select, name='edituser'),
+    path('edituser/<str:user_id>/', views.client_edit, name='edituser'),
     # Deleting user by admin
     path('deleteuser/', views.client_delete, name='deleteuser'),
     # Logged user details page
