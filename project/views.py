@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm, CreateUserForm, EditUserSelectForm, EditUserForm
+from .forms import SignUpForm, CreateUserForm, DeleteUserForm, EditUserSelectForm, EditUserForm
 from .models import CustomUser
 
 # Home view
@@ -66,7 +66,6 @@ def client_create_new(request):
         "form" : form
     })
 
-
 def client_edit_select(request):
     if request.method == "GET":
         form = EditUserSelectForm()
@@ -107,6 +106,36 @@ def client_edit(request, user_id):
     form.save()
     messages.success(request, f"User {user_id} edited")
     return redirect("edituser")
+
+# Deleting user by admin
+def client_delete(request):
+    if request.method == "GET":
+        form = DeleteUserForm()
+        # Render form
+        return render(request, "delete_user.html", {
+            "form" : form
+        })
+    
+    form = DeleteUserForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("deleteuser")
+
+    try:
+        user_to_delete_id = form.cleaned_data["user_to_delete"]
+        # Try to find and delete requested user in database
+        user_to_delete = get_user_model().objects.get(username=user_to_delete_id)
+        user_to_delete.delete()
+        messages.success(request, f"User {user_to_delete_id} deleted successfully.")
+
+    except CustomUser.DoesNotExist:
+        messages.error(request, f"Error occured while deleting user {user_to_delete_id}. User does not exist.")
+    
+    except Exception as e:
+        messages.error(request, f"Unexpected exception occured, while deleting user: {e}")
+    
+    finally:
+        return redirect("deleteuser")
 
 # Show details for currently logged in user
 def client_details(request):

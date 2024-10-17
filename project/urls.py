@@ -17,6 +17,8 @@ urlpatterns = [
     # Editing user by admin
     path('edituser/', views.client_edit_select, name='edituser'),
     path('edituser/<str:user_id>/', views.client_edit, name='edituser'),
+    # Deleting user by admin
+    path('deleteuser/', views.client_delete, name='deleteuser'),
     # Logged user details page
     path('userdetails/', views.client_details, name='userdetails'),
 ]
