@@ -55,7 +55,7 @@ def client_login(request):
         if user is not None:
             login(request, user)
             # User has default password set, issue warning
-            if password == "pwd123456":
+            if password == "password1234":
                 messages.warning(request, "You have default password set, change it in profile details!")
             messages.success(request, mark_safe(f"Welcome back <strong>{username}</strong>!"))
             # Redirect back to homepage
@@ -135,7 +135,7 @@ def client_edit(request, user_id):
         messages.error(request, "Invalid form.")
         return redirect("edituser", user_id=user_id)
 
-    form.save(form.cleaned_data["reset_pwd"])
+    form.save()
     messages.success(request, f"User {user_id} edited")
     return redirect("edituser")
 
