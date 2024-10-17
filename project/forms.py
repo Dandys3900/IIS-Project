@@ -111,7 +111,7 @@ class EditUserForm(forms.Form):
     email = createField(255, "email", "Email", False)
     phone_number = createField(9, "phone_number", "Phone number", False)
     user_role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
-    # TODO add a checkbox that flags the account for password reset / add the password field directly here
+    reset_password = forms.BooleanField(label="Reset user password", required=False)
 
     def __init__(self, *args, **kwargs):
         # Assumes that user_id is a valid account for simplicity. It should be checked in the caller view
@@ -133,6 +133,8 @@ class EditUserForm(forms.Form):
         for field in ["first_name", "last_name", "email", "phone_number"]:
             if (value := self.cleaned_data.get(field)):
                 setattr(self.user, field, value)
+        if self.cleaned_data["reset_password"]:
+            self.user.password = "password1234"
 
         self.user.save()
 
