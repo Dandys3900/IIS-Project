@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm, CreateUserForm, UploadImageForm, DeleteUserForm
+from .forms import SignUpForm, CreateUserForm, UploadImageForm, DeleteUserForm, EditUserSelectForm, EditUserForm
 from .models import AnimalPhoto, CustomUser
 
 # Home view
@@ -31,7 +31,7 @@ def home(request):
             messages.success(request, mark_safe("Upload of Your image was succesful"))
             # Redirect back to homepage
             return redirect("home")
-    return render(request, 'home.html', {
+    return render(request, "home.html", {
         "form"   : form,
         "images" : pictures
     })
@@ -93,6 +93,47 @@ def client_create_new(request):
         "form" : form
     })
 
+def client_edit_select(request):
+    if request.method == "GET":
+        form = EditUserSelectForm()
+        # Render form
+        return render(request, "edit_user.html", {
+            "form" : form
+        })
+
+    form = EditUserSelectForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("edituser")
+
+    return redirect("edituser", user_id=form.cleaned_data["user_to_edit"])
+
+
+def client_edit(request, user_id):
+    try: # check user_to_edit_id validity
+        CustomUser.objects.get(username=user_id)
+    except CustomUser.DoesNotExist:
+        messages.error(request, f"Error occured while editing a user. Nonexistent user {user_id} selected")
+        return redirect("edituser")
+    except Exception as e:
+        messages.error(request, f"Unexpected exception occured, while editing user: {e}")
+
+    if request.method == "GET":
+        form = EditUserForm(user_to_edit_id=user_id)
+        # Render form
+        return render(request, "edit_user.html", {
+            "form" : form
+        })
+
+    form = EditUserForm(request.POST, user_to_edit_id=user_id)
+    if not form.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("edituser", user_id=user_id)
+
+    form.save()
+    messages.success(request, f"User {user_id} edited")
+    return redirect("edituser")
+
 # Deleting user by admin
 def client_delete(request):
     if request.method == "GET":
@@ -142,7 +183,7 @@ def handle_registration(request, form, doLogin):
             "last_name"    : form.cleaned_data.get("last_name"),
             "email"        : form.cleaned_data.get("email"),
             "phone_number" : form.cleaned_data.get("phone_number"),
-            # Default role when none given is 'volunteer'
+            # Default role when none given is "volunteer"
             "userrole"     : form.cleaned_data.get("userrole", "volunteer")
         }
         # Check if user already exists
