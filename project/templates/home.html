@@ -1,63 +1,95 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    <div class="row justify-content-center">
-        <h1 style="text-align: center; margin-top: 1em;">
-            Animal Shelter at VUT FIT
-        </h1>
-        <!-- Search bar -->
-        <div class="col-md-5" style="margin-top: 1em; margin-bottom: 2em;">
-            <form class="d-flex">
-                <input class="form-control me-2" type="search" placeholder="Search animal" aria-label="Search">
-                <button class="btn btn-primary" type="submit">Search</button>
-            </form>
+    <div class="container">
+        <div class="row justify-content-center">
+            <h1 style="text-align: center; margin-top: 1em;">
+                Animal Shelter at VUT FIT
+            </h1>
+            <!-- Search bar -->
+            <div class="col-md-5" style="margin-top: 1em; margin-bottom: 2em;">
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Search animal" aria-label="Search">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </form>
+            </div>
         </div>
-    </div>
-    <!-- Main content container -->
-    <div class="container-fluid">
-        <div class="row" style="gap: 20px;">
-            <!-- Animal cards column -->
-            <div class="col">
-                <!-- Setup grid for cards -->
-                <div class="row">
-                    <!-- Example card -->
-                    <div class="col mb-3">
-                        <div class="card" style="width: 20em; height: 20em;" id="cards1" onclick="showDetails(this.id)">
-                            <img src="..." class="card-img-top" alt="...">
+        <!-- Add animal button for carer -->
+        {% if user.userRole == "carer" %}
+            <button class="btn btn-primary position-relative top-0 start-50 translate-middle" onclick="addAnimal()">Add animal</button>
+        {% endif %}
+        <!-- Main content container -->
+        <div class="container-fluid">
+            <div class="row" style="gap: 20px;">
+                <!-- Animal cards column -->
+                <div class="col">
+                    <!-- Setup grid for cards -->
+                    <div class="row">
+                        {% for image in images %}
+                            <div class="col mb-3">
+                                <div class="card" style="width: 20em; height: 20em;" id="{{ image.animal_id }}" onclick="showDetails(this.id)">
+                                    <img src="{{ image.image.url }}" class="card-img-top" style="width: 100%; height: 50%; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Animal</h5>
+                                        <p class="card-text">Example text</p>
+                                        <a href="#" class="btn btn-primary" style="position: absolute; bottom: 10px; right: 10px;">Take me for a walk!</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Animal details column -->
+                <div class="col-3" id="details-container" style="display: none;">
+                    <!-- Details section container -->
+                    <div class="col-col-3">
+                        <!-- Card details widget -->
+                        <div class="card" style="height: 30em;">
+                            <button type="button" class="btn-close" aria-label="Close" style="position: absolute; right: 5px; top: 5px;" onclick="hideDetails()"></button>
                             <div class="card-body">
-                                <h5 class="card-title">Animal 1</h5>
-                                <p class="card-text">Example text.</p>
-                                <a href="#" class="btn btn-primary">Take me for a walk</a>
+                                <h5 class="card-title">Animal details</h5>
+                                <p id="details-content" class="card-text"></p>
+                                {% if user.is_authenticated %}
+                                    <form method="POST" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <!-- Render form -->
+                                        {{ form.as_p }}
+                                        <button type="submit" class="btn btn-primary btn-block">Upload image</button>
+                                    </form>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Animal details column -->
-            <div class="col-3" id="details-container" style="display: none;">
-                <!-- Details section container -->
-                <div class="col-col-3">
-                    <!-- Card details widget -->
-                    <div class="card" style="height: 30em;">
-                        <button type="button" class="btn-close" aria-label="Close" style="position: absolute; right: 5px; top: 5px;" onclick="hideDetails()"></button>
-                        <div class="card-body">
-                            <h5 class="card-title">Details</h5>
-                            <p id="details-content" class="card-text"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <script>
-        function showDetails(cardId) {
-            document.getElementById('details-content').innerText = "Details for card " + cardId;
-            document.getElementById('details-container').style.display = 'block';
-        }
+    {% block extra_js %}
+        <script>
+            function addAnimal() {
+                // Calculate current number of cards (animals)
+                cards = document.getElementsByClassName("card").length;
+                // Exclude details card
+                cards--;
+                // Create new card
+                showDetails(cards);
+            }
 
-        function hideDetails() {
-            document.getElementById('details-container').style.display = 'none';
-        }
-    </script>
+            function showDetails(cardID) {
+                document.getElementById("details-content").innerText = "Details for card " + cardID;
+                document.getElementById("details-container").style.display = "block";
+                // Get hidden cardIDValue form input
+                cardIDElement = document.getElementById("id_animal_id")
+                // Null for not-loged user
+                if (cardIDElement)
+                    cardIDElement.value = cardID;
+            }
+
+            function hideDetails() {
+                document.getElementById("details-container").style.display = "none";
+            }
+        </script>
+    {% endblock extra_js %}
 {% endblock %}

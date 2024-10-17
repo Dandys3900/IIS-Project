@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from .models import CustomUser
+from .models import CustomUser, AnimalPhoto
 from django.contrib.auth import get_user_model
 
 ROLE_CHOICES = [
@@ -62,6 +62,7 @@ class SignUpForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
 
+        # Setup pre-defined fields of UserCreationForm class
         self.fields["username"].widget.attrs["class"] = "form-control"
         self.fields["username"].widget.attrs["placeholder"] = "Enter Your username"
         self.fields["username"].label     = ""
@@ -88,6 +89,18 @@ class CreateUserForm(SignUpForm):
     # Setup rest of form fields
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
+
+class UploadImageForm(forms.ModelForm):
+    # Card_id taken from home.html
+    animal_id = forms.IntegerField(widget=forms.HiddenInput())
+    image     = forms.ImageField(widget=forms.FileInput(), required=False)
+
+    class Meta():
+        model = AnimalPhoto
+        fields = (
+            "animal_id",
+            "image",
+        )
 
 class EditUserSelectForm(forms.Form):
     user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True)

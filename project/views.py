@@ -2,12 +2,39 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm, CreateUserForm, DeleteUserForm, EditUserSelectForm, EditUserForm
-from .models import CustomUser
+from .forms import SignUpForm, CreateUserForm, UploadImageForm, DeleteUserForm, EditUserSelectForm, EditUserForm
+from .models import AnimalPhoto, CustomUser
 
 # Home view
 def home(request):
-    return render(request, "home.html", {})
+    form = UploadImageForm()
+    pictures = AnimalPhoto.objects.all().order_by('animal_id')
+    # User is trying to upload (animal) image
+    if request.method == 'POST':
+        form = UploadImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Extract image and cardID to check if already has image
+            image    = form.cleaned_data["image"] or "generic_animal.png"
+            animalID = form.cleaned_data["animal_id"]
+            # Check if that image already exists
+            curImage = AnimalPhoto.objects.filter(animal_id=animalID).first()
+            if curImage:
+                # Override it
+                curImage.image = image
+                curImage.save()
+            else:
+                # Create new image
+                AnimalPhoto.objects.create(
+                    animal_id=animalID,
+                    image=image
+                )
+            messages.success(request, mark_safe("Upload of Your image was succesful"))
+            # Redirect back to homepage
+            return redirect("home")
+    return render(request, "home.html", {
+        "form"   : form,
+        "images" : pictures
+    })
 
 # Perform client login
 def client_login(request):
@@ -115,7 +142,7 @@ def client_delete(request):
         return render(request, "delete_user.html", {
             "form" : form
         })
-    
+
     form = DeleteUserForm(request.POST)
     if not form.is_valid():
         messages.error(request, "Invalid form.")
@@ -130,10 +157,10 @@ def client_delete(request):
 
     except CustomUser.DoesNotExist:
         messages.error(request, f"Error occured while deleting user {user_to_delete_id}. User does not exist.")
-    
+
     except Exception as e:
         messages.error(request, f"Unexpected exception occured, while deleting user: {e}")
-    
+
     finally:
         return redirect("deleteuser")
 

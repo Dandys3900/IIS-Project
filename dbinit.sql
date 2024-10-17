@@ -39,13 +39,6 @@ CREATE TABLE User (
 
 -- ------------------------------------- CREATE ANIMAL ------------------------------------- --
 
-CREATE TABLE Breed (
-    breedID INT AUTO_INCREMENT not NULL,
-    name VARCHAR(255) not NULL,
-
-    PRIMARY KEY(breedID)
-);
-
 CREATE TABLE Animal (
     animalID INT AUTO_INCREMENT not NULL,
     species VARCHAR(255) not NULL,
@@ -54,24 +47,22 @@ CREATE TABLE Animal (
     birthDate DATE, -- can be NULL if the animal's birth date or age is unknown
     arrivalDate DATE not NULL,
     isActive BOOLEAN not NULL, -- false = not in shelter, true = in shelter
+    breed VARCHAR(255) not NULL,
     description TEXT not NULL,
 
-    PRIMARY KEY(animalID),
-
-    breedID INT, -- foreign key to Breed table
-    FOREIGN KEY(breedID) REFERENCES Breed(breedID) -- Link to Breed
+    PRIMARY KEY(animalID)
 );
 
--- <<week>> entity --
 CREATE TABLE AnimalPhoto (
     photoID INT AUTO_INCREMENT not NULL,
     imagePath VARCHAR(255) not NULL,
+    animalID INT not NULL,
 
-    PRIMARY KEY(photoID),
-
-    animalID INT not NULL, -- foreign key to Animal
-    FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE
-        -- delete photos if the animal is deleted
+    PRIMARY KEY(photoID)
+    -- NOTE: Wait for ability to create Animal first, then uncomment and use it
+        -- animalID INT not NULL, -- foreign key to Animal
+        -- FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE
+            -- delete photos if the animal is deleted
 );
 
 CREATE TABLE HealthRecord (
@@ -151,33 +142,25 @@ VALUES
 (NULL, 'Eva', 'Kralová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555', 'volunteer'), -- ID 6
 (NULL, 'Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413', 'carer'); -- ID 7
 
--- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- --
-
--- Inserting breeds
-INSERT INTO Breed (name) VALUES
-('Labrador'),
-('Německý ovčák'),
-('Britská krátkosrstá kočka'),
-('Kočka domácí'),
-('Siamská kočka');
+-- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- -
 
 -- Inserting animals
-INSERT INTO Animal (species, name, gender, birthDate, arrivalDate, isActive, description, breedID)
+INSERT INTO Animal (species, name, gender, birthDate, arrivalDate, isActive, breed, description)
 VALUES
-('Pes', 'Max', 0, '2017-04-15', '2022-10-01', TRUE,
-    'Max je přátelský labrador, miluje děti a dlouhé procházky. Váží 32kg.', 1), -- Labrador
-('Pes', 'Bella', 1, '2019-11-20', '2023-01-05', TRUE,
-    'Hrava fenka, vhodná k aktivním majitelům. Váží 26kg.', 1), -- Labrador
-('Pes', 'Rex', 0, '2018-05-10', '2022-09-15', TRUE,
-    'Velký přátelský pes, vhodný pro rodiny s dětmi. Váží 35kg.', 2), -- Německý ovčák
-('Kočka', 'Molly', 1, '2020-07-23', '2023-02-01', TRUE,
-    'Molly je klidná kočka, ráda se mazlí a sleduje okolí. Váží necelé 4kg.', 3), -- Britská krátkosrstá kočka
-('Kočka', 'Jerry', 0, '2019-06-03', '2023-03-05', TRUE,
-    'Jerry je velký kocour, který rád spí. Váží okolo 5kg.', 3), -- Britská krátkosrstá kočka
-('Kočka', 'Kotěnka', 1, NULL, '2023-03-10', TRUE,
-    'Klidná a přítulná kočka, ráda spí v teple. Váží 3kg.', 4), -- Kočka domácí
-('Kočka', 'Simba', 0, '2021-01-30', '2023-04-25', TRUE,
-    'Simba je hravý a energický siamský kocour, rád se honí za hračkami.', 5);-- Siamská kočka
+('Pes', 'Max', 0, '2017-04-15', '2022-10-01', TRUE, 'Labrador',
+    'Max je přátelský labrador, miluje děti a dlouhé procházky. Váží 32kg.'),
+('Pes', 'Bella', 1, '2019-11-20', '2023-01-05', TRUE, 'Labrador',
+    'Hrava fenka, vhodná k aktivním majitelům. Váží 26kg.'),
+('Pes', 'Rex', 0, '2018-05-10', '2022-09-15', TRUE, 'Německý ovčák',
+    'Velký přátelský pes, vhodný pro rodiny s dětmi. Váží 35kg.'),
+('Kočka', 'Molly', 1, '2020-07-23', '2023-02-01', TRUE, 'Britská krátkosrstá kočka',
+    'Molly je klidná kočka, ráda se mazlí a sleduje okolí. Váží necelé 4kg.'),
+('Kočka', 'Jerry', 0, '2019-06-03', '2023-03-05', TRUE, 'Britská krátkosrstá kočka',
+    'Jerry je velký kocour, který rád spí. Váží okolo 5kg.'),
+('Kočka', 'Kotěnka', 1, NULL, '2023-03-10', TRUE, 'Kočka domácí',
+    'Klidná a přítulná kočka, ráda spí v teple. Váží 3kg.'),
+('Kočka', 'Simba', 0, '2021-01-30', '2023-04-25', TRUE, 'Siamská kočka',
+    'Simba je hravý a energický siamský kocour, rád se honí za hračkami.');
 
 -- Inserting health records for animals
 INSERT INTO HealthRecord (name, detail, animalID, veterinarianID)
@@ -205,32 +188,6 @@ VALUES
 
 -- Simba
 ('Očkování', 'Simba byl očkován proti vzteklině.', 7, 3);
-
--- Inserting animal photos (for illustration only)
-INSERT INTO AnimalPhoto (imagePath, animalID)
-VALUES
--- Photos for Max
-('../images/max_1.jpg', 1),
-('../images/max_2.jpg', 1),
-
--- Photos for Bella
-('../images/bella_1.jpg', 2),
-
--- Photos for Rex
-('../images/rex_1.jpg', 3),
-
--- Photos for Molly
-('../images/molly_1.jpg', 4),
-('../images/molly_2.jpg', 4),
-
--- Photos for Jerry
-('../images/jerry_1.jpg', 5),
-
--- Photos for Kotěnka
-('../images/kittenka_1.jpg', 6),
-
--- Photos for Simba
-('../images/simba_1.jpg', 7);
 
 -- -------------------------------- INSERT FOR RESERVATIONS -------------------------------- --
 
