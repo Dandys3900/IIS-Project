@@ -39,10 +39,10 @@ def createField(max_length, elementName, placeholderText, required):
 # Singup form class
 class SignUpForm(UserCreationForm):
     # Get new user information
-    first_name   = createField(255, "first_name", "Enter Your firstname", True)
-    last_name    = createField(255, "last_name", "Enter Your lastname", True)
-    email        = createField(255, "email", "Enter Your email", True)
-    phone_number = createField(9, "phone_number", "Enter Your phone number", True)
+    first_name   = createField(255, "first_name", "Enter firstname", True)
+    last_name    = createField(255, "last_name", "Enter lastname", True)
+    email        = createField(255, "email", "Enter email", True)
+    phone_number = createField(9, "phone_number", "Enter phone number", True)
 
     # New user model class
     class Meta:
@@ -64,17 +64,15 @@ class SignUpForm(UserCreationForm):
 
         # Setup pre-defined fields of UserCreationForm class
         self.fields["username"].widget.attrs["class"] = "form-control"
-        self.fields["username"].widget.attrs["placeholder"] = "Enter Your username"
+        self.fields["username"].widget.attrs["placeholder"] = "Enter username"
         self.fields["username"].label     = ""
-        self.fields["username"].help_text = ""
 
         self.fields["password1"].widget.attrs["class"] = "form-control"
-        self.fields["password1"].widget.attrs["placeholder"] = "Enter Your password"
+        self.fields["password1"].widget.attrs["placeholder"] = "Enter password"
         self.fields["password1"].label     = ""
-        self.fields["password1"].help_text = ""
 
         self.fields["password2"].widget.attrs["class"] = "form-control"
-        self.fields["password2"].widget.attrs["placeholder"] = "Enter Your password again"
+        self.fields["password2"].widget.attrs["placeholder"] = "Enter password again"
         self.fields["password2"].label     = ""
         self.fields["password2"].help_text = ""
 
@@ -111,8 +109,7 @@ class EditUserForm(forms.Form):
     email = createField(255, "email", "Email", False)
     phone_number = createField(9, "phone_number", "Phone number", False)
     user_role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
-    reset_pwd = forms.BooleanField(label="Reset user's password to default value")
-    # TODO add a checkbox that flags the account for password reset / add the password field directly here
+    reset_pwd = forms.BooleanField(label="Reset user's password")
 
     def __init__(self, *args, **kwargs):
         # Assumes that user_id is a valid account for simplicity. It should be checked in the caller view

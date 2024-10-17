@@ -28,7 +28,9 @@ def home(request):
                     animal_id=animalID,
                     image=image
                 )
-            messages.success(request, mark_safe("Upload of Your image was succesful"))
+            # Notify user about succesful upload
+            if image != "generic_animal.png":
+                messages.success(request, mark_safe("Upload of Your image was succesful"))
             # Redirect back to homepage
             return redirect("home")
     return render(request, "home.html", {
