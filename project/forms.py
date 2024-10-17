@@ -111,6 +111,7 @@ class EditUserForm(forms.Form):
     email = createField(255, "email", "Email", False)
     phone_number = createField(9, "phone_number", "Phone number", False)
     user_role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
+    reset_pwd = forms.BooleanField(label="Reset user's password to default value")
     # TODO add a checkbox that flags the account for password reset / add the password field directly here
 
     def __init__(self, *args, **kwargs):
@@ -120,20 +121,29 @@ class EditUserForm(forms.Form):
 
         self.fields["first_name"].label= "First name"
         self.fields["first_name"].widget.attrs["placeholder"] = self.user.first_name
+
         self.fields["last_name"].label= "Last name"
         self.fields["last_name"].widget.attrs["placeholder"] = self.user.last_name
+
         self.fields["email"].label= "Email"
         self.fields["email"].widget.attrs["placeholder"] = self.user.email
+
         self.fields["phone_number"].label= "Phone number"
         self.fields["phone_number"].widget.attrs["placeholder"] = self.user.phone_number
+
         self.fields["user_role"].choices = reorderChoices(ROLE_CHOICES, self.user.userrole)
 
-    def save(self):
+    def save(self, resetPwd=False):
         self.user.userrole = self.cleaned_data["user_role"]
         for field in ["first_name", "last_name", "email", "phone_number"]:
             if (value := self.cleaned_data.get(field)):
                 setattr(self.user, field, value)
 
+        # Reset user password to default value
+        if resetPwd:
+            self.user.password = "pwd123456"
+
+        # Save changes for user
         self.user.save()
 
 class DeleteUserForm(forms.Form):
