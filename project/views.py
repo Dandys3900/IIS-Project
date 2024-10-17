@@ -7,7 +7,7 @@ from .models import CustomUser
 
 # Home view
 def home(request):
-    return render(request, 'home.html', {})
+    return render(request, "home.html", {})
 
 # Perform client login
 def client_login(request):
@@ -80,30 +80,18 @@ def client_edit_select(request):
         messages.error(request, "Invalid form.")
         return redirect("edituser")
 
-    user_to_edit_id = form.cleaned_data["user_to_edit"]
-
-    try:
-        # Try to find requested user in database
-        get_user_model().objects.get(username=user_to_edit_id)
-        return redirect('edituser', user_id=user_to_edit_id)
-    
-    except CustomUser.DoesNotExist:
-        messages.error(request, f"Error occured while editing a user. Nonexistent user {user_to_edit_id} selected")
-
-    except Exception as e:
-        messages.error(request, f"Unexpected exception occured, while editing user: {e}")
-
-    return redirect('edituser')
+    return redirect("edituser", user_id=form.cleaned_data["user_to_edit"])
 
 
 def client_edit(request, user_id):
     try: # check user_to_edit_id validity
         CustomUser.objects.get(username=user_id)
-    
     except CustomUser.DoesNotExist:
         messages.error(request, f"Error occured while editing a user. Nonexistent user {user_id} selected")
-        return redirect('edituser')
-    
+        return redirect("edituser")
+    except Exception as e:
+        messages.error(request, f"Unexpected exception occured, while editing user: {e}")
+
     if request.method == "GET":
         form = EditUserForm(user_to_edit_id=user_id)
         # Render form
@@ -114,15 +102,11 @@ def client_edit(request, user_id):
     form = EditUserForm(request.POST, user_to_edit_id=user_id)
     if not form.is_valid():
         messages.error(request, "Invalid form.")
-        return redirect('edituser', user_id=user_id)
+        return redirect("edituser", user_id=user_id)
 
     form.save()
-
-    return redirect('edituser')
-
-
-
-
+    messages.success(request, f"User {user_id} edited")
+    return redirect("edituser")
 
 # Show details for currently logged in user
 def client_details(request):
@@ -143,7 +127,7 @@ def handle_registration(request, form, doLogin):
             "last_name"    : form.cleaned_data.get("last_name"),
             "email"        : form.cleaned_data.get("email"),
             "phone_number" : form.cleaned_data.get("phone_number"),
-            # Default role when none given is 'volunteer'
+            # Default role when none given is "volunteer"
             "userrole"     : form.cleaned_data.get("userrole", "volunteer")
         }
         # Check if user already exists

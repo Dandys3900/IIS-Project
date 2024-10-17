@@ -10,13 +10,13 @@ ROLE_CHOICES = [
     ("volunteer", "Volunteer"),
 ]
 
-def reorder_choices(role_choices, first_choice):
+def reorderChoices(role_choices, first_choice):
     # Separate the first choice tuple from the rest
-    reordered = [role for role in role_choices if role[0] == first_choice]
+    first_choice = [role_choice for role_choice in role_choices if role_choice[0] == first_choice]
     # Get the unused rest
-    remaining = [role for role in role_choices if role[0] != first_choice]
+    remaining = [role_choice for role_choice in role_choices if role_choice[0] != first_choice]
     # Return the reordered list
-    return reordered + remaining
+    return first_choice + remaining
 
 
 # Function for constructing textInput with given args
@@ -93,9 +93,9 @@ class EditUserSelectForm(forms.Form):
     user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True)
 
 class EditUserForm(forms.Form):
-    first_name   = createField(255, "first_name", "Firstname", False)
-    last_name    = createField(255, "last_name", "Lastname", False)
-    email        = createField(255, "email", "Email", False)
+    first_name = createField(255, "first_name", "Firstname", False)
+    last_name = createField(255, "last_name", "Lastname", False)
+    email = createField(255, "email", "Email", False)
     phone_number = createField(9, "phone_number", "Phone number", False)
     user_role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
     # TODO add a checkbox that flags the account for password reset / add the password field directly here
@@ -113,17 +113,12 @@ class EditUserForm(forms.Form):
         self.fields["email"].widget.attrs["placeholder"] = self.user.email
         self.fields["phone_number"].label= "Phone number"
         self.fields["phone_number"].widget.attrs["placeholder"] = self.user.phone_number
-        self.fields["user_role"].choices = reorder_choices(ROLE_CHOICES, self.user.userrole)
+        self.fields["user_role"].choices = reorderChoices(ROLE_CHOICES, self.user.userrole)
 
     def save(self):
-        if self.cleaned_data["first_name"]:
-            self.user.first_name = self.cleaned_data["first_name"]
-        if self.cleaned_data["last_name"]:
-            self.user.last_name = self.cleaned_data["last_name"]
-        if self.cleaned_data["email"]:
-            self.user.email = self.cleaned_data["email"]
-        if self.cleaned_data["phone_number"]:
-            self.user.phone_number = self.cleaned_data["phone_number"]
         self.user.userrole = self.cleaned_data["user_role"]
+        for field in ["first_name", "last_name", "email", "phone_number"]:
+            if (value := self.cleaned_data.get(field)):
+                setattr(self.user, field, value)
 
         self.user.save()
