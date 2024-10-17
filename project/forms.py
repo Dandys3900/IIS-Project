@@ -90,3 +90,7 @@ class UploadImageForm(forms.ModelForm):
             "animal_id",
             "image",
         )
+
+class DeleteUserForm(forms.Form):
+    user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True)
+    confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
