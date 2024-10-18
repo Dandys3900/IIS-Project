@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 from .forms import *
@@ -175,6 +175,8 @@ def client_details(request):
         if form.is_valid():
             # Save changes in user profile
             form.save()
+            # Re-authenticate user and update session hash to prevent logout
+            update_session_auth_hash(request, request.user)
     # Redirect to page user is currently on
     return redirect(request.META.get('HTTP_REFERER'))
 
