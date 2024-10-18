@@ -104,6 +104,7 @@ class EditUserSelectForm(forms.Form):
     user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True)
 
 class EditUserForm(forms.Form):
+    user_name = createField(255, "user_name", "Username", False)
     first_name = createField(255, "first_name", "Firstname", False)
     last_name = createField(255, "last_name", "Lastname", False)
     email = createField(255, "email", "Email", False)
@@ -111,10 +112,28 @@ class EditUserForm(forms.Form):
     user_role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
     reset_password = forms.BooleanField(label="Reset user password", required=False)
 
+    class Meta:
+        model = CustomUser
+        fields = (
+            "user_name",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "user_role",
+            "reset_password"
+        )
+
     def __init__(self, *args, **kwargs):
         # Assumes that user_id is a valid account for simplicity. It should be checked in the caller view
-        self.user = CustomUser.objects.get(username=kwargs.pop("user_to_edit_id"))
+        self.user = kwargs.pop("user")
         super(EditUserForm, self).__init__(*args, **kwargs)
+
+        self.fields["user_name"].label= "Username"
+        self.fields["user_name"].widget.attrs["placeholder"] = self.user.username
+
+        self.fields["first_name"].label= "First name"
+        self.fields["first_name"].widget.attrs["placeholder"] = self.user.first_name
 
         self.fields["first_name"].label= "First name"
         self.fields["first_name"].widget.attrs["placeholder"] = self.user.first_name
@@ -132,7 +151,7 @@ class EditUserForm(forms.Form):
 
     def save(self):
         self.user.userrole = self.cleaned_data["user_role"]
-        for field in ["first_name", "last_name", "email", "phone_number"]:
+        for field in ["user_name", "first_name", "last_name", "email", "phone_number"]:
             if (value := self.cleaned_data.get(field)):
                 setattr(self.user, field, value)
         if self.cleaned_data["reset_password"]:
@@ -143,3 +162,11 @@ class EditUserForm(forms.Form):
 class DeleteUserForm(forms.Form):
     user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True)
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
+
+class UserInfoForm(EditUserForm):
+    class Meta(EditUserForm.Meta):
+        # Inherit only needed fields from EditUserForm (all parent's fields - exclude)
+        exclude = (
+            "user_role",
+            "reset_password"
+        )

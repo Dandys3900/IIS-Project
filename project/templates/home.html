@@ -52,6 +52,7 @@
                                 <p id="details-content" class="card-text"></p>
                                 {% if user.is_authenticated %}
                                     <form method="POST" enctype="multipart/form-data">
+                                        <!-- Django requires this token for enhanced security -->
                                         {% csrf_token %}
                                         <!-- Render form -->
                                         {{ form.as_p }}

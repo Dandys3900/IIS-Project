@@ -29,19 +29,19 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a class="dropdown-item" href="{% url 'createuser' %}">
-                                    Add new user
+                                        Add new user
                                     </a>
                                 </li>
                                 <hr class="dropdown-divider">
                                 <li>
                                     <a class="dropdown-item" href="{% url 'deleteuser' %}">
-                                    Delete user
+                                        Delete user
                                     </a>
                                 </li>
                                 <hr class="dropdown-divider">
                                 <li>
                                     <a class="dropdown-item" href="{% url 'edituser' %}">
-                                    Edit user
+                                        Edit user
                                     </a>
                                 </li>
                             </ul>
@@ -53,9 +53,18 @@
                         </a>
                     </li>
                     <li class="nav-item me-2">
-                        <a class="nav-link active" aria-current="page" href="{% url 'userdetails' %}" style="color: #FF0028;">
+                        <a class="nav-link dropdown-toggle" role="button" onclick="toggleUserDetails()" aria-expanded="false" aria-current="page" style="color: #FF0028;">
                             {{ user.userName }} ({{ user.userRole }})
                         </a>
+                        <div class="dropdown-content" id="userDetails" style="display: none;">
+                            <form method="POST" action="{% url 'userdetails' %}">
+                                <!-- Django requires this token for enhanced security -->
+                                {% csrf_token %}
+                                <!-- Render form -->
+                                {{ userdetails_form.as_p }}
+                                <button type="submit">Save</button>
+                            </form>
+                        </div>
                     </li>
                 {% else %}
                     <li class="nav-item">
@@ -72,4 +81,18 @@
             </ul>
         </div>
     </div>
+
+    {% block extra_js %}
+        <script>
+            function toggleUserDetails() {
+                // Get user details element
+                userdetails = document.getElementById("userDetails");
+                // Reverse it;s current visibility
+                if (userdetails.style.display === "none")
+                    userdetails.style.display = "block";
+                else
+                    userdetails.style.display = "none";
+            }
+        </script>
+    {% endblock extra_js %}
 </nav>

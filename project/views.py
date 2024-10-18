@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm, CreateUserForm, UploadImageForm, DeleteUserForm, EditUserSelectForm, EditUserForm
-from .models import AnimalPhoto, CustomUser
+from .forms import *
+from .models import *
 
 # Home view
 def home(request):
     form = UploadImageForm()
-    pictures = AnimalPhoto.objects.all().order_by('animal_id')
+    pictures = AnimalPhoto.objects.all().order_by("animal_id")
     # User is trying to upload (animal) image
-    if request.method == 'POST':
+    if request.method == "POST":
         form = UploadImageForm(request.POST, request.FILES)
         if form.is_valid():
             # Extract image and cardID to check if already has image
@@ -113,24 +113,24 @@ def client_edit_select(request):
 
     return redirect("edituser", user_id=form.cleaned_data["user_to_edit"])
 
-
 def client_edit(request, user_id):
-    try: # check user_to_edit_id validity
-        CustomUser.objects.get(username=user_id)
+    try: # Check user_id validity
+        user = CustomUser.objects.get(username=user_id)
     except CustomUser.DoesNotExist:
         messages.error(request, f"Error occured while editing a user. Nonexistent user {user_id} selected")
         return redirect("edituser")
     except Exception as e:
         messages.error(request, f"Unexpected exception occured, while editing user: {e}")
+        return redirect("edituser")
 
     if request.method == "GET":
-        form = EditUserForm(user_to_edit_id=user_id)
+        form = EditUserForm(user=user)
         # Render form
         return render(request, "edit_user.html", {
             "form" : form
         })
 
-    form = EditUserForm(request.POST, user_to_edit_id=user_id)
+    form = EditUserForm(request.POST, user=user)
     if not form.is_valid():
         messages.error(request, "Invalid form.")
         return redirect("edituser", user_id=user_id)
@@ -156,22 +156,26 @@ def client_delete(request):
     try:
         user_to_delete_id = form.cleaned_data["user_to_delete"]
         # Try to find and delete requested user in database
-        user_to_delete = get_user_model().objects.get(username=user_to_delete_id)
+        user_to_delete = CustomUser.objects.get(username=user_to_delete_id)
         user_to_delete.delete()
         messages.success(request, f"User {user_to_delete_id} deleted successfully.")
 
     except CustomUser.DoesNotExist:
         messages.error(request, f"Error occured while deleting user {user_to_delete_id}. User does not exist.")
-
     except Exception as e:
         messages.error(request, f"Unexpected exception occured, while deleting user: {e}")
-
     finally:
         return redirect("deleteuser")
 
 # Show details for currently logged in user
 def client_details(request):
-    pass
+    form = UserInfoForm(user=request.user)
+    if request.method == "POST":
+        form = UserInfoForm(request.POST, user=request.user)
+        if form.is_valid():
+            form.save()
+    # Redirect to page user is currently on
+    return redirect(request.META.get('HTTP_REFERER'))
 
 ######################################################
 ################## HELPER FUNCTIONS ##################
@@ -200,7 +204,7 @@ def handle_registration(request, form, doLogin):
         # Check user
         if user is None:
             # Create new user
-            user = get_user_model().objects.create_user(
+            user = CustomUser.objects.create_user(
                 username = username,
                 password = password,
                 **extra_fields
