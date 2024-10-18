@@ -1,7 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from .models import CustomUser, AnimalPhoto
-from django.contrib.auth import get_user_model
 
 ROLE_CHOICES = [
     ("admin", "Administrator"),
@@ -17,7 +16,6 @@ def reorderChoices(role_choices, first_choice):
     remaining = [role_choice for role_choice in role_choices if role_choice[0] != first_choice]
     # Return the reordered list
     return first_choice + remaining
-
 
 # Function for constructing textInput with given args
 def getTextWidget(elementName, placeholderText):
@@ -109,23 +107,11 @@ class EditUserForm(forms.Form):
     last_name = createField(255, "last_name", "Lastname", False)
     email = createField(255, "email", "Email", False)
     phone_number = createField(9, "phone_number", "Phone number", False)
-    user_role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
+    userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
     reset_password = forms.BooleanField(label="Reset user password", required=False)
 
-    class Meta:
-        model = CustomUser
-        fields = (
-            "user_name",
-            "first_name",
-            "last_name",
-            "email",
-            "phone_number",
-            "user_role",
-            "reset_password"
-        )
-
     def __init__(self, *args, **kwargs):
-        # Assumes that user_id is a valid account for simplicity. It should be checked in the caller view
+        # Retrieve user being edited
         self.user = kwargs.pop("user")
         super(EditUserForm, self).__init__(*args, **kwargs)
 
@@ -147,14 +133,13 @@ class EditUserForm(forms.Form):
         self.fields["phone_number"].label= "Phone number"
         self.fields["phone_number"].widget.attrs["placeholder"] = self.user.phone_number
 
-        self.fields["user_role"].choices = reorderChoices(ROLE_CHOICES, self.user.userrole)
+        self.fields["userrole"].choices = reorderChoices(ROLE_CHOICES, self.user.userrole)
 
     def save(self):
-        self.user.userrole = self.cleaned_data["user_role"]
-        for field in ["user_name", "first_name", "last_name", "email", "phone_number"]:
+        for field in self.user.REQUIRED_FIELDS:
             if (value := self.cleaned_data.get(field)):
                 setattr(self.user, field, value)
-        if self.cleaned_data["reset_password"]:
+        if self.cleaned_data.get("reset_password"):
             self.user.password = "password1234"
 
         self.user.save()
@@ -164,9 +149,17 @@ class DeleteUserForm(forms.Form):
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
 
 class UserInfoForm(EditUserForm):
-    class Meta(EditUserForm.Meta):
-        # Inherit only needed fields from EditUserForm (all parent's fields - exclude)
-        exclude = (
-            "user_role",
-            "reset_password"
-        )
+    # Field to show user's current password with ability to change it
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        "class" : "form-control"
+    }), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # From inherited fields, remove ones we don't need
+        del self.fields["userrole"]
+        del self.fields["reset_password"]
+
+        # Init password fields
+        self.fields["password"].label= "Password"
+        self.fields["password"].widget.attrs["placeholder"] = self.user.password

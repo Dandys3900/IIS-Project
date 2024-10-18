@@ -58,6 +58,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Custom processor for injecting navbar form to all pages
+                'project.context_processors.userdetails_form',
             ],
         },
     },

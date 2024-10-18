@@ -173,6 +173,7 @@ def client_details(request):
     if request.method == "POST":
         form = UserInfoForm(request.POST, user=request.user)
         if form.is_valid():
+            # Save changes in user profile
             form.save()
     # Redirect to page user is currently on
     return redirect(request.META.get('HTTP_REFERER'))
