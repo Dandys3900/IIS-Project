@@ -7,35 +7,14 @@ from .models import *
 
 # Home view
 def home(request):
-    form = UploadImageForm()
-    pictures = AnimalPhoto.objects.all().order_by("animal_id")
-    # User is trying to upload (animal) image
+    # Get only active animals
+    animals = Animal.objects.filter(is_active=True).order_by("animal_id")
+    # User is trying to upload animal schedule
     if request.method == "POST":
-        form = UploadImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Extract image and cardID to check if already has image
-            image    = form.cleaned_data["image"] or "generic_animal.png"
-            animalID = form.cleaned_data["animal_id"]
-            # Check if that image already exists
-            curImage = AnimalPhoto.objects.filter(animal_id=animalID).first()
-            if curImage:
-                # Override it
-                curImage.image = image
-                curImage.save()
-            else:
-                # Create new image
-                AnimalPhoto.objects.create(
-                    animal_id=animalID,
-                    image=image
-                )
-            # Notify user about succesful upload
-            if image != "generic_animal.png":
-                messages.success(request, mark_safe("Upload of Your image was succesful"))
-            # Redirect back to homepage
-            return redirect("home")
+        # TODO: Add form for animal schedule and its handling
+        pass
     return render(request, "home.html", {
-        "form"   : form,
-        "images" : pictures
+        "animals" : animals
     })
 
 # Perform client login
@@ -178,7 +157,68 @@ def client_details(request):
             # Re-authenticate user and update session hash to prevent logout
             update_session_auth_hash(request, request.user)
     # Redirect to page user is currently on
-    return redirect(request.META.get('HTTP_REFERER'))
+    return redirect(request.META.get("HTTP_REFERER"))
+
+def animal_create(request):
+    form = CreateAnimalForm()
+    formset = AnimalPhotoFormSet()
+    # Animal creation form submitted
+    if request.method == "POST":
+        form = CreateAnimalForm(request.POST)
+        formset = AnimalPhotoFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            animal = form.save()
+            photos = formset.save(commit=False)
+            # No photos added, use default one
+            if not photos:
+                # Create new image
+                AnimalPhoto.objects.create(
+                    animal_id=animal,
+                    image="generic_animal.png"
+                )
+            else:
+                for photo in photos:
+                    # Set photo reference to animal object
+                    photo.animal = animal
+                    photo.save()
+            # Notify user
+            messages.success(request, f"Animal {animal.name} added.")
+            # Redirect back to homepage
+            return redirect("home")
+    # Render page
+    return render(request, "create_animal.html", {
+        "form": form,
+        "formset": formset
+    })
+
+def animal_edit(request, animal_id):
+    # Get animal to be edited
+    animal = Animal.objects.get(animal_id=animal_id)
+    form = EditAnimalForm(animal=animal)
+    # Animal edit form submitted
+    if request.method == "POST":
+        form = EditAnimalForm(request.POST, animal=animal)
+        if form.is_valid():
+            form.save()
+            # Notify user
+            messages.success(request, f"Animal {animal.name} edited.")
+            # Redirect back to homepage
+            return redirect("home")
+    # Render page
+    return render(request, "edit_animal.html", {
+        "form": form
+    })
+
+def animal_delete(request, animal_id):
+    # Get animal to be deleted
+    animal = Animal.objects.get(animal_id=animal_id)
+    # Change isActive to False to mark it deleted
+    animal.is_active = False
+    animal.save()
+    # Notify user
+    messages.success(request, f"Animal {animal.name} deleted successfully.")
+    # Redirect back to homepage
+    return redirect("home")
 
 ######################################################
 ################## HELPER FUNCTIONS ##################

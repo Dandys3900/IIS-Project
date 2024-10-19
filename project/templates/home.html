@@ -17,7 +17,9 @@
         </div>
         <!-- Add animal button for carer -->
         {% if user.userRole == "carer" %}
-            <button class="btn btn-primary position-relative top-0 start-50 translate-middle" onclick="addAnimal()">Add animal</button>
+            <a href="{% url 'createanimal' %}">
+                <button class="btn btn-primary position-relative top-0 start-50 translate-middle">Add animal</button>
+            </a>
         {% endif %}
         <!-- Main content container -->
         <div class="container-fluid">
@@ -26,13 +28,24 @@
                 <div class="col">
                     <!-- Setup grid for cards -->
                     <div class="row">
-                        {% for image in images %}
+                        {% for animal in animals %}
                             <div class="col mb-3">
-                                <div class="card" style="width: 20em; height: 20em;" id="{{ image.animal_id }}" onclick="showDetails(this.id)">
-                                    <img src="{{ image.image.url }}" class="card-img-top" style="width: 100%; height: 50%; object-fit: cover;">
+                                <div class="card" style="width: 20em; height: 20em;">
+                                    {% if user.userRole == "carer" %}
+                                    <div style="display: flex; gap: 5px;">
+                                        <a href="{% url 'editanimal' animal.animal_id %}">
+                                            <button class="btn btn-primary">Edit</button>
+                                        </a>
+                                        <a href="{% url 'deleteanimal' animal.animal_id %}">
+                                            <button class="btn btn-primary">Delete</button>
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                    <!-- For card, show only first picture of animal -->
+                                    <img src="{{ animal.animalphoto_set.first.image.url }}" class="card-img-top" style="width: 100%; height: 50%; object-fit: cover;">
                                     <div class="card-body">
-                                        <h5 class="card-title">Animal</h5>
-                                        <p class="card-text">Example text</p>
+                                        <h5 class="card-title">{{ animal.name }}</h5>
+                                        <p class="card-text">{{ animal.description }}</p>
                                         <a href="#" class="btn btn-primary" style="position: absolute; bottom: 10px; right: 10px;">Take me for a walk!</a>
                                     </div>
                                 </div>
@@ -69,7 +82,7 @@
 
     {% block extra_js %}
         <script>
-            function addAnimal() {
+            /*function addAnimal() {
                 // Calculate current number of cards (animals)
                 cards = document.getElementsByClassName("card").length;
                 // Exclude details card
@@ -86,7 +99,7 @@
                 // Null for not-loged user
                 if (cardIDElement)
                     cardIDElement.value = cardID;
-            }
+            }*/
 
             function hideDetails() {
                 document.getElementById("details-container").style.display = "none";

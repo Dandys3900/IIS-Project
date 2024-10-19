@@ -21,4 +21,10 @@ urlpatterns = [
     path('deleteuser/', views.client_delete, name='deleteuser'),
     # Logged user details page
     path('userdetails/', views.client_details, name='userdetails'),
+    # Creating new animal
+    path('createanimal/', views.animal_create, name='createanimal'),
+    # Editing animal
+    path('editanimal/<int:animal_id>/', views.animal_edit, name='editanimal'),
+    # Deleting animal
+    path('deleteanimal/<int:animal_id>/', views.animal_delete, name='deleteanimal')
 ]

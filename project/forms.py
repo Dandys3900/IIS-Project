@@ -1,12 +1,18 @@
 from django.contrib.auth.forms import UserCreationForm
+from django.forms import inlineformset_factory
 from django import forms
-from .models import CustomUser, AnimalPhoto
+from .models import *
 
 ROLE_CHOICES = [
     ("admin", "Administrator"),
     ("carer", "Caretaker"),
     ("vet"  , "Veterinarian"),
-    ("volunteer", "Volunteer"),
+    ("volunteer", "Volunteer")
+]
+
+GENDER_CHOICES = [
+    (0, "Male"),
+    (1, "Female")
 ]
 
 def reorderChoices(role_choices, first_choice):
@@ -26,7 +32,7 @@ def getTextWidget(elementName, placeholderText):
     })
 
 # Function for constructing charFields
-def createField(max_length, elementName, placeholderText, required):
+def createField(max_length, elementName, placeholderText, required=True):
     return forms.CharField(
         required   = required,
         max_length = max_length,
@@ -37,10 +43,10 @@ def createField(max_length, elementName, placeholderText, required):
 # Singup form class
 class SignUpForm(UserCreationForm):
     # Get new user information
-    first_name   = createField(255, "first_name", "Enter firstname", True)
-    last_name    = createField(255, "last_name", "Enter lastname", True)
-    email        = createField(255, "email", "Enter email", True)
-    phone_number = createField(9, "phone_number", "Enter phone number", True)
+    first_name   = createField(255, "first_name", "Enter firstname")
+    last_name    = createField(255, "last_name", "Enter lastname")
+    email        = createField(255, "email", "Enter email")
+    phone_number = createField(9, "phone_number", "Enter phone number")
 
     # New user model class
     class Meta:
@@ -86,18 +92,6 @@ class CreateUserForm(SignUpForm):
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
 
-class UploadImageForm(forms.ModelForm):
-    # Card_id taken from home.html
-    animal_id = forms.IntegerField(widget=forms.HiddenInput())
-    image     = forms.ImageField(widget=forms.FileInput(), required=False)
-
-    class Meta():
-        model = AnimalPhoto
-        fields = (
-            "animal_id",
-            "image",
-        )
-
 class EditUserSelectForm(forms.Form):
     user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True)
 
@@ -117,22 +111,14 @@ class EditUserForm(forms.Form):
 
         self.fields["user_name"].label= "Username"
         self.fields["user_name"].widget.attrs["placeholder"] = self.user.username
-
         self.fields["first_name"].label= "First name"
         self.fields["first_name"].widget.attrs["placeholder"] = self.user.first_name
-
-        self.fields["first_name"].label= "First name"
-        self.fields["first_name"].widget.attrs["placeholder"] = self.user.first_name
-
         self.fields["last_name"].label= "Last name"
         self.fields["last_name"].widget.attrs["placeholder"] = self.user.last_name
-
         self.fields["email"].label= "Email"
         self.fields["email"].widget.attrs["placeholder"] = self.user.email
-
         self.fields["phone_number"].label= "Phone number"
         self.fields["phone_number"].widget.attrs["placeholder"] = self.user.phone_number
-
         self.fields["userrole"].choices = reorderChoices(ROLE_CHOICES, self.user.userrole)
 
     def save(self):
@@ -163,3 +149,65 @@ class UserInfoForm(EditUserForm):
         # Init password fields
         self.fields["password"].label= "Password"
         self.fields["password"].widget.attrs["placeholder"] = self.user.password
+
+class UploadImageForm(forms.ModelForm):
+    # Card_id taken from home.html
+    image = forms.ImageField(widget=forms.FileInput(), required=False)
+
+    class Meta():
+        model = AnimalPhoto
+        fields = (
+            "image",
+        )
+
+class CreateAnimalForm(forms.ModelForm):
+    # Specify attributes for custom widgets
+    attrs = {
+        "type"  : "date",
+        "class" : "form-control"
+    }
+
+    name         = createField(255, "name", "Enter animal name")
+    species      = createField(255, "species", "Enter specie")
+    breed        = createField(255, "breed", "Enter animal breed")
+    gender       = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Select gender")
+    birth_date   = forms.DateField(required=False, widget=forms.DateInput(attrs=attrs), label="Enter birth date (if known)")
+    arrival_date = forms.DateField(required=True, widget=forms.DateInput(attrs=attrs), label="Enter arrival date")
+    description  = forms.CharField(widget=forms.Textarea, required=True, label="Animal description")
+
+    class Meta:
+        model = Animal
+        # List user attributes
+        fields = (
+            "name",
+            "species",
+            "gender",
+            "birth_date",
+            "arrival_date",
+            "breed",
+            "description"
+        )
+
+AnimalPhotoFormSet = inlineformset_factory(Animal, AnimalPhoto, form=UploadImageForm, extra=1)
+
+class EditAnimalForm(CreateAnimalForm):
+    def __init__(self, *args, **kwargs):
+        # Retrieve animal being edited
+        self.animal = kwargs.pop("animal")
+        super().__init__(*args, **kwargs)
+
+        # Set custom placeholders for each field
+        self.fields['name'].widget.attrs['placeholder'] = self.animal.name
+        self.fields['name'].required = False
+        self.fields['species'].widget.attrs['placeholder'] = self.animal.species
+        self.fields['species'].required = False
+        self.fields['gender'].widget.attrs['placeholder'] = self.animal.gender
+        self.fields['gender'].required = False
+        self.fields['birth_date'].widget.attrs['placeholder'] = self.animal.birth_date
+        self.fields['birth_date'].required = False
+        self.fields['arrival_date'].widget.attrs['placeholder'] = self.animal.arrival_date
+        self.fields['arrival_date'].required = False
+        self.fields['breed'].widget.attrs['placeholder'] = self.animal.breed
+        self.fields['breed'].required = False
+        self.fields['description'].initial = self.animal.description
+        self.fields['description'].required = False
