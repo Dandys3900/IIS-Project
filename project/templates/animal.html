@@ -17,7 +17,7 @@
                         {% endfor %}
                         <br><br>
                         <div style="display: flex; gap: 5px;">
-                            <button type="submit" class="btn btn-primary btn-block" name="action" value="upload">Upload Image</button>
+                            <button type="submit" class="btn btn-primary btn-block" name="action" value="upload" onclick="handleSubmit(event)">Upload Image</button>
                             <button type="submit" class="btn btn-primary btn-block" name="action" value="save">Save</button>
                         </div>
                     </form>
@@ -44,4 +44,16 @@
             </div>
         </div>
     {% endif %}
+
+    {% block extra_js %}
+        <script>
+            function handleSubmit(event) {
+                var action = event.target.value;
+                var fileInput = document.getElementById('id_photos-0-image');
+                // If no images given, prevent the form from submitting
+                if (action === 'upload' && fileInput.files.length === 0)
+                    event.preventDefault();
+            }
+        </script>
+    {% endblock extra_js %}
 {% endblock %}

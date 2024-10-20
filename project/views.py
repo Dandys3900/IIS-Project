@@ -195,20 +195,22 @@ def animal_edit(request, animal_id):
     formset = AnimalPhotoFormSet()
     # Animal edit form submitted
     if request.method == "POST":
-        form = EditAnimalForm(request.POST, animal=animal)
+        form = EditAnimalForm(request.POST, instance=animal, animal=animal)
         formset = AnimalPhotoFormSet(request.POST, request.FILES)
         if form.is_valid() and formset.is_valid():
-            animal = form.save()
-            for subform in formset:
-                photo = subform.save(commit=False)
-                if photo:
+            photos = formset.save(commit=False)
+            # Store photos for animal (if any)
+            if photos:
+                for photo in photos:
+                    # Set photo reference to animal object
                     photo.animal_id = animal
                     photo.save()
                     # Notify user
                     messages.success(request, f"Animal {animal.name} edited.")
+            form.save()
             # Re-show form with uploaded image
             if request.POST.get('action') == 'upload':
-                return redirect("editanimal", animal_id=animal.animal_id)
+                return redirect("editanimal", animal_id=animal_id)
             # Redirect back to homepage
             return redirect("home")
     # Render page

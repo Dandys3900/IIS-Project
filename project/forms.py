@@ -68,15 +68,15 @@ class SignUpForm(UserCreationForm):
 
         # Setup pre-defined fields of UserCreationForm class
         self.fields["username"].widget.attrs["class"] = "form-control"
-        self.fields["username"].widget.attrs["placeholder"] = "Enter username"
+        self.fields["username"].initial = "Enter username"
         self.fields["username"].label     = ""
 
         self.fields["password1"].widget.attrs["class"] = "form-control"
-        self.fields["password1"].widget.attrs["placeholder"] = "Enter password"
+        self.fields["password1"].initial = "Enter password"
         self.fields["password1"].label     = ""
 
         self.fields["password2"].widget.attrs["class"] = "form-control"
-        self.fields["password2"].widget.attrs["placeholder"] = "Enter password again"
+        self.fields["password2"].initial = "Enter password again"
         self.fields["password2"].label     = ""
         self.fields["password2"].help_text = ""
 
@@ -110,15 +110,15 @@ class EditUserForm(forms.Form):
         super(EditUserForm, self).__init__(*args, **kwargs)
 
         self.fields["user_name"].label= "Username"
-        self.fields["user_name"].widget.attrs["placeholder"] = self.user.username
+        self.fields["user_name"].initial = self.user.username
         self.fields["first_name"].label= "First name"
-        self.fields["first_name"].widget.attrs["placeholder"] = self.user.first_name
+        self.fields["first_name"].initial = self.user.first_name
         self.fields["last_name"].label= "Last name"
-        self.fields["last_name"].widget.attrs["placeholder"] = self.user.last_name
+        self.fields["last_name"].initial = self.user.last_name
         self.fields["email"].label= "Email"
-        self.fields["email"].widget.attrs["placeholder"] = self.user.email
+        self.fields["email"].initial = self.user.email
         self.fields["phone_number"].label= "Phone number"
-        self.fields["phone_number"].widget.attrs["placeholder"] = self.user.phone_number
+        self.fields["phone_number"].initial = self.user.phone_number
         self.fields["userrole"].choices = reorderChoices(ROLE_CHOICES, self.user.userrole)
 
     def save(self):
@@ -148,11 +148,11 @@ class UserInfoForm(EditUserForm):
 
         # Init password fields
         self.fields["password"].label= "Password"
-        self.fields["password"].widget.attrs["placeholder"] = self.user.password
+        self.fields["password"].initial = self.user.password
 
 class UploadImageForm(forms.ModelForm):
     # Card_id taken from home.html
-    image = forms.ImageField(widget=forms.FileInput(attrs={"required" : True}))
+    image = forms.ImageField(widget=forms.FileInput())
 
     class Meta():
         model = AnimalPhoto
@@ -197,11 +197,11 @@ class EditAnimalForm(CreateAnimalForm):
         super().__init__(*args, **kwargs)
 
         # Set custom placeholders for each field
-        self.fields['name'].widget.attrs['placeholder'] = self.animal.name
+        self.fields['name'].initial = self.animal.name
         self.fields['name'].required = False
-        self.fields['species'].widget.attrs['placeholder'] = self.animal.species
+        self.fields['species'].initial = self.animal.species
         self.fields['species'].required = False
-        self.fields['gender'].widget.attrs['placeholder'] = self.animal.gender
+        self.fields['gender'].initial = self.animal.gender
         self.fields['gender'].required = False
         # Set if birth_date is known
         if self.animal.birth_date:
@@ -209,7 +209,7 @@ class EditAnimalForm(CreateAnimalForm):
             self.fields['birth_date'].required = False
         self.fields['arrival_date'].initial = self.animal.arrival_date.strftime('%Y-%m-%d')
         self.fields['arrival_date'].required = False
-        self.fields['breed'].widget.attrs['placeholder'] = self.animal.breed
+        self.fields['breed'].initial = self.animal.breed
         self.fields['breed'].required = False
         self.fields['description'].initial = self.animal.description
         self.fields['description'].required = False
