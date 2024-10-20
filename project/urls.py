@@ -27,6 +27,8 @@ urlpatterns = [
     path('editanimal/<int:animal_id>/', views.animal_edit, name='editanimal'),
     # Deleting animal
     path('deleteanimal/<int:animal_id>/', views.animal_delete, name='deleteanimal'),
-    # Deleting image
-    path('deleteimage/<int:image_id>/', views.delete_image, name='deleteimage')
+    # Deleting animal image
+    path('deleteimage/<int:image_id>/', views.delete_image, name='deleteimage'),
+    # Book animal for walk
+    path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal')
 ]

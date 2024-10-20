@@ -7,8 +7,14 @@ from .models import *
 
 # Home view
 def home(request):
-    # Get only active animals
-    animals = Animal.objects.filter(is_active=True).order_by("animal_id")
+    # Get search query if any
+    search_query = request.GET.get("query")
+
+    if search_query:
+        animals = Animal.objects.filter(name__icontains=search_query, is_active=True)
+    else:
+        animals = Animal.objects.filter(is_active=True).order_by("animal_id")
+
     # User is trying to upload animal schedule
     if request.method == "POST":
         # TODO: Add form for animal schedule and its handling
@@ -247,6 +253,10 @@ def delete_image(request, image_id):
         # Delete photo
         photo.delete()
         return redirect("editanimal", animal_id=animal_id)
+
+def animal_book(request, animal_id):
+    # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule
+    pass
 
 ######################################################
 ################## HELPER FUNCTIONS ##################

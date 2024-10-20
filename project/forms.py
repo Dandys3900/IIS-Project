@@ -146,12 +146,12 @@ class UserInfoForm(EditUserForm):
         del self.fields["userrole"]
         del self.fields["reset_password"]
 
-        # Init password fields
+        # Init password field
         self.fields["password"].label= "Password"
-        self.fields["password"].initial = self.user.password
+        # For security reasons, Django doesn't allow assigning direct value to the field
+        self.fields["password"].widget.attrs["placeholder"] = self.user.password
 
 class UploadImageForm(forms.ModelForm):
-    # Card_id taken from home.html
     image = forms.ImageField(widget=forms.FileInput())
 
     class Meta():
@@ -177,7 +177,7 @@ class CreateAnimalForm(forms.ModelForm):
 
     class Meta:
         model = Animal
-        # List user attributes
+        # List animal attributes
         fields = (
             "name",
             "species",
@@ -196,7 +196,7 @@ class EditAnimalForm(CreateAnimalForm):
         self.animal = kwargs.pop("animal")
         super().__init__(*args, **kwargs)
 
-        # Set custom placeholders for each field
+        # Fill fields with animal's data
         self.fields['name'].initial = self.animal.name
         self.fields['name'].required = False
         self.fields['species'].initial = self.animal.species
@@ -207,6 +207,7 @@ class EditAnimalForm(CreateAnimalForm):
         if self.animal.birth_date:
             self.fields['birth_date'].initial = self.animal.birth_date.strftime('%Y-%m-%d')
             self.fields['birth_date'].required = False
+        # Arrival date is compulsory
         self.fields['arrival_date'].initial = self.animal.arrival_date.strftime('%Y-%m-%d')
         self.fields['arrival_date'].required = False
         self.fields['breed'].initial = self.animal.breed
