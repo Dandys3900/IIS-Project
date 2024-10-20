@@ -82,8 +82,8 @@ class Animal(models.Model):
 
 # Model for animal photos
 class AnimalPhoto(models.Model):
-    image_id  = models.AutoField(primary_key=True,                  db_column="photoID")
-    animal_id = models.ForeignKey(Animal, on_delete=models.CASCADE, db_column="animalID")
+    image_id  = models.AutoField(primary_key=True, db_column="photoID")
+    animal_id = models.ForeignKey(Animal, related_name="photos", on_delete=models.CASCADE, db_column="animalID")
     # Store image in MEDIA_ROOT folder
     image = models.ImageField(db_column="imagePath")
 

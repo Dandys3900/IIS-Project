@@ -152,7 +152,7 @@ class UserInfoForm(EditUserForm):
 
 class UploadImageForm(forms.ModelForm):
     # Card_id taken from home.html
-    image = forms.ImageField(widget=forms.FileInput(), required=False)
+    image = forms.ImageField(widget=forms.FileInput(attrs={"required" : True}))
 
     class Meta():
         model = AnimalPhoto
@@ -203,9 +203,11 @@ class EditAnimalForm(CreateAnimalForm):
         self.fields['species'].required = False
         self.fields['gender'].widget.attrs['placeholder'] = self.animal.gender
         self.fields['gender'].required = False
-        self.fields['birth_date'].widget.attrs['placeholder'] = self.animal.birth_date
-        self.fields['birth_date'].required = False
-        self.fields['arrival_date'].widget.attrs['placeholder'] = self.animal.arrival_date
+        # Set if birth_date is known
+        if self.animal.birth_date:
+            self.fields['birth_date'].initial = self.animal.birth_date.strftime('%Y-%m-%d')
+            self.fields['birth_date'].required = False
+        self.fields['arrival_date'].initial = self.animal.arrival_date.strftime('%Y-%m-%d')
         self.fields['arrival_date'].required = False
         self.fields['breed'].widget.attrs['placeholder'] = self.animal.breed
         self.fields['breed'].required = False

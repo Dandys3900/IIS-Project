@@ -31,22 +31,23 @@
                         {% for animal in animals %}
                             <div class="col mb-3">
                                 <div class="card" style="width: 20em; height: 20em;">
-                                    {% if user.userRole == "carer" %}
-                                    <div style="display: flex; gap: 5px;">
-                                        <a href="{% url 'editanimal' animal.animal_id %}">
-                                            <button class="btn btn-primary">Edit</button>
-                                        </a>
-                                        <a href="{% url 'deleteanimal' animal.animal_id %}">
-                                            <button class="btn btn-primary">Delete</button>
-                                        </a>
-                                    </div>
-                                    {% endif %}
                                     <!-- For card, show only first picture of animal -->
-                                    <img src="{{ animal.animalphoto_set.first.image.url }}" class="card-img-top" style="width: 100%; height: 50%; object-fit: cover;">
+                                    {% if animal.photos.exists %}
+                                        <img src="{{ animal.photos.first.image.url }}" class="card-img-top" style="width: 100%; height: 50%; object-fit: cover;"/>
+                                    {% else %}
+                                        <img src="media/generic_animal.png" class="card-img-top" style="width: 100%; height: 50%; object-fit: cover;"/>
+                                    {% endif %}
                                     <div class="card-body">
                                         <h5 class="card-title">{{ animal.name }}</h5>
                                         <p class="card-text">{{ animal.description }}</p>
-                                        <a href="#" class="btn btn-primary" style="position: absolute; bottom: 10px; right: 10px;">Take me for a walk!</a>
+                                        <!-- Display cards buttons -->
+                                        <div style="display: flex; gap: 5px; position: absolute; bottom: 10px; right: 10px;">
+                                            {% if user.userRole == "carer" %}
+                                                <a href="{% url 'editanimal' animal.animal_id %}" class="btn btn-primary">Edit</a>
+                                                <a href="{% url 'deleteanimal' animal.animal_id %}" class="btn btn-primary">Delete</a>
+                                            {% endif %}
+                                            <a href="#" class="btn btn-primary">Take me for a walk!</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

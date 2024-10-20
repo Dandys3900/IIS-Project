@@ -169,44 +169,53 @@ def animal_create(request):
         if form.is_valid() and formset.is_valid():
             animal = form.save()
             photos = formset.save(commit=False)
-            # No photos added, use default one
-            if not photos:
-                # Create new image
-                AnimalPhoto.objects.create(
-                    animal_id=animal,
-                    image="generic_animal.png"
-                )
-            else:
+            # Store photos for animal (if any)
+            if photos:
                 for photo in photos:
                     # Set photo reference to animal object
-                    photo.animal = animal
+                    photo.animal_id = animal
                     photo.save()
             # Notify user
             messages.success(request, f"Animal {animal.name} added.")
+            # Re-show form with uploaded image
+            if request.POST.get('action') == 'upload':
+                return redirect("editanimal", animal_id=animal.animal_id)
             # Redirect back to homepage
             return redirect("home")
     # Render page
-    return render(request, "create_animal.html", {
-        "form": form,
-        "formset": formset
+    return render(request, "animal.html", {
+        "form"    : form,
+        "formset" : formset
     })
 
 def animal_edit(request, animal_id):
     # Get animal to be edited
     animal = Animal.objects.get(animal_id=animal_id)
     form = EditAnimalForm(animal=animal)
+    formset = AnimalPhotoFormSet()
     # Animal edit form submitted
     if request.method == "POST":
         form = EditAnimalForm(request.POST, animal=animal)
-        if form.is_valid():
-            form.save()
-            # Notify user
-            messages.success(request, f"Animal {animal.name} edited.")
+        formset = AnimalPhotoFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            animal = form.save()
+            for subform in formset:
+                photo = subform.save(commit=False)
+                if photo:
+                    photo.animal_id = animal
+                    photo.save()
+                    # Notify user
+                    messages.success(request, f"Animal {animal.name} edited.")
+            # Re-show form with uploaded image
+            if request.POST.get('action') == 'upload':
+                return redirect("editanimal", animal_id=animal.animal_id)
             # Redirect back to homepage
             return redirect("home")
     # Render page
-    return render(request, "edit_animal.html", {
-        "form": form
+    return render(request, "animal.html", {
+        "form"    : form,
+        "formset" : formset,
+        "animal"  : animal
     })
 
 def animal_delete(request, animal_id):
@@ -215,10 +224,27 @@ def animal_delete(request, animal_id):
     # Change isActive to False to mark it deleted
     animal.is_active = False
     animal.save()
+    # Get all animal photos
+    photos = animal.photos.all()
+    # Delete these photos as no longer needed
+    for photo in photos:
+        photo.delete()
     # Notify user
     messages.success(request, f"Animal {animal.name} deleted successfully.")
     # Redirect back to homepage
     return redirect("home")
+
+def delete_image(request, image_id):
+    try:
+        photo = AnimalPhoto.objects.get(image_id=image_id)
+    except Exception as e:
+        messages.error(request, f"Error while deleting image: {e}")
+    else:
+        # Store animal_id to return back
+        animal_id = photo.animal_id.animal_id
+        # Delete photo
+        photo.delete()
+        return redirect("editanimal", animal_id=animal_id)
 
 ######################################################
 ################## HELPER FUNCTIONS ##################
