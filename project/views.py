@@ -5,6 +5,9 @@ from django.utils.safestring import mark_safe
 from .forms import *
 from .models import *
 
+# Define max. size for uploaded image to 2MB
+MAX_IMG_SIZE = 2*1024*1024
+
 # Home view
 def home(request):
     # Get search query if any
@@ -178,14 +181,17 @@ def animal_create(request):
             # Store photos for animal (if any)
             if photos:
                 for photo in photos:
+                    if photo.image.size > MAX_IMG_SIZE:
+                        messages.warning(request, "Uploaded image size must be < 2MB")
+                        break
                     # Set photo reference to animal object
                     photo.animal_id = animal
                     photo.save()
-            # Notify user
-            messages.success(request, f"Animal {animal.name} added.")
             # Re-show form with uploaded image
             if request.POST.get('action') == 'upload':
                 return redirect("editanimal", animal_id=animal.animal_id)
+            # Notify user
+            messages.success(request, f"Animal {animal.name} added.")
             # Redirect back to homepage
             return redirect("home")
     # Render page
@@ -208,15 +214,18 @@ def animal_edit(request, animal_id):
             # Store photos for animal (if any)
             if photos:
                 for photo in photos:
+                    if photo.image.size > MAX_IMG_SIZE:
+                        messages.warning(request, "Uploaded image size must be < 4MB")
+                        break
                     # Set photo reference to animal object
                     photo.animal_id = animal
                     photo.save()
-                    # Notify user
-                    messages.success(request, f"Animal {animal.name} edited.")
             form.save()
             # Re-show form with uploaded image
             if request.POST.get('action') == 'upload':
                 return redirect("editanimal", animal_id=animal_id)
+            # Notify user
+            messages.success(request, f"Animal {animal.name} edited.")
             # Redirect back to homepage
             return redirect("home")
     # Render page

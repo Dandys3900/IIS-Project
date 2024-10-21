@@ -197,20 +197,14 @@ class EditAnimalForm(CreateAnimalForm):
         super().__init__(*args, **kwargs)
 
         # Fill fields with animal's data
-        self.fields['name'].initial = self.animal.name
-        self.fields['name'].required = False
-        self.fields['species'].initial = self.animal.species
-        self.fields['species'].required = False
-        self.fields['gender'].initial = self.animal.gender
-        self.fields['gender'].required = False
+        self.fields["name"].initial = self.animal.name
+        self.fields["species"].initial = self.animal.species
+        self.fields["gender"].initial = self.animal.gender
         # Set if birth_date is known
         if self.animal.birth_date:
-            self.fields['birth_date'].initial = self.animal.birth_date.strftime('%Y-%m-%d')
-            self.fields['birth_date'].required = False
+            self.fields["birth_date"].initial = self.animal.birth_date.strftime("%Y-%m-%d")
+            self.fields["birth_date"].required = False
         # Arrival date is compulsory
-        self.fields['arrival_date'].initial = self.animal.arrival_date.strftime('%Y-%m-%d')
-        self.fields['arrival_date'].required = False
-        self.fields['breed'].initial = self.animal.breed
-        self.fields['breed'].required = False
-        self.fields['description'].initial = self.animal.description
-        self.fields['description'].required = False
+        self.fields["arrival_date"].initial = self.animal.arrival_date.strftime("%Y-%m-%d")
+        self.fields["breed"].initial = self.animal.breed
+        self.fields["description"].initial = self.animal.description
