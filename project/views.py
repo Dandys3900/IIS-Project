@@ -118,14 +118,15 @@ def client_edit(request, user_id):
             "form" : form
         })
 
-    form = EditUserForm(request.POST, user=user)
-    if not form.is_valid():
-        messages.error(request, "Invalid form.")
-        return redirect("edituser", user_id=user_id)
+    form = EditUserForm(request.POST, instance=user, user=user)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"User {user_id} edited")
+        return redirect("edituser")
 
-    form.save()
-    messages.success(request, f"User {user_id} edited")
-    return redirect("edituser")
+    return render(request, "edit_user.html", {
+        "form" : form
+    })
 
 # Deleting user by admin
 def client_delete(request):
@@ -159,7 +160,7 @@ def client_delete(request):
 def client_details(request):
     form = UserInfoForm(user=request.user)
     if request.method == "POST":
-        form = UserInfoForm(request.POST, user=request.user)
+        form = UserInfoForm(request.POST, instance=request.user, user=request.user)
         if form.is_valid():
             # Save changes in user profile
             form.save()
@@ -171,73 +172,91 @@ def client_details(request):
 def animal_create(request):
     form = CreateAnimalForm()
     formset = AnimalPhotoFormSet()
+
+    if request.method == "GET":
+        # Render page
+        return render(request, "animal.html", {
+            "form"    : form,
+            "formset" : formset
+        })
+
     # Animal creation form submitted
-    if request.method == "POST":
-        form = CreateAnimalForm(request.POST)
-        formset = AnimalPhotoFormSet(request.POST, request.FILES)
-        if form.is_valid() and formset.is_valid():
-            animal = form.save()
-            photos = formset.save(commit=False)
-            # Store photos for animal (if any)
-            if photos:
-                for photo in photos:
-                    if photo.image.size > MAX_IMG_SIZE:
-                        messages.warning(request, "Uploaded image size must be < 2MB")
-                        break
-                    # Set photo reference to animal object
-                    photo.animal_id = animal
-                    photo.save()
-            # Re-show form with uploaded image
-            if request.POST.get('action') == 'upload':
-                return redirect("editanimal", animal_id=animal.animal_id)
-            # Notify user
-            messages.success(request, f"Animal {animal.name} added.")
-            # Redirect back to homepage
-            return redirect("home")
-    # Render page
-    return render(request, "animal.html", {
-        "form"    : form,
-        "formset" : formset
-    })
+    form = CreateAnimalForm(request.POST)
+    formset = AnimalPhotoFormSet(request.POST, request.FILES)
+
+    if not form.is_valid() or not formset.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("createanimal")
+
+    animal = form.save()
+    photos = formset.save(commit=False) or []
+    # Store photos for animal (if any)
+    for photo in photos:
+        if photo.image.size > MAX_IMG_SIZE:
+            messages.warning(request, "Uploaded image size must be < 2MB")
+            break
+        # Set photo reference to animal object
+        photo.animal_id = animal
+        photo.save()
+    # Re-show form with uploaded image
+    if request.POST.get('action') == 'upload':
+        return redirect("editanimal", animal_id=animal.animal_id)
+    # Notify user
+    messages.success(request, f"Animal {animal.name} added.")
+    # Redirect back to homepage
+    return redirect("home")
 
 def animal_edit(request, animal_id):
-    # Get animal to be edited
-    animal = Animal.objects.get(animal_id=animal_id)
+    try: # Get animal to be edited
+        animal = Animal.objects.get(animal_id=animal_id)
+    except Exception as e:
+        messages.error(request, f"Error while editing animal: {e}")
+        return redirect("home")
+
     form = EditAnimalForm(animal=animal)
     formset = AnimalPhotoFormSet()
+
+    if request.method == "GET":
+        # Render page
+        return render(request, "animal.html", {
+            "form"    : form,
+            "formset" : formset,
+            "animal"  : animal
+        })
+
     # Animal edit form submitted
-    if request.method == "POST":
-        form = EditAnimalForm(request.POST, instance=animal, animal=animal)
-        formset = AnimalPhotoFormSet(request.POST, request.FILES)
-        if form.is_valid() and formset.is_valid():
-            photos = formset.save(commit=False)
-            # Store photos for animal (if any)
-            if photos:
-                for photo in photos:
-                    if photo.image.size > MAX_IMG_SIZE:
-                        messages.warning(request, "Uploaded image size must be < 4MB")
-                        break
-                    # Set photo reference to animal object
-                    photo.animal_id = animal
-                    photo.save()
-            form.save()
-            # Re-show form with uploaded image
-            if request.POST.get('action') == 'upload':
-                return redirect("editanimal", animal_id=animal_id)
-            # Notify user
-            messages.success(request, f"Animal {animal.name} edited.")
-            # Redirect back to homepage
-            return redirect("home")
-    # Render page
-    return render(request, "animal.html", {
-        "form"    : form,
-        "formset" : formset,
-        "animal"  : animal
-    })
+    form = EditAnimalForm(request.POST, instance=animal, animal=animal)
+    formset = AnimalPhotoFormSet(request.POST, request.FILES)
+
+    if not form.is_valid() or not formset.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("editanimal", anima_id=animal.animal_id)
+
+    photos = formset.save(commit=False) or []
+    # Store photos for animal (if any)
+    for photo in photos:
+        if photo.image.size > MAX_IMG_SIZE:
+            messages.warning(request, "Uploaded image size must be < 4MB")
+            break
+        # Set photo reference to animal object
+        photo.animal_id = animal
+        photo.save()
+    form.save()
+    # Re-show form with uploaded image
+    if request.POST.get('action') == 'upload':
+        return redirect("editanimal", animal_id=animal_id)
+    # Notify user
+    messages.success(request, f"Animal {animal.name} edited.")
+    # Redirect back to homepage
+    return redirect("home")
 
 def animal_delete(request, animal_id):
-    # Get animal to be deleted
-    animal = Animal.objects.get(animal_id=animal_id)
+    try: # Get animal to be deleted
+        animal = Animal.objects.get(animal_id=animal_id)
+    except Exception as e:
+        messages.error(request, f"Error while deleting animal: {e}")
+        return redirect("home")
+
     # Change isActive to False to mark it deleted
     animal.is_active = False
     animal.save()
@@ -251,17 +270,18 @@ def animal_delete(request, animal_id):
     # Redirect back to homepage
     return redirect("home")
 
-def delete_image(request, image_id):
+def image_delete(request, animal_id, image_id):
     try:
         photo = AnimalPhoto.objects.get(image_id=image_id)
     except Exception as e:
         messages.error(request, f"Error while deleting image: {e}")
-    else:
-        # Store animal_id to return back
-        animal_id = photo.animal_id.animal_id
-        # Delete photo
-        photo.delete()
         return redirect("editanimal", animal_id=animal_id)
+
+    # Store animal_id to return back
+    animal_id = photo.animal_id.animal_id
+    # Delete photo
+    photo.delete()
+    return redirect("editanimal", animal_id=animal_id)
 
 def animal_book(request, animal_id):
     # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule

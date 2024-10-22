@@ -32,7 +32,7 @@
                         {% if photo.image %}
                             <div>
                                 <img src="{{ photo.image.url }}" style="width: 400px; height: 280;">
-                                <form method="POST" action="{% url 'deleteimage' photo.image_id %}">
+                                <form method="POST" action="{% url 'deleteimage' animal.animal_id photo.image_id %}">
                                     <!-- Render form -->
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-primary btn-block" style="margin-top: 5px;">Delete</button>

@@ -1,4 +1,5 @@
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 from django import forms
 from .models import *
@@ -14,6 +15,16 @@ GENDER_CHOICES = [
     (0, "Male"),
     (1, "Female")
 ]
+
+phone_regex = RegexValidator(
+    regex=r'^[0-9]{9}$',
+    message="Phone number should contain cifres only."
+)
+
+email_regex = RegexValidator(
+    regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    message="Email should have format: account@server.domain"
+)
 
 def reorderChoices(role_choices, first_choice):
     # Separate the first choice tuple from the rest
@@ -32,11 +43,12 @@ def getTextWidget(elementName, placeholderText):
     })
 
 # Function for constructing charFields
-def createField(max_length, elementName, placeholderText, required=True):
+def createField(max_length, elementName, placeholderText, required=True, validators=[]):
     return forms.CharField(
         required   = required,
         max_length = max_length,
         label      = "",
+        validators = validators,
         widget     = getTextWidget(elementName, placeholderText)
     )
 
@@ -45,8 +57,8 @@ class SignUpForm(UserCreationForm):
     # Get new user information
     first_name   = createField(255, "first_name", "Enter firstname")
     last_name    = createField(255, "last_name", "Enter lastname")
-    email        = createField(255, "email", "Enter email")
-    phone_number = createField(9, "phone_number", "Enter phone number")
+    email        = createField(255, "email", "Enter email", validators=[email_regex])
+    phone_number = createField(9, "phone_number", "Enter phone number", validators=[phone_regex])
 
     # New user model class
     class Meta:
@@ -68,15 +80,15 @@ class SignUpForm(UserCreationForm):
 
         # Setup pre-defined fields of UserCreationForm class
         self.fields["username"].widget.attrs["class"] = "form-control"
-        self.fields["username"].initial = "Enter username"
+        self.fields["username"].widget.attrs["placeholder"] = "Enter username"
         self.fields["username"].label     = ""
 
         self.fields["password1"].widget.attrs["class"] = "form-control"
-        self.fields["password1"].initial = "Enter password"
+        self.fields["password1"].widget.attrs["placeholder"] = "Enter password"
         self.fields["password1"].label     = ""
 
         self.fields["password2"].widget.attrs["class"] = "form-control"
-        self.fields["password2"].initial = "Enter password again"
+        self.fields["password2"].widget.attrs["placeholder"] = "Enter password again"
         self.fields["password2"].label     = ""
         self.fields["password2"].help_text = ""
 
@@ -95,22 +107,30 @@ class CreateUserForm(SignUpForm):
 class EditUserSelectForm(forms.Form):
     user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True)
 
-class EditUserForm(forms.Form):
-    user_name = createField(255, "user_name", "Username", False)
-    first_name = createField(255, "first_name", "Firstname", False)
-    last_name = createField(255, "last_name", "Lastname", False)
-    email = createField(255, "email", "Email", False)
-    phone_number = createField(9, "phone_number", "Phone number", False)
+class EditUserForm(forms.ModelForm):
+    first_name = createField(255, "first_name", "Firstname")
+    last_name = createField(255, "last_name", "Lastname")
+    email = createField(255, "email", "Email", validators=[email_regex])
+    phone_number = createField(9, "phone_number", "Phone number", validators=[phone_regex])
     userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
     reset_password = forms.BooleanField(label="Reset user password", required=False)
+
+    class Meta:
+        model = CustomUser
+        # List user attributes
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "userrole"
+        )
 
     def __init__(self, *args, **kwargs):
         # Retrieve user being edited
         self.user = kwargs.pop("user")
         super(EditUserForm, self).__init__(*args, **kwargs)
 
-        self.fields["user_name"].label= "Username"
-        self.fields["user_name"].initial = self.user.username
         self.fields["first_name"].label= "First name"
         self.fields["first_name"].initial = self.user.first_name
         self.fields["last_name"].label= "Last name"
@@ -122,9 +142,6 @@ class EditUserForm(forms.Form):
         self.fields["userrole"].choices = reorderChoices(ROLE_CHOICES, self.user.userrole)
 
     def save(self):
-        for field in self.user.REQUIRED_FIELDS:
-            if (value := self.cleaned_data.get(field)):
-                setattr(self.user, field, value)
         if self.cleaned_data.get("reset_password"):
             self.user.password = "password1234"
 
@@ -139,6 +156,17 @@ class UserInfoForm(EditUserForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
         "class" : "form-control"
     }), required=False)
+
+    class Meta:
+        model = CustomUser
+        # List user attributes
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "password"
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
