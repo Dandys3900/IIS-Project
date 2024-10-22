@@ -53,16 +53,15 @@ CREATE TABLE Animal (
     PRIMARY KEY(animalID)
 );
 
+-- <<week>> entity --
 CREATE TABLE AnimalPhoto (
     photoID INT AUTO_INCREMENT not NULL,
     imagePath VARCHAR(255) not NULL,
-    animalID INT not NULL,
 
-    PRIMARY KEY(photoID)
-    -- NOTE: Wait for ability to create Animal first, then uncomment and use it
-        -- animalID INT not NULL, -- foreign key to Animal
-        -- FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE
-            -- delete photos if the animal is deleted
+    PRIMARY KEY(photoID),
+    animalID INT not NULL, -- foreign key to Animal
+    FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE
+        -- delete photos if the animal is deleted
 );
 
 CREATE TABLE HealthRecord (

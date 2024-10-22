@@ -21,4 +21,14 @@ urlpatterns = [
     path('deleteuser/', views.client_delete, name='deleteuser'),
     # Logged user details page
     path('userdetails/', views.client_details, name='userdetails'),
+    # Creating new animal
+    path('createanimal/', views.animal_create, name='createanimal'),
+    # Editing animal
+    path('editanimal/<int:animal_id>/', views.animal_edit, name='editanimal'),
+    # Deleting animal
+    path('deleteanimal/<int:animal_id>/', views.animal_delete, name='deleteanimal'),
+    # Deleting animal image
+    path('deleteimage/<int:animal_id>/<int:image_id>/', views.image_delete, name='deleteimage'),
+    # Book animal for walk
+    path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal')
 ]

@@ -1,39 +1,29 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
 from django.utils.safestring import mark_safe
-from .forms import SignUpForm, CreateUserForm, UploadImageForm, DeleteUserForm, EditUserSelectForm, EditUserForm
-from .models import AnimalPhoto, CustomUser
+from .forms import *
+from .models import *
+
+# Define max. size for uploaded image to 2MB
+MAX_IMG_SIZE = 2*1024*1024
 
 # Home view
 def home(request):
-    form = UploadImageForm()
-    pictures = AnimalPhoto.objects.all().order_by('animal_id')
-    # User is trying to upload (animal) image
-    if request.method == 'POST':
-        form = UploadImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Extract image and cardID to check if already has image
-            image    = form.cleaned_data["image"] or "generic_animal.png"
-            animalID = form.cleaned_data["animal_id"]
-            # Check if that image already exists
-            curImage = AnimalPhoto.objects.filter(animal_id=animalID).first()
-            if curImage:
-                # Override it
-                curImage.image = image
-                curImage.save()
-            else:
-                # Create new image
-                AnimalPhoto.objects.create(
-                    animal_id=animalID,
-                    image=image
-                )
-            messages.success(request, mark_safe("Upload of Your image was succesful"))
-            # Redirect back to homepage
-            return redirect("home")
+    # Get search query if any
+    search_query = request.GET.get("query")
+
+    if search_query:
+        animals = Animal.objects.filter(name__icontains=search_query, is_active=True)
+    else:
+        animals = Animal.objects.filter(is_active=True).order_by("animal_id")
+
+    # User is trying to upload animal schedule
+    if request.method == "POST":
+        # TODO: Add form for animal schedule and its handling
+        pass
     return render(request, "home.html", {
-        "form"   : form,
-        "images" : pictures
+        "animals" : animals
     })
 
 # Perform client login
@@ -52,6 +42,9 @@ def client_login(request):
         # Check if successful
         if user is not None:
             login(request, user)
+            # User has default password set, issue warning
+            if password == "password1234":
+                messages.warning(request, "You have default password set, change it in profile details!")
             messages.success(request, mark_safe(f"Welcome back <strong>{username}</strong>!"))
             # Redirect back to homepage
             return redirect("home")
@@ -108,31 +101,32 @@ def client_edit_select(request):
 
     return redirect("edituser", user_id=form.cleaned_data["user_to_edit"])
 
-
 def client_edit(request, user_id):
-    try: # check user_to_edit_id validity
-        CustomUser.objects.get(username=user_id)
+    try: # Check user_id validity
+        user = CustomUser.objects.get(username=user_id)
     except CustomUser.DoesNotExist:
         messages.error(request, f"Error occured while editing a user. Nonexistent user {user_id} selected")
         return redirect("edituser")
     except Exception as e:
         messages.error(request, f"Unexpected exception occured, while editing user: {e}")
+        return redirect("edituser")
 
     if request.method == "GET":
-        form = EditUserForm(user_to_edit_id=user_id)
+        form = EditUserForm(user=user)
         # Render form
         return render(request, "edit_user.html", {
             "form" : form
         })
 
-    form = EditUserForm(request.POST, user_to_edit_id=user_id)
-    if not form.is_valid():
-        messages.error(request, "Invalid form.")
-        return redirect("edituser", user_id=user_id)
+    form = EditUserForm(request.POST, instance=user, user=user)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"User {user_id} edited")
+        return redirect("edituser")
 
-    form.save()
-    messages.success(request, f"User {user_id} edited")
-    return redirect("edituser")
+    return render(request, "edit_user.html", {
+        "form" : form
+    })
 
 # Deleting user by admin
 def client_delete(request):
@@ -151,21 +145,146 @@ def client_delete(request):
     try:
         user_to_delete_id = form.cleaned_data["user_to_delete"]
         # Try to find and delete requested user in database
-        user_to_delete = get_user_model().objects.get(username=user_to_delete_id)
+        user_to_delete = CustomUser.objects.get(username=user_to_delete_id)
         user_to_delete.delete()
         messages.success(request, f"User {user_to_delete_id} deleted successfully.")
 
     except CustomUser.DoesNotExist:
         messages.error(request, f"Error occured while deleting user {user_to_delete_id}. User does not exist.")
-
     except Exception as e:
         messages.error(request, f"Unexpected exception occured, while deleting user: {e}")
-
     finally:
         return redirect("deleteuser")
 
 # Show details for currently logged in user
 def client_details(request):
+    form = UserInfoForm(user=request.user)
+    if request.method == "POST":
+        form = UserInfoForm(request.POST, instance=request.user, user=request.user)
+        if form.is_valid():
+            # Save changes in user profile
+            form.save()
+            # Re-authenticate user and update session hash to prevent logout
+            update_session_auth_hash(request, request.user)
+    # Redirect to page user is currently on
+    return redirect(request.META.get("HTTP_REFERER"))
+
+def animal_create(request):
+    form = CreateAnimalForm()
+    formset = AnimalPhotoFormSet()
+
+    if request.method == "GET":
+        # Render page
+        return render(request, "animal.html", {
+            "form"    : form,
+            "formset" : formset
+        })
+
+    # Animal creation form submitted
+    form = CreateAnimalForm(request.POST)
+    formset = AnimalPhotoFormSet(request.POST, request.FILES)
+
+    if not form.is_valid() or not formset.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("createanimal")
+
+    animal = form.save()
+    photos = formset.save(commit=False) or []
+    # Store photos for animal (if any)
+    for photo in photos:
+        if photo.image.size > MAX_IMG_SIZE:
+            messages.warning(request, "Uploaded image size must be < 2MB")
+            break
+        # Set photo reference to animal object
+        photo.animal_id = animal
+        photo.save()
+    # Re-show form with uploaded image
+    if request.POST.get('action') == 'upload':
+        return redirect("editanimal", animal_id=animal.animal_id)
+    # Notify user
+    messages.success(request, f"Animal {animal.name} added.")
+    # Redirect back to homepage
+    return redirect("home")
+
+def animal_edit(request, animal_id):
+    try: # Get animal to be edited
+        animal = Animal.objects.get(animal_id=animal_id)
+    except Exception as e:
+        messages.error(request, f"Error while editing animal: {e}")
+        return redirect("home")
+
+    form = EditAnimalForm(animal=animal)
+    formset = AnimalPhotoFormSet()
+
+    if request.method == "GET":
+        # Render page
+        return render(request, "animal.html", {
+            "form"    : form,
+            "formset" : formset,
+            "animal"  : animal
+        })
+
+    # Animal edit form submitted
+    form = EditAnimalForm(request.POST, instance=animal, animal=animal)
+    formset = AnimalPhotoFormSet(request.POST, request.FILES)
+
+    if not form.is_valid() or not formset.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("editanimal", anima_id=animal.animal_id)
+
+    photos = formset.save(commit=False) or []
+    # Store photos for animal (if any)
+    for photo in photos:
+        if photo.image.size > MAX_IMG_SIZE:
+            messages.warning(request, "Uploaded image size must be < 4MB")
+            break
+        # Set photo reference to animal object
+        photo.animal_id = animal
+        photo.save()
+    form.save()
+    # Re-show form with uploaded image
+    if request.POST.get('action') == 'upload':
+        return redirect("editanimal", animal_id=animal_id)
+    # Notify user
+    messages.success(request, f"Animal {animal.name} edited.")
+    # Redirect back to homepage
+    return redirect("home")
+
+def animal_delete(request, animal_id):
+    try: # Get animal to be deleted
+        animal = Animal.objects.get(animal_id=animal_id)
+    except Exception as e:
+        messages.error(request, f"Error while deleting animal: {e}")
+        return redirect("home")
+
+    # Change isActive to False to mark it deleted
+    animal.is_active = False
+    animal.save()
+    # Get all animal photos
+    photos = animal.photos.all()
+    # Delete these photos as no longer needed
+    for photo in photos:
+        photo.delete()
+    # Notify user
+    messages.success(request, f"Animal {animal.name} deleted successfully.")
+    # Redirect back to homepage
+    return redirect("home")
+
+def image_delete(request, animal_id, image_id):
+    try:
+        photo = AnimalPhoto.objects.get(image_id=image_id)
+    except Exception as e:
+        messages.error(request, f"Error while deleting image: {e}")
+        return redirect("editanimal", animal_id=animal_id)
+
+    # Store animal_id to return back
+    animal_id = photo.animal_id.animal_id
+    # Delete photo
+    photo.delete()
+    return redirect("editanimal", animal_id=animal_id)
+
+def animal_book(request, animal_id):
+    # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule
     pass
 
 ######################################################
@@ -195,7 +314,7 @@ def handle_registration(request, form, doLogin):
         # Check user
         if user is None:
             # Create new user
-            user = get_user_model().objects.create_user(
+            user = CustomUser.objects.create_user(
                 username = username,
                 password = password,
                 **extra_fields

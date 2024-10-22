@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title text-center">Animal form</h3>
+                        <form method="POST" enctype="multipart/form-data">
+                            <!-- Django requires this token for enhanced security -->
+                            {% csrf_token %}
+                            <!-- Render form -->
+                            {{ form.as_p }}
+                            {{ formset.management_form }}
+                                {% for form in formset %}
+                                    {{ form.image }}
+                            {% endfor %}
+                            <br><br>
+                            <div style="display: flex; gap: 5px;">
+                                <button type="submit" class="btn btn-primary btn-block" name="action" value="upload" onclick="handleSubmit(event)">Upload Image</button>
+                                <button type="submit" class="btn btn-primary btn-block" name="action" value="save">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% if animal and animal.photos.exists %}
+                <div class="col-md-4">
+                    <h3>Current photos:</h3>
+                    {% for photo in animal.photos.all %}
+                        {% if photo.image %}
+                            <div>
+                                <img src="{{ photo.image.url }}" style="width: 400px; height: 280;">
+                                <form method="POST" action="{% url 'deleteimage' animal.animal_id photo.image_id %}">
+                                    <!-- Render form -->
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 5px;">Delete</button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% block extra_js %}
+        <script>
+            function handleSubmit(event) {
+                var action = event.target.value;
+                var fileInput = document.getElementById('id_photos-0-image');
+                // If no images given, prevent the form from submitting
+                if (action === 'upload' && fileInput.files.length === 0)
+                    event.preventDefault();
+            }
+        </script>
+    {% endblock extra_js %}
+{% endblock %}

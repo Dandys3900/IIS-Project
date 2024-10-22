@@ -64,10 +64,26 @@ class CustomUser(AbstractBaseUser):
     def userName(self):
         return self.username
 
+class Animal(models.Model):
+    # Define fields for animal
+    animal_id    = models.AutoField(primary_key=True,      db_column="animalID")
+    species      = models.CharField(max_length=255,        db_column="species")
+    name         = models.CharField(max_length=255,        db_column="name")
+    gender       = models.SmallIntegerField(               db_column="gender")
+    birth_date   = models.DateField(null=True, blank=True, db_column="birthDate")
+    arrival_date = models.DateField(                       db_column="arrivalDate")
+    is_active    = models.BooleanField(default=True,       db_column="isActive")
+    breed        = models.CharField(max_length=255,        db_column="breed")
+    description  = models.TextField(                       db_column="description")
+
+    class Meta:
+        # Specify table for storing animals
+        db_table = "Animal"
+
 # Model for animal photos
 class AnimalPhoto(models.Model):
     image_id  = models.AutoField(primary_key=True, db_column="photoID")
-    animal_id = models.IntegerField(db_column="animalID")
+    animal_id = models.ForeignKey(Animal, related_name="photos", on_delete=models.CASCADE, db_column="animalID")
     # Store image in MEDIA_ROOT folder
     image = models.ImageField(db_column="imagePath")
 
