@@ -27,8 +27,13 @@
                                 Medical records
                             </a>
                         </li>
-                    {% endif %}
-                    {% if user.userRole == "admin" %}
+                    {% elif user.userRole == "carer" %}
+                        <li class="nav-item me-2">
+                            <a class="nav-link active" aria-current="page" href="{% url 'animalslist' %}">
+                                Tasks for veterinarian
+                            </a>
+                        </li>
+                    {% elif user.userRole == "admin" %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Manage users

@@ -241,7 +241,9 @@ class EditAnimalForm(CreateAnimalForm):
 
 class CreateMedicalRecordForm(forms.ModelForm):
     name   = createField(255, "name", "Enter record name")
-    detail = forms.CharField(widget=forms.Textarea, required=True, label="Record description")
+    detail = forms.CharField(widget=forms.Textarea(attrs={
+        "class" : "form-control"
+    }), required=True, label="Record description")
 
     class Meta:
         model = HealthRecord
@@ -249,4 +251,17 @@ class CreateMedicalRecordForm(forms.ModelForm):
         fields = (
             "name",
             "detail"
+        )
+
+class CreateAnimalTaskForm(forms.ModelForm):
+    target_vet = forms.ModelChoiceField(queryset=CustomUser.objects.filter(userrole="vet"), label="Assign task to", required=True)
+    detail = forms.CharField(widget=forms.Textarea(attrs={
+        "class" : "form-control"
+    }), required=True, label="Task description")
+
+    class Meta:
+        model = AnimalTask
+        # List animal task attributes
+        fields = (
+            "detail",
         )

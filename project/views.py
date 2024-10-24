@@ -294,8 +294,9 @@ def animal_medrecord(request, animal_id):
     try: # Get animal and its health records
         animal = Animal.objects.get(animal_id=animal_id)
         health_records = animal.med_records.all()
+        animal_tasks = animal.animal_tasks.filter(veterinarian=request.user)
     except Exception as e:
-        messages.error(request, f"Error while deleting animal: {e}")
+        messages.error(request, f"Error while getting animal: {e}")
         return redirect("home")
 
     form = CreateMedicalRecordForm()
@@ -305,6 +306,7 @@ def animal_medrecord(request, animal_id):
         return render(request, "animal_detail.html", {
             "animal"         : animal,
             "health_records" : health_records,
+            "animal_tasks"   : animal_tasks,
             "form"           : form
         })
 
@@ -312,13 +314,47 @@ def animal_medrecord(request, animal_id):
 
     if not form.is_valid():
         messages.error(request, "Invalid form.")
-        return redirect("animalmedrecs", anima_id=animal.animal_id)
+        return redirect("animalmedrecs", animal_id=animal.animal_id)
 
     health_record = form.save(commit=False)
-    health_record.animal = animal
+    health_record.animal_id = animal
     health_record.veterinarian = request.user
     health_record.save()
+    # Notify user
+    messages.success(request, "Medical record added succesfully")
     return redirect("animalmedrecs", animal_id=animal.animal_id)
+
+def animal_vetrecord(request, animal_id):
+    try: # Get animal and its health records
+        animal = Animal.objects.get(animal_id=animal_id)
+        animal_tasks = animal.animal_tasks.all()
+    except Exception as e:
+        messages.error(request, f"Error while getting animal: {e}")
+        return redirect("home")
+
+    form = CreateAnimalTaskForm()
+
+    if request.method == "GET":
+        # Render page
+        return render(request, "animal_tasks.html", {
+            "animal" : animal,
+            "tasks"  : animal_tasks,
+            "form"   : form
+        })
+
+    form = CreateAnimalTaskForm(request.POST)
+
+    if not form.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("animalvettasks", animal_id=animal.animal_id)
+
+    vet_task = form.save(commit=False)
+    vet_task.animal_id = animal
+    vet_task.veterinarian = form.cleaned_data["target_vet"]
+    vet_task.save()
+    # Notify user
+    messages.success(request, "Task created succesfully")
+    return redirect("animalvettasks", animal_id=animal.animal_id)
 
 def animal_book(request, animal_id):
     # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule

@@ -21,7 +21,11 @@
                         <td>{{ animal.species }}</td>
                         <td>{{ animal.breed }}</td>
                         <td>
-                            <a href="{% url 'animalmedrecs' animal.animal_id %}" class="btn btn-primary">View details</a>
+                            {% if user.userRole == "vet" %}
+                                <a href="{% url 'animalmedrecs' animal.animal_id %}" class="btn btn-primary">View details</a>
+                            {% elif user.userRole == "carer" %}
+                                <a href="{% url 'animalvettasks' animal.animal_id %}" class="btn btn-primary">Manage tasks</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
