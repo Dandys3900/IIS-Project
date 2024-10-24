@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-4">{{ animal.name }}</h1>
+        <p><strong>ID:</strong> {{ animal.animal_id }}</p>
+        <p><strong>Species:</strong> {{ animal.species }}</p>
+        <p><strong>Breed:</strong> {{ animal.breed }}</p>
+        <p><strong>Description:</strong> {{ animal.description }}</p>
+
+        <h2 class="mt-4">Health records</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Detail</th>
+                    <th>Veterinarian (ID)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in health_records %}
+                    <tr>
+                        <td>{{ record.record_id }}</td>
+                        <td>{{ record.name }}</td>
+                        <td>{{ record.detail }}</td>
+                        <td>
+                            {{ record.veterinarian.first_name }}
+                            {{ record.veterinarian.last_name }}
+                            ({{ record.veterinarian.user_id }})
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button class="btn btn-primary btn-block" onclick="triggerRecordForm()">Add record</button>
+    </div>
+
+    <div class="col-md-4" id="addrecord" style="display: none;">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title text-center">Login</h3>
+                    <button type="button" class="btn-close" aria-label="Close" style="position: absolute; right: 5px; top: 5px;" onclick="triggerRecordForm()"></button>
+                    <form method="POST" action="{% url 'animalmedrecs' animal.animal_id %}">
+                        <!-- Django requires this token for enhanced security -->
+                        {% csrf_token %}
+                        <!-- Render form -->
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary btn-block">Save</button>
+                    </form>
+                </div>
+            </div>
+    </div>
+
+    {% block extra_js %}
+        <script>
+            function triggerRecordForm() {
+                var recordform = document.getElementById('addrecord');
+                if (recordform.style.display === "block")
+                    recordform.style.display = "none";
+                else
+                recordform.style.display = "block"
+            }
+        </script>
+    {% endblock extra_js %}
+{% endblock %}

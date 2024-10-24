@@ -29,6 +29,10 @@ urlpatterns = [
     path('deleteanimal/<int:animal_id>/', views.animal_delete, name='deleteanimal'),
     # Deleting animal image
     path('deleteimage/<int:animal_id>/<int:image_id>/', views.image_delete, name='deleteimage'),
+    # Getting list of animals
+    path('animalslist/', views.animals_list, name='animalslist'),
+    # Getting medical details of animal
+    path('animalmedrecs/<int:animal_id>', views.animal_medrecord, name='animalmedrecs'),
     # Book animal for walk
     path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal')
 ]

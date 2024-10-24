@@ -283,6 +283,43 @@ def image_delete(request, animal_id, image_id):
     photo.delete()
     return redirect("editanimal", animal_id=animal_id)
 
+def animals_list(request):
+    animals = Animal.objects.all().order_by("animal_id")
+    # Render page
+    return render(request, "animal_list.html", {
+        "animals" : animals
+    })
+
+def animal_medrecord(request, animal_id):
+    try: # Get animal and its health records
+        animal = Animal.objects.get(animal_id=animal_id)
+        health_records = animal.med_records.all()
+    except Exception as e:
+        messages.error(request, f"Error while deleting animal: {e}")
+        return redirect("home")
+
+    form = CreateMedicalRecordForm()
+
+    if request.method == "GET":
+        # Render page
+        return render(request, "animal_detail.html", {
+            "animal"         : animal,
+            "health_records" : health_records,
+            "form"           : form
+        })
+
+    form = CreateMedicalRecordForm(request.POST)
+
+    if not form.is_valid():
+        messages.error(request, "Invalid form.")
+        return redirect("animalmedrecs", anima_id=animal.animal_id)
+
+    health_record = form.save(commit=False)
+    health_record.animal = animal
+    health_record.veterinarian = request.user
+    health_record.save()
+    return redirect("animalmedrecs", animal_id=animal.animal_id)
+
 def animal_book(request, animal_id):
     # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule
     pass
