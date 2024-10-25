@@ -17,6 +17,7 @@
                             <th>ID</th>
                             <th>Detail</th>
                             <th>Assigned veterinarian (ID)</th>
+                            <th>Done</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,6 +30,7 @@
                                     {{ task.veterinarian.last_name }}
                                     ({{ task.veterinarian.user_id }})
                                 </td>
+                                <td>{{ task.is_done }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>

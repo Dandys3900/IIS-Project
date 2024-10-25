@@ -42,6 +42,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Detail</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,6 +50,7 @@
                             <tr>
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
+                                <td><a href="{% url 'finishtask' task.task_id %}" class="btn btn-primary">Mark done</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>

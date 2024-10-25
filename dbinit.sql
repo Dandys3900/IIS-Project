@@ -83,6 +83,7 @@ CREATE TABLE HealthRecord (
 CREATE TABLE Task (
     taskID INT AUTO_INCREMENT not NULL,
     detail TEXT not NULL,
+    isDone BOOLEAN not NULL,
 
     PRIMARY KEY(taskID),
 

@@ -33,8 +33,10 @@ urlpatterns = [
     path('animalslist/', views.animals_list, name='animalslist'),
     # Getting medical details of animal
     path('animalmedrecs/<int:animal_id>', views.animal_medrecord, name='animalmedrecs'),
-    # Getting medical details of animal
+    # Getting details of tasks for animal
     path('animalvettasks/<int:animal_id>', views.animal_vetrecord, name='animalvettasks'),
+    # Setting task to done
+    path('finishtask/<int:task_id>', views.animal_finish_task, name='finishtask'),
     # Book animal for walk
     path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal')
 ]
