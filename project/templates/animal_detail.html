@@ -47,10 +47,16 @@
                     </thead>
                     <tbody>
                         {% for task in animal_tasks %}
-                            <tr>
+                            <tr class="{% if task.is_done %} table-success {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
-                                <td><a href="{% url 'finishtask' task.task_id %}" class="btn btn-primary">Mark done</a></td>
+                                <td><a href="{% url 'updatetaskstatus' task.task_id %}" class="btn btn-primary">
+                                    {% if task.is_done == False %}
+                                        Mark done
+                                    {% else %}
+                                        Reopen
+                                    {% endif %}
+                                </a></td>
                             </tr>
                         {% endfor %}
                     </tbody>

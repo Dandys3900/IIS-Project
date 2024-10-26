@@ -108,7 +108,7 @@ class AnimalTask(models.Model):
     detail       = models.TextField(db_column="detail")
     is_done      = models.BooleanField(default=False, db_column="isDone")
     animal_id    = models.ForeignKey(Animal, related_name="animal_tasks", on_delete=models.CASCADE, db_column="animalID")
-    veterinarian = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, db_column="veterinarianID")
+    veterinarian = models.ForeignKey(CustomUser, related_name="assigned_tasks", on_delete=models.DO_NOTHING, db_column="veterinarianID")
 
     class Meta:
         # Specify table for storing animal task for veterinarians

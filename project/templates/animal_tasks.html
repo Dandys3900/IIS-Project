@@ -22,7 +22,7 @@
                     </thead>
                     <tbody>
                         {% for task in tasks %}
-                            <tr>
+                            <tr class="{% if task.is_done %} table-success {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
                                 <td>

@@ -24,7 +24,7 @@
                     {% if user.userRole == "vet" %}
                         <li class="nav-item me-2">
                             <a class="nav-link active" aria-current="page" href="{% url 'animalslist' %}">
-                                Medical records
+                                Medical records (TODO: {{ assigned_tasks }})
                             </a>
                         </li>
                     {% elif user.userRole == "carer" %}

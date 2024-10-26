@@ -115,7 +115,8 @@ def client_edit(request, user_id):
         form = EditUserForm(user=user)
         # Render form
         return render(request, "edit_user.html", {
-            "form" : form
+            "form" : form,
+            "username" : user.username
         })
 
     form = EditUserForm(request.POST, instance=user, user=user)
@@ -125,7 +126,8 @@ def client_edit(request, user_id):
         return redirect("edituser")
 
     return render(request, "edit_user.html", {
-        "form" : form
+        "form" : form,
+        "username" : user.username
     })
 
 # Deleting user by admin
@@ -356,18 +358,17 @@ def animal_vetrecord(request, animal_id):
     messages.success(request, "Task created succesfully")
     return redirect("animalvettasks", animal_id=animal.animal_id)
 
-def animal_finish_task(request, task_id):
+def animal_update_task(request, task_id):
     try: # Get task
         task = AnimalTask.objects.get(task_id=task_id)
     except Exception as e:
         messages.error(request, f"Error while getting task: {e}")
         return redirect("animalmedrecs", animal_id=task.animal_id.animal_id)
 
-    task.is_done = True
+    task.is_done = not task.is_done
     task.save()
     # Redirect back
     return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
-
 
 def animal_book(request, animal_id):
     # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule

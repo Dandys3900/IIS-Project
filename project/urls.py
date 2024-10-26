@@ -36,7 +36,7 @@ urlpatterns = [
     # Getting details of tasks for animal
     path('animalvettasks/<int:animal_id>', views.animal_vetrecord, name='animalvettasks'),
     # Setting task to done
-    path('finishtask/<int:task_id>', views.animal_finish_task, name='finishtask'),
+    path('updatetaskstatus/<int:task_id>', views.animal_update_task, name='updatetaskstatus'),
     # Book animal for walk
     path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal')
 ]
