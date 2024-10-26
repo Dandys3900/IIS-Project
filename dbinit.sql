@@ -89,7 +89,7 @@ CREATE TABLE Task (
 
     animalID INT not NULL,
     FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE,
-        -- when the animal is deleted, its health records are deleted too
+        -- when the animal is deleted, its tasks are deleted too
 
     veterinarianID INT not NULL, -- references userID from User (Veterinarian)
     FOREIGN KEY(veterinarianID) REFERENCES User(userID)
