@@ -80,6 +80,22 @@ CREATE TABLE HealthRecord (
         -- do not delete records if the veterinarian is deleted
 );
 
+CREATE TABLE Task (
+    taskID INT AUTO_INCREMENT not NULL,
+    detail TEXT not NULL,
+    isDone BOOLEAN not NULL,
+
+    PRIMARY KEY(taskID),
+
+    animalID INT not NULL,
+    FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE,
+        -- when the animal is deleted, its tasks are deleted too
+
+    veterinarianID INT not NULL, -- references userID from User (Veterinarian)
+    FOREIGN KEY(veterinarianID) REFERENCES User(userID)
+        -- do not delete records if the veterinarian is deleted
+);
+
 -- ---------------------------------- CREATE RESERVATION ----------------------------------- --
 
 CREATE TABLE Reservation (

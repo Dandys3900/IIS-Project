@@ -201,7 +201,9 @@ class CreateAnimalForm(forms.ModelForm):
     gender       = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Select gender")
     birth_date   = forms.DateField(required=False, widget=forms.DateInput(attrs=attrs), label="Enter birth date (if known)")
     arrival_date = forms.DateField(required=True, widget=forms.DateInput(attrs=attrs), label="Enter arrival date")
-    description  = forms.CharField(widget=forms.Textarea, required=True, label="Animal description")
+    description  = forms.CharField(widget=forms.Textarea(attrs={
+        "class" : "form-control"
+    }), required=True, label="Animal description")
 
     class Meta:
         model = Animal
@@ -236,3 +238,30 @@ class EditAnimalForm(CreateAnimalForm):
         self.fields["arrival_date"].initial = self.animal.arrival_date.strftime("%Y-%m-%d")
         self.fields["breed"].initial = self.animal.breed
         self.fields["description"].initial = self.animal.description
+
+class CreateMedicalRecordForm(forms.ModelForm):
+    name   = createField(255, "name", "Enter record name")
+    detail = forms.CharField(widget=forms.Textarea(attrs={
+        "class" : "form-control"
+    }), required=True, label="Record description")
+
+    class Meta:
+        model = HealthRecord
+        # List health record attributes
+        fields = (
+            "name",
+            "detail"
+        )
+
+class CreateAnimalTaskForm(forms.ModelForm):
+    target_vet = forms.ModelChoiceField(queryset=CustomUser.objects.filter(userrole="vet"), label="Assign task to", required=True)
+    detail = forms.CharField(widget=forms.Textarea(attrs={
+        "class" : "form-control"
+    }), required=True, label="Task description")
+
+    class Meta:
+        model = AnimalTask
+        # List animal task attributes
+        fields = (
+            "detail",
+        )

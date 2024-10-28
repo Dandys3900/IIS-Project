@@ -21,7 +21,19 @@
             </ul>
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 {% if user.is_authenticated %}
-                    {% if user.userRole == "admin" %}
+                    {% if user.userRole == "vet" %}
+                        <li class="nav-item me-2">
+                            <a class="nav-link active" aria-current="page" href="{% url 'animalslist' %}">
+                                Medical records (TODO: {{ assigned_tasks }})
+                            </a>
+                        </li>
+                    {% elif user.userRole == "carer" %}
+                        <li class="nav-item me-2">
+                            <a class="nav-link active" aria-current="page" href="{% url 'animalslist' %}">
+                                Tasks for veterinarian
+                            </a>
+                        </li>
+                    {% elif user.userRole == "admin" %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Manage users

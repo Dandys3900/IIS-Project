@@ -90,3 +90,26 @@ class AnimalPhoto(models.Model):
     class Meta:
         # Specify table for storing images
         db_table = "AnimalPhoto"
+
+# Model for animal medical record
+class HealthRecord(models.Model):
+    record_id    = models.AutoField(primary_key=True, db_column="recordID")
+    name         = models.CharField(max_length=255, db_column="name")
+    detail       = models.TextField(db_column="detail")
+    animal_id    = models.ForeignKey(Animal, related_name="med_records", on_delete=models.CASCADE, db_column="animalID")
+    veterinarian = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, db_column="veterinarianID")
+
+    class Meta:
+        # Specify table for storing animal medical records
+        db_table = "HealthRecord"
+
+class AnimalTask(models.Model):
+    task_id      = models.AutoField(primary_key=True, db_column="taskID")
+    detail       = models.TextField(db_column="detail")
+    is_done      = models.BooleanField(default=False, db_column="isDone")
+    animal_id    = models.ForeignKey(Animal, related_name="animal_tasks", on_delete=models.CASCADE, db_column="animalID")
+    veterinarian = models.ForeignKey(CustomUser, related_name="assigned_tasks", on_delete=models.DO_NOTHING, db_column="veterinarianID")
+
+    class Meta:
+        # Specify table for storing animal task for veterinarians
+        db_table = "Task"
