@@ -370,6 +370,27 @@ def animal_update_task(request, task_id):
     # Redirect back
     return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
 
+def volunteers_list(request):
+    volunteers = CustomUser.objects.filter(userrole="volunteer", verified=False)
+    # Render page
+    return render(request, "volunteers_list.html", {
+        "volunteers" : volunteers
+    })
+
+def verify_volunteer(request, volunteer_id):
+    try: # Get volunteer (user)
+        volunteer = CustomUser.objects.get(user_id=volunteer_id)
+    except Exception as e:
+        messages.error(request, f"Error while getting volunteer: {e}")
+    else:
+        volunteer.verified = True
+        volunteer.save()
+        # Notify user
+        messages.success(request, f"Volunteer {volunteer.username} verified succesfully")
+    finally:
+        # Redirect back
+        return redirect("volunteerslist")
+
 def animal_book(request, animal_id):
     # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule
     pass

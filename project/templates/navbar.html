@@ -29,6 +29,11 @@
                         </li>
                     {% elif user.userRole == "carer" %}
                         <li class="nav-item me-2">
+                            <a class="nav-link active" aria-current="page" href="{% url 'volunteerslist' %}">
+                                Verify volunteers (Pending: {{ pending_volunteers }})
+                            </a>
+                        </li>
+                        <li class="nav-item me-2">
                             <a class="nav-link active" aria-current="page" href="{% url 'animalslist' %}">
                                 Tasks for veterinarian
                             </a>

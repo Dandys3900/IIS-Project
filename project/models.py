@@ -35,6 +35,7 @@ class CustomUser(AbstractBaseUser):
     email        = models.CharField(max_length=255,   db_column="email", unique=True)
     phone_number = models.CharField(max_length=9,     db_column="phoneNumber")
     userrole     = models.CharField(max_length=20,    db_column="userRole")
+    verified     = models.BooleanField(default=False, db_column="verified")
 
     objects = CustomUserManager()
 
