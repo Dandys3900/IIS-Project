@@ -29,6 +29,11 @@
                         </li>
                     {% elif user.userRole == "carer" %}
                         <li class="nav-item me-2">
+                            <a class="nav-link active" aria-current="page" href="{% url 'volunteerslist' %}">
+                                Verify volunteers (Pending: {{ pending_volunteers }})
+                            </a>
+                        </li>
+                        <li class="nav-item me-2">
                             <a class="nav-link active" aria-current="page" href="{% url 'animalslist' %}">
                                 Tasks for veterinarian
                             </a>
@@ -67,6 +72,13 @@
                     <li class="nav-item me-2">
                         <a class="nav-link dropdown-toggle" role="button" onclick="toggleUserDetails()" aria-expanded="false" aria-current="page" style="color: #FF0028;">
                             {{ user.userName }} ({{ user.userRole }})
+                            {% if user.userRole == "volunteer" %}
+                                {% if user.verified %}
+                                    <span style="color: green;">Verified</span>
+                                {% else %}
+                                    <span style="color: yellow;">Not verified</span>
+                                {% endif %}
+                            {% endif %}
                         </a>
                         <div class="dropdown-content" id="userDetails" style="display: none;">
                                 <div class="card">
