@@ -9,6 +9,8 @@
                     <th>ID</th>
                     <th>Name</th>
                     <th>Username</th>
+                    <th>Email</th>
+                    <th>Phone number</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -18,6 +20,8 @@
                         <td>{{ volunteer.user_id }}</td>
                         <td>{{ volunteer.first_name }} {{ volunteer.last_name }}</td>
                         <td>{{ volunteer.username }}</td>
+                        <td>{{ volunteer.email }}</td>
+                        <td>{{ volunteer.phone_number }}</td>
                         <td>
                             <a href="{% url 'volunteerverify' volunteer.user_id %}" class="btn btn-primary">Verify</a>
                         </td>
