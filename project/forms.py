@@ -16,6 +16,11 @@ GENDER_CHOICES = [
     (1, "Female")
 ]
 
+SELECT_FORM_STYLE = {
+    "class": "form-control",
+    "style": "width: 50%;"
+}
+
 phone_regex = RegexValidator(
     regex=r'^[0-9]{9}$',
     message="Phone number should contain cifres only."
@@ -94,7 +99,7 @@ class SignUpForm(UserCreationForm):
 
 class CreateUserForm(SignUpForm):
     # Add dropdown menu to select role for new user
-    userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Select role for new user")
+    userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Select role for new user", widget=forms.Select(attrs=SELECT_FORM_STYLE))
 
     class Meta(SignUpForm.Meta):
         # Inherit fields from SignUpForm and add own role dropdown element
@@ -105,14 +110,14 @@ class CreateUserForm(SignUpForm):
         super(CreateUserForm, self).__init__(*args, **kwargs)
 
 class EditUserSelectForm(forms.Form):
-    user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True)
+    user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
 
 class EditUserForm(forms.ModelForm):
     first_name = createField(255, "first_name", "Firstname")
     last_name = createField(255, "last_name", "Lastname")
     email = createField(255, "email", "Email", validators=[email_regex])
     phone_number = createField(9, "phone_number", "Phone number", validators=[phone_regex])
-    userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role")
+    userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role", widget=forms.Select(attrs=SELECT_FORM_STYLE))
     reset_password = forms.BooleanField(label="Reset user password", required=False)
 
     class Meta:
@@ -148,7 +153,7 @@ class EditUserForm(forms.ModelForm):
         self.user.save()
 
 class DeleteUserForm(forms.Form):
-    user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True)
+    user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
 
 class UserInfoForm(EditUserForm):
@@ -198,7 +203,7 @@ class CreateAnimalForm(forms.ModelForm):
     name         = createField(255, "name", "Enter animal name")
     species      = createField(255, "species", "Enter specie")
     breed        = createField(255, "breed", "Enter animal breed")
-    gender       = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Select gender")
+    gender       = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Select gender", widget=forms.Select(attrs=SELECT_FORM_STYLE))
     birth_date   = forms.DateField(required=False, widget=forms.DateInput(attrs=attrs), label="Enter birth date (if known)")
     arrival_date = forms.DateField(required=True, widget=forms.DateInput(attrs=attrs), label="Enter arrival date")
     description  = forms.CharField(widget=forms.Textarea(attrs={
@@ -254,7 +259,7 @@ class CreateMedicalRecordForm(forms.ModelForm):
         )
 
 class CreateAnimalTaskForm(forms.ModelForm):
-    target_vet = forms.ModelChoiceField(queryset=CustomUser.objects.filter(userrole="vet"), label="Assign task to", required=True)
+    target_vet = forms.ModelChoiceField(queryset=CustomUser.objects.filter(userrole="vet"), label="Assign task to", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     detail = forms.CharField(widget=forms.Textarea(attrs={
         "class" : "form-control"
     }), required=True, label="Task description")
