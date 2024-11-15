@@ -445,12 +445,12 @@ def animal_book(request, animal_id):
 ################## HELPER FUNCTIONS ##################
 
 # Helper to ensure only allowed users can access certain views
-def role_required(request, allowedRoles=[]):
+def role_required(request, allowedRoles=None):
     # No user logged in -> block access
     if not request.user or not request.user.is_authenticated:
         raise PermissionDenied
     # User has different role
-    if request.user.userRole() not in allowedRoles:
+    if allowedRoles and request.user.userRole() not in allowedRoles:
         raise PermissionDenied
 
 # Helper function handling registration of new user in multiple contexts
