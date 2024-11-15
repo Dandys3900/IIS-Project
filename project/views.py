@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
 from django.utils.safestring import mark_safe
+from django.core.exceptions import PermissionDenied
 from .forms import *
 from .models import *
 
@@ -74,6 +75,9 @@ def client_register(request):
 
 # Create new user by currently logged user
 def client_create_new(request):
+    # Security: only admin can view this
+    role_required(request, ["admin"])
+
     form = CreateUserForm()
     # User is trying to register
     if request.method == "POST":
@@ -87,6 +91,9 @@ def client_create_new(request):
     })
 
 def client_edit_select(request):
+    # Security: only admin can view this
+    role_required(request, ["admin"])
+
     if request.method == "GET":
         form = EditUserSelectForm()
         # Render form
@@ -102,6 +109,9 @@ def client_edit_select(request):
     return redirect("edituser", user_id=form.cleaned_data["user_to_edit"])
 
 def client_edit(request, user_id):
+    # Security: only admin can view this
+    role_required(request, ["admin"])
+
     try: # Check user_id validity
         user = CustomUser.objects.get(username=user_id)
     except CustomUser.DoesNotExist:
@@ -132,6 +142,9 @@ def client_edit(request, user_id):
 
 # Deleting user by admin
 def client_delete(request):
+    # Security: only admin can view this
+    role_required(request, ["admin"])
+
     if request.method == "GET":
         form = DeleteUserForm()
         # Render form
@@ -160,6 +173,9 @@ def client_delete(request):
 
 # Show details for currently logged in user
 def client_details(request):
+    # Security: only logged user can view this
+    role_required(request)
+
     form = UserInfoForm(user=request.user)
     if request.method == "POST":
         form = UserInfoForm(request.POST, instance=request.user, user=request.user)
@@ -172,6 +188,9 @@ def client_details(request):
     return redirect(request.META.get("HTTP_REFERER"))
 
 def animal_create(request):
+    # Security: only carer can view this
+    role_required(request, ["carer"])
+
     form = CreateAnimalForm()
     formset = AnimalPhotoFormSet()
 
@@ -209,6 +228,9 @@ def animal_create(request):
     return redirect("home")
 
 def animal_edit(request, animal_id):
+    # Security: only carer can view this
+    role_required(request, ["carer"])
+
     try: # Get animal to be edited
         animal = Animal.objects.get(animal_id=animal_id)
     except Exception as e:
@@ -253,6 +275,9 @@ def animal_edit(request, animal_id):
     return redirect("home")
 
 def animal_delete(request, animal_id):
+    # Security: only carer can view this
+    role_required(request, ["carer"])
+
     try: # Get animal to be deleted
         animal = Animal.objects.get(animal_id=animal_id)
     except Exception as e:
@@ -273,6 +298,9 @@ def animal_delete(request, animal_id):
     return redirect("home")
 
 def image_delete(request, animal_id, image_id):
+    # Security: only carer can view this
+    role_required(request, ["carer"])
+
     try:
         photo = AnimalPhoto.objects.get(image_id=image_id)
     except Exception as e:
@@ -286,6 +314,9 @@ def image_delete(request, animal_id, image_id):
     return redirect("editanimal", animal_id=animal_id)
 
 def animals_list(request):
+    # Security: only carer or veterinarian can view this
+    role_required(request, ["carer", "vet"])
+
     animals = Animal.objects.all().order_by("animal_id")
     # Render page
     return render(request, "animal_list.html", {
@@ -293,6 +324,9 @@ def animals_list(request):
     })
 
 def animal_medrecord(request, animal_id):
+    # Security: only veterinarian can view this
+    role_required(request, ["vet"])
+
     try: # Get animal and its health records
         animal = Animal.objects.get(animal_id=animal_id)
         health_records = animal.med_records.all()
@@ -327,6 +361,9 @@ def animal_medrecord(request, animal_id):
     return redirect("animalmedrecs", animal_id=animal.animal_id)
 
 def animal_vetrecord(request, animal_id):
+    # Security: only carer can view this
+    role_required(request, ["carer"])
+
     try: # Get animal and its health records
         animal = Animal.objects.get(animal_id=animal_id)
         animal_tasks = animal.animal_tasks.all()
@@ -359,6 +396,9 @@ def animal_vetrecord(request, animal_id):
     return redirect("animalvettasks", animal_id=animal.animal_id)
 
 def animal_update_task(request, task_id):
+    # Security: only veterinarian can view this
+    role_required(request, ["vet"])
+
     try: # Get task
         task = AnimalTask.objects.get(task_id=task_id)
     except Exception as e:
@@ -371,6 +411,9 @@ def animal_update_task(request, task_id):
     return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
 
 def volunteers_list(request):
+    # Security: only carer can view this
+    role_required(request, ["carer"])
+
     volunteers = CustomUser.objects.filter(userrole="volunteer", verified=False)
     # Render page
     return render(request, "volunteers_list.html", {
@@ -378,6 +421,9 @@ def volunteers_list(request):
     })
 
 def verify_volunteer(request, volunteer_id):
+    # Security: only carer can view this
+    role_required(request, ["carer"])
+
     try: # Get volunteer (user)
         volunteer = CustomUser.objects.get(user_id=volunteer_id)
     except Exception as e:
@@ -397,6 +443,15 @@ def animal_book(request, animal_id):
 
 ######################################################
 ################## HELPER FUNCTIONS ##################
+
+# Helper to ensure only allowed users can access certain views
+def role_required(request, allowedRoles=[]):
+    # No user logged in -> block access
+    if not request.user or not request.user.is_authenticated:
+        raise PermissionDenied
+    # User has different role
+    if request.user.userRole() not in allowedRoles:
+        raise PermissionDenied
 
 # Helper function handling registration of new user in multiple contexts
 def handle_registration(request, form, doLogin):

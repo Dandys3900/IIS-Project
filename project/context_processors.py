@@ -8,7 +8,7 @@ def userdetails_form(request):
     pending_volunteers = 0
 
     # Create form for logged-in user only
-    if user.is_authenticated:
+    if user and user.is_authenticated:
         form = UserInfoForm(user=user)
         if user.userRole() == "vet":
             pendingTasksCount = user.assigned_tasks.filter(is_done=False).count()
