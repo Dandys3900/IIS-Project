@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 from django import forms
 from .models import *
-from datetime import datetime
+from datetime import datetime, timezone
 
 ROLE_CHOICES = [
     ("admin", "Administrator"),
@@ -297,18 +297,22 @@ class BookAnimalForm(forms.Form):
         fields = ()
     
     def save(self, commit=True):
+        reservation = Reservation()
         walk = Walking()
         # Combine date and time into datetime
         date = self.cleaned_data["date"]
         start_time = self.cleaned_data["start_time"]
         end_time = self.cleaned_data["end_time"]
-        walk.start_time = datetime.combine(date, start_time)
         # Set fields
-        walk.end_time = datetime.combine(date, end_time)
-        walk.animal_id = self.animal
+        reservation.start_time = datetime.combine(date, start_time).replace(tzinfo=timezone.utc)
+        reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
+        reservation.animal_id = self.animal
+        reservation.caregiver = self.user # HACK - caregiver cannot be NULL, but caregiver is irrelevant for this table entry
         walk.volunteer_id = self.user
         walk.confirmation = "pending"
+        walk.walk_id = reservation
 
         if commit:
+            reservation.save()
             walk.save()
         return walk

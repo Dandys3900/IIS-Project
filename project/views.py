@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from .forms import *
 from .models import *
 from time import gmtime, strftime
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Define max. size for uploaded image to 2MB
 MAX_IMG_SIZE = 2*1024*1024
@@ -466,16 +466,13 @@ def animal_book(request, animal_id):
         messages.error(request, "Could not book a walk.")
         return redirect("bookanimal", animal_id)
 
-    print(form.cleaned_data["start_time"])
-    print(form.cleaned_data["end_time"])
-
     if form.cleaned_data["date"] < datetime.today().date():
         messages.error(request, "Error while booking animal: Cannot book animal in the past day.")
         return redirect("bookanimal", animal_id)
-    if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"] < datetime.now().time():
+    if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) < datetime.now().time().replace(tzinfo=timezone.utc):
         messages.error(request, "Error while booking animal: Cannot book animal in the past time.")
         return redirect("bookanimal", animal_id)
-    if form.cleaned_data["start_time"] > form.cleaned_data["end_time"]:
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) > form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
         messages.error(request, "Error while booking animal: Cannot book animal for a negative time.")
         return redirect("bookanimal", animal_id)
 
@@ -485,8 +482,9 @@ def animal_book(request, animal_id):
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])
-
     walks = Walking.objects.all()
+    if request.user.userrole == "volunteer":
+        walks = walks.filter(volunteer_id=request.user.user_id)
     return render(request, "walk_list.html", {
         "walks" : walks
     })
@@ -499,12 +497,24 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
 
     try: # Get walk to be edited
         walk = Walking.objects.get(walk_id=walk_id)
-        walk.confirmation = desired_confirmation
-        messages.success(request, f"Booking confirmation changed to '{desired_confirmation}'.")
-        # TODO disallow confirming bookings at the same time
     except Exception as e:
         messages.error(request, f"Error while changing booking confirmation: {e}.")
+        return redirect("walklist")
 
+    # Forbid changing of already ongoing booking
+    if walk.walk_id.start_time < datetime.now().replace(tzinfo=timezone.utc):
+        messages.error(request, "Cannot modify an already finished/ongoing walk.")
+        return redirect("walklist")
+
+    # Forbid confirming two bookings at the same time
+    if desired_confirmation == "approved" and walk.walk_id.has_conflict():
+        messages.error(request, "Cannot approve walk. Another booking is in conflict.")
+        return redirect("walklist")
+
+
+    walk.confirmation = desired_confirmation
+    walk.save()
+    messages.success(request, f"Booking confirmation changed to '{desired_confirmation}'.")
     return redirect("walklist")
 
 def walk_delete(request, walk_id):
@@ -512,11 +522,15 @@ def walk_delete(request, walk_id):
 
     try: # Get walk to be edited
         walk = Walking.objects.get(walk_id=walk_id)
-        walk.delete()
         messages.success(request, "Walk booking deleted.")
     except Exception as e:
         messages.error(request, f"Error while deleting walk booking: {e}.")
 
+    if walk.walk_id.start_time < datetime.now().replace(tzinfo=timezone.utc):
+        messages.error(request, "Cannot cancel an already finished/ongoing walk.")
+        return redirect("walklist")
+
+    walk.delete()
     return redirect("walklist")
 
 ######################################################

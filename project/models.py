@@ -124,6 +124,14 @@ class Reservation(models.Model):
 
     class Meta:
         db_table = "Reservation"
+    
+    def has_conflict(self):
+        return Reservation.objects.filter(
+            animal_id=self.animal_id,  # Only consider reservations for the same animal
+            start_time__lt=self.end_time,  # Check overlap: starts before this ends
+            end_time__gt=self.start_time,  # Check overlap: ends after this starts
+            walking__confirmation="approved"
+        ).exclude(reservationID=self.reservationID).exists()
 
 class Walking(models.Model):
     walk_id = models.OneToOneField(Reservation, primary_key=True, on_delete=models.CASCADE, db_column="reservationID")

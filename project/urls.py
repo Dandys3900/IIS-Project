@@ -48,5 +48,5 @@ urlpatterns = [
 	# Change booking confirmation
 	path('walklist/<int:walk_id>/<str:desired_confirmation>/', views.walk_change_confirmation, name='walk_change_confirmation'),
     # Delete booking confirmation
-	path('walklist/<int:walk_id>/delete', views.walk_delete, name='walk_delete'),
+	path('walk_delete/<int:walk_id>', views.walk_delete, name='walk_delete'),
 ]

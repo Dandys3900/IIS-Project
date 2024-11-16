@@ -20,7 +20,7 @@
                     <tr>
                         <td>{{ walk.walk_id.reservationID }}</td>
                         <td>{{ walk.volunteer_id }}</td>
-                        <td>{{ walk.walk_id.animal_id }}</td>
+                        <td>{{ walk.walk_id.animal_id.name }}</td>
                         <td>{{ walk.walk_id.start_time }}</td>
                         <td>{{ walk.walk_id.end_time }}</td>
                         <td>{{ walk.confirmation }}</td>
@@ -37,7 +37,7 @@
                             </td>
                         {% elif user.userRole == "volunteer" %}
                             <td>
-                                <a href="{% url 'walk_delete' walk.walk_id.reservationID 'delete' %}" class="btn btn-primary">Delete</a>
+                                <a href="{% url 'walk_delete' walk.walk_id.reservationID %}" class="btn btn-primary">Cancel</a>
                             </td>
                         {% endif %}
                     </tr>
