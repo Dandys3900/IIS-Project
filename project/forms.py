@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 from django import forms
 from .models import *
+from datetime import datetime
 
 ROLE_CHOICES = [
     ("admin", "Administrator"),
@@ -270,3 +271,44 @@ class CreateAnimalTaskForm(forms.ModelForm):
         fields = (
             "detail",
         )
+
+
+class BookAnimalForm(forms.Form):
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date"}),
+        label="Date",
+    )
+    start_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={"type": "time", "id": "start_time"}),
+        label="Start time",
+    )
+    end_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={"type": "time", "id": "end_time"}),
+        label="End time",
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.animal = kwargs.pop("animal") # Retrieve animal being booked
+        self.user = kwargs.pop("user") # Retrieve volunteer
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = Walking
+        fields = ()
+    
+    def save(self, commit=True):
+        walk = Walking()
+        # Combine date and time into datetime
+        date = self.cleaned_data["date"]
+        start_time = self.cleaned_data["start_time"]
+        end_time = self.cleaned_data["end_time"]
+        walk.start_time = datetime.combine(date, start_time)
+        # Set fields
+        walk.end_time = datetime.combine(date, end_time)
+        walk.animal_id = self.animal
+        walk.volunteer_id = self.user
+        walk.confirmation = "pending"
+
+        if commit:
+            walk.save()
+        return walk

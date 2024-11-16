@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="card-title text-center">Walks</h1>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Volunteer</th>
+                    <th>Animal</th>
+                    <th>Walk start</th>
+                    <th>Walk end</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for walk in walks %}
+                    <tr>
+                        <td>{{ walk.walk_id }}</td>
+                        <td>{{ walk.volunteer_id }}</td>
+                        <td>{{ walk.animal_id }}</td>
+                        <td>{{ walk.start_time }}</td>
+                        <td>{{ walk.end_time }}</td>
+                        <td>{{ walk.confirmation }}</td>
+                        {% if user.userRole == "carer" %}
+                            <td>
+                                {% if walk.confirmation == "pending" %}
+                                    <a href="{% url 'walklist' walk.walk_id approved %}" class="btn btn-primary">Approve</a>
+                                    <a href="{% url 'walklist' walk.walk_id declined %}" class="btn btn-primary">Decline</a>
+                                {% elif walk.confirmation == "approved" %}
+                                    <a href="{% url 'walklist' walk.walk_id pending %}" class="btn btn-primary">Unapprove</a>
+                                {% elif walk.confirmation == "declined" %}
+                                    <a href="{% url 'walklist' walk.walk_id pending %}" class="btn btn-primary">Undecline</a>
+                                {% endif %}
+                            </td>
+                        {% elif user.userRole == "volunteer" %}
+                            <td>
+                                <a href="{% url 'walklist' walk.walk_id delete %}" class="btn btn-primary">Delete</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

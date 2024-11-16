@@ -42,5 +42,11 @@ urlpatterns = [
     # Verifying selected volunteer
     path('volunteerverify/<int:volunteer_id>', views.verify_volunteer, name='volunteerverify'),
     # Book animal for walk
-    path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal')
+    path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal'),
+	# Manage walk bookings
+	path('walklist/', views.walk_list, name='walklist'),
+	# Change booking confirmation
+	path('walklist/<int:walk_id>/<str:desired_confirmation>', views.walk_change_confirmation, name='walk_change_confirmation'),
+    # Delete booking confirmation
+	path('walklist/<int:walk_id>/delete', views.walk_delete, name='walk_delete'),
 ]

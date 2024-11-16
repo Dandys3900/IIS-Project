@@ -15,7 +15,7 @@
             </div>
         </div>
         <!-- Add animal button for carer -->
-        {% if user.userRole == "carer" %}
+        {% if user.userRole == "carer" or user.userRole == "admin" %}
             <a href="{% url 'createanimal' %}">
                 <button class="btn btn-primary position-relative top-0 start-50 translate-middle">Add animal</button>
             </a>
@@ -38,11 +38,18 @@
                                 <p class="card-text">{{ animal.description }}</p>
                                 <!-- Display cards buttons -->
                                 <div style="display: flex; gap: 5px; position: absolute; bottom: 10px; right: 10px;">
-                                    {% if user.userRole == "carer" %}
+                                    {% if user.userRole == "admin" %}
                                         <a href="{% url 'editanimal' animal.animal_id %}" class="btn btn-primary">Edit</a>
                                         <a href="{% url 'deleteanimal' animal.animal_id %}" class="btn btn-primary">Delete</a>
+                                    {% elif user.userRole == "carer" %}
+                                        <a href="{% url 'editanimal' animal.animal_id %}" class="btn btn-primary">Edit</a>
+                                        <a href="{% url 'deleteanimal' animal.animal_id %}" class="btn btn-primary">Delete</a>
+                                        <a href="{% url 'animalvettasks' animal.animal_id %}" class="btn btn-primary">Vet tasks</a>
+                                    {% elif user.userRole == "vet" %}
+                                        <a href="{% url 'animalmedrecs' animal.animal_id %}" class="btn btn-primary">Medical recods</a>
+                                    {% else %}
+                                        <a href="{% url 'bookanimal' animal.animal_id %}" class="btn btn-primary">Take me for a walk!</a>
                                     {% endif %}
-                                    <a href="{% url 'bookanimal' animal.animal_id %}" class="btn btn-primary">Take me for a walk!</a>
                                 </div>
                             </div>
                         </div>

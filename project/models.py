@@ -114,3 +114,14 @@ class AnimalTask(models.Model):
     class Meta:
         # Specify table for storing animal task for veterinarians
         db_table = "Task"
+
+class Walking(models.Model):
+    walk_id = models.AutoField(primary_key=True, db_column="walkingID")
+    animal_id = models.ForeignKey(Animal, on_delete=models.CASCADE, db_column="animalID")
+    volunteer_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="volunteerID")
+    start_time = models.DateTimeField(db_column="start")
+    end_time = models.DateTimeField(db_column="end")
+    confirmation = models.CharField(max_length=9, db_column="confirmation")
+
+    class Meta:
+        db_table = "Walking"

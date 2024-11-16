@@ -5,6 +5,8 @@ from django.utils.safestring import mark_safe
 from django.core.exceptions import PermissionDenied
 from .forms import *
 from .models import *
+from time import gmtime, strftime
+from datetime import datetime
 
 # Define max. size for uploaded image to 2MB
 MAX_IMG_SIZE = 2*1024*1024
@@ -66,7 +68,7 @@ def client_register(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if handle_registration(request, form, True):
-            # Redirect back to homepage
+            # Redirect back to homepagef
             return redirect("home")
     # Re-render form with eventual errors
     return render(request, "register.html", {
@@ -438,8 +440,84 @@ def verify_volunteer(request, volunteer_id):
         return redirect("volunteerslist")
 
 def animal_book(request, animal_id):
-    # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule
-    pass
+    if not request.user.is_authenticated: # Anonymous user
+        messages.warning(request, "To take an animal for a walk, you need to be logged in as a Volunteer.")
+        return redirect("login")
+    if not request.user.verified: # Unverified volunteer
+        messages.warning(request, "To take an animal for a walk, you need to be verified. Contact a carer to be verified.")
+        return redirect("home")
+
+    try: # Get animal to be edited
+        animal = Animal.objects.get(animal_id=animal_id)
+    except Exception as e:
+        messages.error(request, f"Error while booking animal: {e}")
+        return redirect("home")
+
+    form = BookAnimalForm(animal=animal, user=request.user)
+    if request.method == "GET":
+        # Render page
+        return render(request, "animal_book.html", {
+            "form"    : form,
+            "animal"  : animal
+        })
+
+    form = BookAnimalForm(data=request.POST, animal=animal, user=request.user)
+    if not form.is_valid():
+        messages.error(request, "Could not book a walk.")
+        return redirect("bookanimal", animal_id)
+
+    print(form.cleaned_data["start_time"])
+    print(form.cleaned_data["end_time"])
+
+    if form.cleaned_data["date"] < datetime.today().date():
+        messages.error(request, "Error while booking animal: Cannot book animal in the past day.")
+        return redirect("bookanimal", animal_id)
+    if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"] < datetime.now().time():
+        messages.error(request, "Error while booking animal: Cannot book animal in the past time.")
+        return redirect("bookanimal", animal_id)
+    if form.cleaned_data["start_time"] > form.cleaned_data["end_time"]:
+        messages.error(request, "Error while booking animal: Cannot book animal for a negative time.")
+        return redirect("bookanimal", animal_id)
+
+    form.save()
+    messages.success(request, "Walk booked.")
+    return redirect("home")
+
+def walk_list(request):
+    role_required(request, ["carer", "volunteer"])
+
+    walks = Walking.objects.all()
+    return render(request, "walk_list.html", {
+        "walks" : walks
+    })
+
+def walk_change_confirmation(request, walk_id, desired_confirmation):
+    role_required(request, ["carer"])
+    if not desired_confirmation in ["pending", "approved", "declined"]:
+        messages.error(request, f"Booking confirmation could not be changed to '{desired_confirmation}'. Bad choice.")
+        return redirect("walklist")
+
+    try: # Get walk to be edited
+        walk = Walking.objects.get(walk_id=walk_id)
+        walk.confirmation = desired_confirmation
+        messages.success(request, f"Booking confirmation changed to '{desired_confirmation}'.")
+        # TODO disallow confirming bookings at the same time
+    except Exception as e:
+        messages.error(request, f"Error while changing booking confirmation: {e}.")
+
+    return redirect("walklist")
+
+def walk_delete(request, walk_id):
+    role_required(request, ["volunteer"])
+
+    try: # Get walk to be edited
+        walk = Walking.objects.get(walk_id=walk_id)
+        walk.delete()
+        messages.success(request, "Walk booking deleted.")
+    except Exception as e:
+        messages.error(request, f"Error while deleting walk booking: {e}.")
+
+    return redirect("walklist")
 
 ######################################################
 ################## HELPER FUNCTIONS ##################

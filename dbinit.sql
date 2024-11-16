@@ -121,8 +121,9 @@ CREATE TABLE Walking (
     FOREIGN KEY(reservationID) REFERENCES Reservation(reservationID) ON DELETE CASCADE,
 
     volunteerID INT not NULL,
-    FOREIGN KEY(volunteerID) REFERENCES User(userID) ON DELETE CASCADE
+    FOREIGN KEY(volunteerID) REFERENCES User(userID) ON DELETE CASCADE,
         -- delete reservation if the volunteer is deleted
+    confirmation VARCHAR(9) not NULL -- pending/declined/approved
 );
 
 -- (specialization/generalization -> Reservation) --

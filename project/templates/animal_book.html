@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title text-center">Book Animal form</h3>
+                        <form method="POST">
+                            <!-- Django requires this token for enhanced security -->
+                            {% csrf_token %}
+                            <!-- Render form -->
+                            {{ form.as_p }}
+                            {{ formset.management_form }}
+                                {% for form in formset %}
+                                    {{ form.image }}
+                            {% endfor %}
+                            <button type="submit" name="submit" class="btn btn-primary btn-block">Request walk</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block extra_js %}
+        <script>
+            // timeslot has a scale of 1h
+            function reset_minutes(e) {
+                let hour = e.target.value.split(":")[0];
+                e.target.value = `${hour}:00`;
+            }
+
+            document.getElementById("start_time").addEventListener("input", reset_minutes);
+            document.getElementById("end_time").addEventListener("input", reset_minutes);
+        </script>
+    {% endblock extra_js %}
+
+{% endblock %}
