@@ -115,13 +115,27 @@ class AnimalTask(models.Model):
         # Specify table for storing animal task for veterinarians
         db_table = "Task"
 
-class Walking(models.Model):
-    walk_id = models.AutoField(primary_key=True, db_column="walkingID")
-    animal_id = models.ForeignKey(Animal, on_delete=models.CASCADE, db_column="animalID")
-    volunteer_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="volunteerID")
+class Reservation(models.Model):
+    reservationID = models.AutoField(primary_key=True, db_column="reservationID")
     start_time = models.DateTimeField(db_column="start")
     end_time = models.DateTimeField(db_column="end")
+    animal_id = models.ForeignKey(Animal, on_delete=models.CASCADE, db_column="animalID")
+    caregiver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="caregiverID")
+
+    class Meta:
+        db_table = "Reservation"
+
+class Walking(models.Model):
+    walk_id = models.OneToOneField(Reservation, primary_key=True, on_delete=models.CASCADE, db_column="reservationID")
+    volunteer_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="volunteerID")
     confirmation = models.CharField(max_length=9, db_column="confirmation")
 
     class Meta:
         db_table = "Walking"
+
+class CheckUp(models.Model):
+    checkup_id = models.OneToOneField(Reservation, primary_key=True, on_delete=models.CASCADE, db_column="reservationID")
+    veterinarian = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="veterinarianID")
+
+    class Meta:
+        db_table = "CheckUp"

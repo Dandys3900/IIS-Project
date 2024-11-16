@@ -226,16 +226,16 @@ VALUES
 ('2023-09-28 11:00:00', '2023-09-28 12:00:00', 5, 1);
 
 -- Inserting walks for animals
-INSERT INTO Walking (reservationID, volunteerID)
+INSERT INTO Walking (reservationID, volunteerID, confirmation)
 VALUES
 -- Walk for Max (Tomáš Daniel - ID 4)
-(1, 4),
+(1, 4, 'pending'),
 
 -- Walk for Bella (Eva Králová - ID 6)
-(3, 6),
+(3, 6, 'pending'),
 
 -- Walk for Rex (Jakub Janšta - ID 5)
-(4, 5);
+(4, 5, 'pending');
 
 -- Inserting CheckUps for animals
 INSERT INTO CheckUp (reservationID, veterinarianID)

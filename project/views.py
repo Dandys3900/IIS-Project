@@ -68,7 +68,7 @@ def client_register(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if handle_registration(request, form, True):
-            # Redirect back to homepagef
+            # Redirect back to homepage
             return redirect("home")
     # Re-render form with eventual errors
     return render(request, "register.html", {
