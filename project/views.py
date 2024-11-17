@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from .forms import *
 from .models import *
 from time import gmtime, strftime
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
 # Define max. size for uploaded image to 2MB
 MAX_IMG_SIZE = 2*1024*1024
@@ -440,40 +440,67 @@ def verify_volunteer(request, volunteer_id):
         return redirect("volunteerslist")
 
 def animal_book(request, animal_id):
-    if not request.user.is_authenticated: # Anonymous user
-        messages.warning(request, "To take an animal for a walk, you need to be logged in as a Volunteer.")
-        return redirect("login")
-    if not request.user.verified: # Unverified volunteer
-        messages.warning(request, "To take an animal for a walk, you need to be verified. Contact a carer to be verified.")
-        return redirect("home")
-
-    try: # Get animal to be edited
+    try: # Get animal
         animal = Animal.objects.get(animal_id=animal_id)
     except Exception as e:
         messages.error(request, f"Error while booking animal: {e}")
         return redirect("home")
 
     form = BookAnimalForm(animal=animal, user=request.user)
+
+    # Get current date
+    today = date.today()
+    # Get all booking for selected animal (don't take past bookings)
+    bookings = Reservation.objects.filter(animal_id=animal, start_time__date__gte=today).order_by("start_time")
+
+    timetable = {}
+    for reservation in bookings:
+        book_date = str(reservation.start_time.date())
+        # Get day name from the reservation
+        day_name = reservation.start_time.strftime('%A')
+        # Use tuple (date, day_name) as dict key
+        key = (book_date, day_name)
+
+        # New date, init whole day for it
+        if key not in timetable:
+            timetable[key] = [None for _ in range(8, 18)]
+
+        # Add reservation
+        reser_time = reservation.start_time.hour - 8
+        # Shelter has opening hours from 8am - 5pm every day
+        if reser_time in [range(0, 10)]:
+            timetable[key][reservation.start_time.hour] = reservation
+
     if request.method == "GET":
         # Render page
         return render(request, "animal_book.html", {
-            "form"    : form,
-            "animal"  : animal
+            "form"     : form,
+            "animal"   : animal,
+            "timetable": timetable,
+            "hours"    : list(range(8, 18))
         })
+
+    if request.user and not request.user.verified: # Unverified volunteer
+        messages.warning(request, "To take an animal for a walk, you need to be verified. Contact a carer to be verified.")
+        return redirect("home")
 
     form = BookAnimalForm(data=request.POST, animal=animal, user=request.user)
     if not form.is_valid():
         messages.error(request, "Could not book a walk.")
         return redirect("bookanimal", animal_id)
 
-    if form.cleaned_data["date"] < datetime.today().date():
-        messages.error(request, "Error while booking animal: Cannot book animal in the past day.")
-        return redirect("bookanimal", animal_id)
-    if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) < datetime.now().time().replace(tzinfo=timezone.utc):
+    # Ensure time is in correct timezone
+    start_time = form.cleaned_data["start_time"].astimezone(timezone.utc)
+    end_time   = form.cleaned_data["end_time"].astimezone(timezone.utc)
+
+    if form.cleaned_data["date"] == datetime.today().date() and start_time < datetime.now().time().replace(tzinfo=timezone.utc):
         messages.error(request, "Error while booking animal: Cannot book animal in the past time.")
         return redirect("bookanimal", animal_id)
-    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) > form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
+    if start_time > end_time:
         messages.error(request, "Error while booking animal: Cannot book animal for a negative time.")
+        return redirect("bookanimal", animal_id)
+    if start_time.hour < 8 or start_time.hour > 17:
+        messages.error(request, "Error while booking animal: Shelter is open from 8am - 5pm.")
         return redirect("bookanimal", animal_id)
 
     form.save()

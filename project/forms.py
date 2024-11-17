@@ -275,7 +275,7 @@ class CreateAnimalTaskForm(forms.ModelForm):
 
 class BookAnimalForm(forms.Form):
     date = forms.DateField(
-        widget=forms.DateInput(attrs={"type": "date"}),
+        widget=forms.DateInput(attrs={"type": "date", "id": "date_input"}),
         label="Date",
     )
     start_time = forms.TimeField(
@@ -295,7 +295,7 @@ class BookAnimalForm(forms.Form):
     class Meta:
         model = Walking
         fields = ()
-    
+
     def save(self, commit=True):
         reservation = Reservation()
         walk = Walking()
