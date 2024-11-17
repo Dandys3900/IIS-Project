@@ -468,8 +468,8 @@ def animal_book(request, animal_id):
         # Add reservation
         reser_time = reservation.start_time.hour - 8
         # Shelter has opening hours from 8am - 5pm every day
-        if reser_time in [range(0, 10)]:
-            timetable[key][reservation.start_time.hour] = reservation
+        if reser_time in range(0, 10):
+            timetable[key][reser_time] = reservation
 
     if request.method == "GET":
         # Render page
@@ -489,17 +489,13 @@ def animal_book(request, animal_id):
         messages.error(request, "Could not book a walk.")
         return redirect("bookanimal", animal_id)
 
-    # Ensure time is in correct timezone
-    start_time = form.cleaned_data["start_time"].astimezone(timezone.utc)
-    end_time   = form.cleaned_data["end_time"].astimezone(timezone.utc)
-
-    if form.cleaned_data["date"] == datetime.today().date() and start_time < datetime.now().time().replace(tzinfo=timezone.utc):
+    if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) < datetime.now().time().replace(tzinfo=timezone.utc):
         messages.error(request, "Error while booking animal: Cannot book animal in the past time.")
         return redirect("bookanimal", animal_id)
-    if start_time > end_time:
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) > form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
         messages.error(request, "Error while booking animal: Cannot book animal for a negative time.")
         return redirect("bookanimal", animal_id)
-    if start_time.hour < 8 or start_time.hour > 17:
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < 8 or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > 17:
         messages.error(request, "Error while booking animal: Shelter is open from 8am - 5pm.")
         return redirect("bookanimal", animal_id)
 
@@ -537,7 +533,6 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
     if desired_confirmation == "approved" and walk.walk_id.has_conflict():
         messages.error(request, "Cannot approve walk. Another booking is in conflict.")
         return redirect("walklist")
-
 
     walk.confirmation = desired_confirmation
     walk.save()
