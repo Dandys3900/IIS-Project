@@ -466,10 +466,13 @@ def animal_book(request, animal_id):
             timetable[key] = [None for _ in range(8, 18)]
 
         # Add reservation
-        reser_time = reservation.start_time.hour - 8
+        start_time = reservation.start_time.hour - 8
+        end_time   = reservation.end_time.hour - 8
         # Shelter has opening hours from 8am - 5pm every day
-        if reser_time in range(0, 10):
-            timetable[key][reser_time] = reservation
+        if start_time in range(0, 10):
+            # If needed, handle multi-hours reservations
+            for book_time in range(start_time, end_time):
+                timetable[key][book_time] = reservation
 
     if request.method == "GET":
         # Render page

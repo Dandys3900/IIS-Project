@@ -9,6 +9,7 @@
                     <thead>
                         <tr>
                             <th>Animal</th>
+                            <th>Specie</th>
                             <th>Date</th>
                             <th>Time</th>
                             <th>Status</th>
@@ -19,6 +20,7 @@
                         {% for walk in walks %}
                             <tr>
                                 <td>{{ walk.walk_id.animal_id.name }}</td>
+                                <td>{{ walk.walk_id.animal_id.species }}</td>
                                 <td>{{ walk.walk_id.start_time.date }}</td>
                                 <td>{{ walk.walk_id.start_time.time }}-{{ walk.walk_id.end_time.time }}</td>
                                 <td>{{ walk.confirmation }}</td>

@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 from django import forms
 from .models import *
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
 ROLE_CHOICES = [
     ("admin", "Administrator"),
@@ -63,7 +63,7 @@ class SignUpForm(UserCreationForm):
     # Get new user information
     first_name   = createField(255, "first_name", "Enter firstname")
     last_name    = createField(255, "last_name", "Enter lastname")
-    email        = createField(255, "email", "Enter email", validators=[email_regex])
+    email        = createField(255, "email", "Enter email (account@server.domain)", validators=[email_regex])
     phone_number = createField(9, "phone_number", "Enter phone number", validators=[phone_regex])
 
     # New user model class
@@ -116,7 +116,7 @@ class EditUserSelectForm(forms.Form):
 class EditUserForm(forms.ModelForm):
     first_name = createField(255, "first_name", "Firstname")
     last_name = createField(255, "last_name", "Lastname")
-    email = createField(255, "email", "Email", validators=[email_regex])
+    email = createField(255, "email", "Email (account@server.domain)", validators=[email_regex])
     phone_number = createField(9, "phone_number", "Phone number", validators=[phone_regex])
     userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role", widget=forms.Select(attrs=SELECT_FORM_STYLE))
     reset_password = forms.BooleanField(label="Reset user password", required=False)
@@ -206,7 +206,7 @@ class CreateAnimalForm(forms.ModelForm):
     breed        = createField(255, "breed", "Enter animal breed")
     gender       = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Select gender", widget=forms.Select(attrs=SELECT_FORM_STYLE))
     birth_date   = forms.DateField(required=False, widget=forms.DateInput(attrs=attrs), label="Enter birth date (if known)")
-    arrival_date = forms.DateField(required=True, widget=forms.DateInput(attrs=attrs), label="Enter arrival date")
+    arrival_date = forms.DateField(initial=date.today, required=True, widget=forms.DateInput(attrs=attrs), label="Enter arrival date")
     description  = forms.CharField(widget=forms.Textarea(attrs={
         "class" : "form-control"
     }), required=True, label="Animal description")
