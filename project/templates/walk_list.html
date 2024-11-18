@@ -18,7 +18,7 @@
                     </thead>
                     <tbody>
                         {% for walk in walks %}
-                            <tr>
+                            <tr class="clickable-row" onclick="window.location='{% url 'bookanimal' walk.walk_id.animal_id.animal_id %}'">
                                 <td>{{ walk.walk_id.animal_id.name }}</td>
                                 <td>{{ walk.walk_id.animal_id.species }}</td>
                                 <td>{{ walk.walk_id.start_time.date }}</td>

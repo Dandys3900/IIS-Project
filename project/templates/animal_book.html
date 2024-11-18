@@ -15,31 +15,30 @@
                         {% else %}
                             Female
                         {% endif %}
-                    <h4>Birth date:
+                    <h4>Birth date:</h4>
                         {% if animal.birth_date %}
-                            <input type="text" class="form-control" value="{{ animal.birth_date }}" readonly>
+                            {{ animal.birth_date }}
                         {% else %}
                             Unknown
                         {% endif %}
-                    </h4>
-                    <h4>
-                        Arrival date: <input type="text" class="form-control" value="{{ animal.arrival_date }}" readonly>
-                    </h4>
+                    <h4>Arrival date:</h4> {{ animal.arrival_date }}
                     <h4>Description:</h4> {{ animal.description }}
                 </div>
             </div>
-            <!-- Animal images (if any) -->
-            {% if animal and animal.photos.exists %}
+            <!-- Animal images -->
                 <div class="col">
                     <div class="d-flex flex-row flex-wrap">
-                        {% for photo in animal.photos.all %}
-                            {% if photo.image %}
-                                <img src="{{ photo.image.url }}" class="img-fluid" style="width: 50%; height: auto;">
-                            {% endif %}
-                        {% endfor %}
+                        {% if animal and animal.photos.exists %}
+                            {% for photo in animal.photos.all %}
+                                {% if photo.image %}
+                                    <img src="{{ photo.image.url }}" class="img-fluid" style="width: 50%; height: auto;">
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <img src="/media/generic_animal.png" class="img-fluid" style="width: 50%; height: auto;"/>
+                        {% endif %}
                     </div>
                 </div>
-            {% endif %}
         </div>
         <hr>
             <h1 class="mt-4">

@@ -15,7 +15,7 @@
             </thead>
             <tbody>
                 {% for animal in animals %}
-                    <tr>
+                    <tr class="{% if animal.animal_id in todo_animals %}table-warning{% endif %}">
                         <td>{{ animal.animal_id }}</td>
                         <td>{{ animal.name }}</td>
                         <td>{{ animal.species }}</td>

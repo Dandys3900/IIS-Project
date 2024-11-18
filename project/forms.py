@@ -195,18 +195,29 @@ class UploadImageForm(forms.ModelForm):
         )
 
 class CreateAnimalForm(forms.ModelForm):
-    # Specify attributes for custom widgets
-    attrs = {
-        "type"  : "date",
-        "class" : "form-control"
-    }
-
     name         = createField(255, "name", "Enter animal name")
     species      = createField(255, "species", "Enter specie")
     breed        = createField(255, "breed", "Enter animal breed")
     gender       = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Select gender", widget=forms.Select(attrs=SELECT_FORM_STYLE))
-    birth_date   = forms.DateField(required=False, widget=forms.DateInput(attrs=attrs), label="Enter birth date (if known)")
-    arrival_date = forms.DateField(initial=date.today, required=True, widget=forms.DateInput(attrs=attrs), label="Enter arrival date")
+    birth_date   = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            "class": "form-control",
+            "type" : "date",
+            "id"   : "birth_date"
+        }),
+        label="Enter birth date (if known)"
+    )
+    arrival_date = forms.DateField(
+        initial=date.today,
+        required=True,
+        widget=forms.DateInput(attrs={
+            "class": "form-control",
+            "type" : "date",
+            "id"   : "arrival_date"
+        }),
+        label="Enter arrival date"
+    )
     description  = forms.CharField(widget=forms.Textarea(attrs={
         "class" : "form-control"
     }), required=True, label="Animal description")

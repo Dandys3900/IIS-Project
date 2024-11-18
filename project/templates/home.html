@@ -23,10 +23,12 @@
         <!-- Main content container -->
         <div class="container-fluid">
             <!-- Setup grid for cards -->
-            <div class="row">
+            <div class="row row-cols-1 row-cols-md-3 g-4">
                 {% for animal in animals %}
-                    <div class="col mb-3">
-                        <div class="card" style="width: 20em; height: 20em;">
+                    <div class="col">
+                        <div class="card" style="width: 23em; height: 23em;">
+                            <!-- Make whole card clickable -->
+                            <a href="{% url 'bookanimal' animal.animal_id %}" class="stretched-link"></a>
                             <!-- For card, show only first picture of animal -->
                             {% if animal.photos.exists %}
                                 <img src="{{ animal.photos.first.image.url }}" class="card-img-top" style="width: 100%; height: 50%; object-fit: cover;"/>
@@ -37,15 +39,13 @@
                                 <h5 class="card-title">{{ animal.name }}</h5>
                                 <p class="card-text">{{ animal.description }}</p>
                                 <!-- Display cards buttons -->
-                                <div style="display: flex; gap: 5px; position: absolute; bottom: 10px; right: 10px;">
+                                <div style="display: flex; gap: 5px; position: absolute; bottom: 10px; right: 10px; z-index: 2;">
                                     {% if user.userRole == "carer" %}
                                         <a href="{% url 'editanimal' animal.animal_id %}" class="btn btn-primary">Edit</a>
                                         <a href="{% url 'deleteanimal' animal.animal_id %}" class="btn btn-primary">Delete</a>
                                         <a href="{% url 'animalvettasks' animal.animal_id %}" class="btn btn-primary">Vet tasks</a>
                                     {% elif user.userRole == "vet" %}
                                         <a href="{% url 'animalmedrecs' animal.animal_id %}" class="btn btn-primary">Medical recods</a>
-                                    {% else %}
-                                        <a href="{% url 'bookanimal' animal.animal_id %}" class="btn btn-primary">Take me for a walk!</a>
                                     {% endif %}
                                 </div>
                             </div>
