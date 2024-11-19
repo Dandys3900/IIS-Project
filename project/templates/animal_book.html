@@ -49,32 +49,6 @@
             </h1>
             <br>
             <div class="row">
-                <!-- Timetable -->
-                {% if timetable %}
-                    <div class="col-md-9">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Day</th>
-                                    {% for hour in hours %}
-                                        <th>{{ hour }}:00-{{ hour|add:1 }}:00</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for key, values in timetable.items %}
-                                    <tr>
-                                        <td>{{ key.1 }} ({{ key.0 }})</td>
-                                        {% for value in values %}
-                                            <td style="background-color: {% if value %} red {% else %} green {% endif %};">
-                                            </td>
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% endif %}
                 {% if user.userRole == "volunteer" %}
                     <!-- Reservation form -->
                     <div class="col-md-3">
@@ -93,12 +67,38 @@
                             </div>
                         </div>
                     </div>
-                {% elif not user %}
+                {% elif not user.is_authenticated %}
                     <br>
                     <br>
                     <label>
-                        Want to take me for walk? <button><a href="/register">Register</a></button> as volunteer, get verified and let's meet!
+                        Want to take me for a walk? <button><a href="/register">Register</a></button> as volunteer, get verified and let's meet!
                     </label>
+                {% endif %}
+                <!-- Timetable -->
+                {% if timetable %}
+                    <div class="col-md-9">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    {% for hour in timetable.hours %}
+                                        <th>{{ hour }}:00-{{ hour|add:1 }}:00</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for day, hours in timetable.days.items %}
+                                    <tr>
+                                        <td>{{ day }}</td>
+                                        {% for hour in hours %}
+                                            <td style="background-color: {% if hour %} red {% else %} green {% endif %};">
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 {% endif %}
             </div>
     </div>

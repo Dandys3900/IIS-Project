@@ -140,6 +140,11 @@ class Walking(models.Model):
 
     class Meta:
         db_table = "Walking"
+    
+    def delete(self, *args, **kwargs):
+        # Delete the related Reservation before deleting this instance
+        self.walk_id.delete()
+        super().delete(*args, **kwargs)
 
 class CheckUp(models.Model):
     checkup_id = models.OneToOneField(Reservation, primary_key=True, on_delete=models.CASCADE, db_column="reservationID")
@@ -147,3 +152,8 @@ class CheckUp(models.Model):
 
     class Meta:
         db_table = "CheckUp"
+    
+    def delete(self, *args, **kwargs):
+        # Delete the related Reservation before deleting this instance
+        self.walk_id.delete()
+        super().delete(*args, **kwargs)

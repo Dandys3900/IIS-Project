@@ -488,52 +488,27 @@ def verify_volunteer(request, volunteer_id):
         return redirect("volunteerslist")
 
 def animal_book(request, animal_id):
+    MIN_HOUR = 8
+    MAX_HOUR = 18
     try: # Get animal
         animal = Animal.objects.get(animal_id=animal_id)
     except Exception as e:
         messages.error(request, f"Error while booking animal: {e}")
-        return redirect("home")
+        return redirect("bookanimal", animal_id)
 
     form = BookAnimalForm(animal=animal, user=request.user)
-
-    # Get current date
-    today = date.today()
-    # Get all booking for selected animal (don't take past bookings)
-    bookings = Reservation.objects.filter(animal_id=animal, start_time__date__gte=today).order_by("start_time")
-
-    timetable = {}
-    for reservation in bookings:
-        book_date = str(reservation.start_time.date())
-        # Get day name from the reservation
-        day_name = reservation.start_time.strftime('%A')
-        # Use tuple (date, day_name) as dict key
-        key = (book_date, day_name)
-
-        # New date, init whole day for it
-        if key not in timetable:
-            timetable[key] = [None for _ in range(8, 18)]
-
-        # Add reservation
-        start_time = reservation.start_time.hour - 8
-        end_time   = reservation.end_time.hour - 8
-        # Shelter has opening hours from 8am - 5pm every day
-        if start_time in range(0, 10):
-            # If needed, handle multi-hours reservations
-            for book_time in range(start_time, end_time):
-                timetable[key][book_time] = reservation
-
+    timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
     if request.method == "GET":
         # Render page
         return render(request, "animal_book.html", {
             "form"     : form,
             "animal"   : animal,
             "timetable": timetable,
-            "hours"    : list(range(8, 18))
         })
 
     if request.user and not request.user.verified: # Unverified volunteer
         messages.warning(request, "To take an animal for a walk, you need to be verified. Contact a carer to be verified.")
-        return redirect("home")
+        return redirect("bookanimal", animal_id)
 
     form = BookAnimalForm(data=request.POST, animal=animal, user=request.user)
     if not form.is_valid():
@@ -550,10 +525,9 @@ def animal_book(request, animal_id):
             "form"     : form,
             "animal"   : animal,
             "timetable": timetable,
-            "hours"    : list(range(8, 18))
         })
-    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) > form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
-        messages.error(request, "Error while booking animal: Cannot book animal for a negative time.")
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) >= form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
+        messages.error(request, "Error while booking animal: Cannot book animal for a negative or zero time.")
         # Reset given times and re-render
         form.data = form.data.copy()
         form.data["start_time"] = ""
@@ -563,10 +537,9 @@ def animal_book(request, animal_id):
             "form"     : form,
             "animal"   : animal,
             "timetable": timetable,
-            "hours"    : list(range(8, 18))
         })
-    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < 8 or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > 17:
-        messages.error(request, "Error while booking animal: Shelter is open from 8am - 5pm.")
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < MIN_HOUR or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > MAX_HOUR:
+        messages.error(request, f"Error while booking animal: Shelter is open from {MIN_HOUR}:00 - {MAX_HOUR}:00.")
         # Reset given times and re-render
         form.data = form.data.copy()
         form.data["start_time"] = ""
@@ -576,12 +549,11 @@ def animal_book(request, animal_id):
             "form"     : form,
             "animal"   : animal,
             "timetable": timetable,
-            "hours"    : list(range(8, 18))
         })
 
     form.save()
     messages.success(request, "Walk booked.")
-    return redirect("home")
+    return redirect("bookanimal", animal_id)
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])
@@ -621,18 +593,22 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
 
 def walk_delete(request, walk_id):
     role_required(request, ["volunteer"])
-
     try: # Get walk to be edited
         walk = Walking.objects.get(walk_id=walk_id)
-        messages.success(request, "Walk booking deleted.")
     except Exception as e:
         messages.error(request, f"Error while deleting walk booking: {e}.")
+        return redirect("walklist")
+
+    # if walk.volunteer_id != request.user.user_id:
+    #     messages.error(request, "Cannot cancel a walk that does not belong to you.")
+    #     return redirect("walklist")
 
     if walk.walk_id.start_time < datetime.now().replace(tzinfo=timezone.utc):
         messages.error(request, "Cannot cancel an already finished/ongoing walk.")
         return redirect("walklist")
 
     walk.delete()
+    messages.success(request, "Walk booking deleted.")
     return redirect("walklist")
 
 ######################################################
@@ -686,3 +662,25 @@ def handle_registration(request, form, doLogin):
             return True
         messages.error(request, mark_safe(f"User <strong>{username}</strong> already exists!"))
     return False
+
+def create_timetable(animal, min_hour, max_hour):
+    # hours - hour range
+    # days - days with reservations
+    #   day - formatted day name + date
+    #       reservations - array of hours with state for each hour
+    timetable = {
+        "hours": range(min_hour, max_hour),
+        "days": {},
+    }
+    # Get all booking for selected animal (don't take past bookings)
+    reservations = Reservation.objects.filter(animal_id=animal, start_time__date__gte=date.today()).order_by("start_time")
+    for reservation in reservations:
+        day_key = f"{str(reservation.start_time.date())} ({reservation.start_time.strftime('%A')})"
+        # Make day empty if not exists
+        if not day_key in timetable["days"].keys():
+            timetable["days"][day_key] = [False for _ in range(min_hour, max_hour)]
+        # Fill the day hours with reservation times
+        for hour in range(min_hour, max_hour):
+            if hour >= reservation.start_time.hour and hour < reservation.end_time.hour:
+                timetable["days"][day_key][hour-min_hour] = True
+    return timetable
