@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('username', models.CharField(db_column='username', max_length=255, unique=True)),
                 ('password', models.CharField(db_column='userPassword', max_length=128)),
                 ('email', models.CharField(db_column='email', max_length=255, unique=True)),
-                ('phone_number', models.CharField(db_column='phoneNumber', max_length=9)),
+                ('phone_number', models.CharField(db_column='phoneNumber', max_length=13)),
                 ('userrole', models.CharField(db_column='userRole', max_length=20)),
                 ('verified', models.BooleanField(db_column='verified', default=False)),
             ],

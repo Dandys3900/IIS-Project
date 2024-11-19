@@ -24,7 +24,7 @@
                     {% if user.userRole == "vet" %}
                         <li class="nav-item me-2">
                             <a class="nav-link active" aria-current="page" href="{% url 'animalslist' %}">
-                                Medical records (TODO: {{ assigned_tasks }})
+                                Medical records <span style="color: yellow;">(TODO: {{ assigned_tasks }})</span>
                             </a>
                         </li>
                     {% elif user.userRole == "carer" %}
@@ -99,6 +99,8 @@
                                             {% csrf_token %}
                                             <!-- Render form -->
                                             {{ userdetails_form.as_p }}
+                                            <!-- Add button to show rest of form for password change -->
+                                            <button type="button" onclick="togglePwdChangeForm()" class="btn btn-warning btn-block">Change password</button>
                                             <button type="submit" class="btn btn-primary btn-block">Save</button>
                                         </form>
                                     </div>
@@ -132,6 +134,24 @@
                 else
                     userdetails.style.display = "none";
             }
+
+            function togglePwdChangeForm() {
+                form = document.getElementById("id_password2");
+                help_text = document.getElementById("id_password1_helptext").parentElement.nextSibling
+                if (form.classList.contains("d-none")) {
+                    help_text.removeAttribute("hidden");
+                    form.classList.remove("d-none");
+                }
+                else {
+                    help_text.setAttribute("hidden", "hidden");
+                    form.classList.add("d-none");
+                }
+            }
+
+            // Initially hide reset password hint text
+            document.addEventListener("DOMContentLoaded", function() {
+                document.getElementById("id_password1_helptext").parentElement.nextSibling.setAttribute("hidden", "hidden");
+            });
         </script>
     {% endblock extra_js %}
 </nav>

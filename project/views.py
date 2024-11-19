@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
@@ -209,7 +210,25 @@ def animal_create(request):
 
     if not form.is_valid() or not formset.is_valid():
         messages.error(request, "Invalid form.")
-        return redirect("createanimal")
+        # Re-render page
+        return render(request, "animal.html", {
+            "form"    : form,
+            "formset" : formset
+        })
+
+    # Check for valid date combination
+    if form.cleaned_data["birth_date"]:
+        if form.cleaned_data["birth_date"] > form.cleaned_data["arrival_date"]:
+            messages.error(request, "Invalid date combination entered.")
+            # Reset given dates
+            form.data = form.data.copy()
+            form.data["birth_date"] = ""
+            form.data["arrival_date"] = ""
+            # Re-render page
+            return render(request, "animal.html", {
+                "form"    : form,
+                "formset" : formset
+            })
 
     animal = form.save()
     photos = formset.save(commit=False) or []
@@ -256,7 +275,27 @@ def animal_edit(request, animal_id):
 
     if not form.is_valid() or not formset.is_valid():
         messages.error(request, "Invalid form.")
-        return redirect("editanimal", anima_id=animal.animal_id)
+        # Re-render page
+        return render(request, "animal.html", {
+            "form"    : form,
+            "formset" : formset,
+            "animal"  : animal
+        })
+
+    # Check for valid date combination
+    if form.cleaned_data["birth_date"]:
+        if form.cleaned_data["birth_date"] > form.cleaned_data["arrival_date"]:
+            messages.error(request, "Invalid date combination entered.")
+            # Reset given dates
+            form.data = form.data.copy()
+            form.data["birth_date"] = ""
+            form.data["arrival_date"] = ""
+            # Re-render page
+            return render(request, "animal.html", {
+                "form"    : form,
+                "formset" : formset,
+                "animal"  : animal
+            })
 
     photos = formset.save(commit=False) or []
     # Store photos for animal (if any)
@@ -311,6 +350,8 @@ def image_delete(request, animal_id, image_id):
 
     # Store animal_id to return back
     animal_id = photo.animal_id.animal_id
+    # Remove photo from filesystem first
+    os.remove(photo.image.path)
     # Delete photo
     photo.delete()
     return redirect("editanimal", animal_id=animal_id)
@@ -320,9 +361,16 @@ def animals_list(request):
     role_required(request, ["carer", "vet"])
 
     animals = Animal.objects.all().order_by("animal_id")
+    # Create list of all animals having todo tasks for logged-in vet to highlight them in table
+    todo_animals = []
+    for animal in animals:
+        tasks_count = request.user.assigned_tasks.filter(is_done=False, animal_id=animal.animal_id).count()
+        if request.user.userRole() == "vet" and tasks_count != 0:
+            todo_animals.append(animal.animal_id)
     # Render page
     return render(request, "animal_list.html", {
-        "animals" : animals
+        "animals"     : animals,
+        "todo_animals": todo_animals
     })
 
 def animal_medrecord(request, animal_id):
@@ -466,10 +514,13 @@ def animal_book(request, animal_id):
             timetable[key] = [None for _ in range(8, 18)]
 
         # Add reservation
-        reser_time = reservation.start_time.hour - 8
+        start_time = reservation.start_time.hour - 8
+        end_time   = reservation.end_time.hour - 8
         # Shelter has opening hours from 8am - 5pm every day
-        if reser_time in range(0, 10):
-            timetable[key][reser_time] = reservation
+        if start_time in range(0, 10):
+            # If needed, handle multi-hours reservations
+            for book_time in range(start_time, end_time):
+                timetable[key][book_time] = reservation
 
     if request.method == "GET":
         # Render page
@@ -491,13 +542,42 @@ def animal_book(request, animal_id):
 
     if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) < datetime.now().time().replace(tzinfo=timezone.utc):
         messages.error(request, "Error while booking animal: Cannot book animal in the past time.")
-        return redirect("bookanimal", animal_id)
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        # Render page
+        return render(request, "animal_book.html", {
+            "form"     : form,
+            "animal"   : animal,
+            "timetable": timetable,
+            "hours"    : list(range(8, 18))
+        })
     if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) > form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
         messages.error(request, "Error while booking animal: Cannot book animal for a negative time.")
-        return redirect("bookanimal", animal_id)
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        form.data["end_time"] = ""
+        # Render page
+        return render(request, "animal_book.html", {
+            "form"     : form,
+            "animal"   : animal,
+            "timetable": timetable,
+            "hours"    : list(range(8, 18))
+        })
     if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < 8 or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > 17:
         messages.error(request, "Error while booking animal: Shelter is open from 8am - 5pm.")
-        return redirect("bookanimal", animal_id)
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        form.data["end_time"] = ""
+        # Render page
+        return render(request, "animal_book.html", {
+            "form"     : form,
+            "animal"   : animal,
+            "timetable": timetable,
+            "hours"    : list(range(8, 18))
+        })
 
     form.save()
     messages.success(request, "Walk booked.")

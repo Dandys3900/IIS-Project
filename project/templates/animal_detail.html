@@ -35,7 +35,10 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <button class="btn btn-primary btn-block" onclick="triggerRecordForm()">Add record</button>
+                <!-- Avoid adding medical record for dead animal -->
+                {% if animal.is_active %}
+                    <button class="btn btn-primary btn-block" onclick="triggerRecordForm()">Add record</button>
+                {% endif %}
                 <h2 class="mt-4">Your tasks for animal</h2>
                 <table class="table">
                     <thead>

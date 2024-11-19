@@ -12,12 +12,14 @@
                         <!-- Render form -->
                         {{ form.as_p }}
                         <button type="submit" class="btn btn-primary btn-block">Register</button>
-                        <br>
-                        <br>
-                        <label>
-                            Already have an account?
-                            <button><a href="/login">Login</a></button>
-                        </label>
+                        {% if not user %}
+                            <br>
+                            <br>
+                            <label>
+                                Already have an account?
+                                <button><a href="/login">Login</a></button>
+                            </label>
+                        {% endif %}
                     </form>
                 </div>
             </div>

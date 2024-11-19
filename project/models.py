@@ -33,7 +33,7 @@ class CustomUser(AbstractBaseUser):
     username     = models.CharField(max_length=255,   db_column="username", unique=True)
     password     = models.CharField(max_length=128,   db_column="userPassword")
     email        = models.CharField(max_length=255,   db_column="email", unique=True)
-    phone_number = models.CharField(max_length=9,     db_column="phoneNumber")
+    phone_number = models.CharField(max_length=13,     db_column="phoneNumber")
     userrole     = models.CharField(max_length=20,    db_column="userRole")
     verified     = models.BooleanField(default=False, db_column="verified")
 
