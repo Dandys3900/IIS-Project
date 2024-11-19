@@ -144,19 +144,6 @@ CREATE TABLE CheckUp (
 
 -- The database will be filled with sample data for easier development
 
--- ---------------------------------- INSERT INTO USER---------------------------------- --
-
--- Inserting basic users into User table
-INSERT INTO User (last_login, firstName, lastName, username, userPassword, email, phoneNumber, userRole, verified)
-VALUES
-(NULL, 'Jan', 'Novák', 'jnovak', 'Heslo123', 'jan.novak@email.cz', '+420123456789', 'volunteer', FALSE), -- ID 1
-(NULL, 'Milan', 'Vrbas', 'Milisaurus', 'C!master7', 'milan.vrbas1@gmail.com', '+420731672979', 'vet', FALSE), -- ID 2
-(NULL, 'Petr', 'Svoboda', 'psvoboda', 'Petr*Heslo', 'petr.svoboda@email.com', '+420987654321', 'carer', FALSE), -- ID 3
-(NULL, 'Tomáš', 'Daniel', 'xDandys', 'Gym_Monster', 'tomas.daniel@centrum.cz', '+420731572983', 'admin', FALSE), -- ID 4
-(NULL, 'Janšta', 'Jakub', 'Kubalabambula', 'Godot#Master', 'jakub.jansta@gmail.com', '+420732315134', 'admin', FALSE), -- ID 5
-(NULL, 'Eva', 'Kralová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '+420555555555', 'volunteer', FALSE), -- ID 6
-(NULL, 'Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '+420624421413', 'carer', FALSE); -- ID 7
-
 -- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- -
 
 -- Inserting animals

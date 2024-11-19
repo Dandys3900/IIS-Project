@@ -14,20 +14,23 @@ MAX_IMG_SIZE = 2*1024*1024
 
 # Home view
 def home(request):
-    # Get search query if any
-    search_query = request.GET.get("query")
+    form = AnimalSearchForm(request.GET)
+    animals = Animal.objects.all()
 
-    if search_query:
-        animals = Animal.objects.filter(name__icontains=search_query, is_active=True)
+    if form.is_valid():
+        search_query = form.cleaned_data["search_bar"]
+        search_specie = form.cleaned_data["specie_choice"]
+
+        if search_query:
+            animals = Animal.objects.filter(name__icontains=search_query, is_active=True)
+        if search_specie:
+            animals = Animal.objects.filter(species__in=search_specie)
     else:
         animals = Animal.objects.filter(is_active=True).order_by("animal_id")
 
-    # User is trying to upload animal schedule
-    if request.method == "POST":
-        # TODO: Add form for animal schedule and its handling
-        pass
     return render(request, "home.html", {
-        "animals" : animals
+        "animals" : animals,
+        "form" : form
     })
 
 # Perform client login
@@ -554,6 +557,7 @@ def animal_book(request, animal_id):
     form.save()
     messages.success(request, "Walk booked.")
     return redirect("bookanimal", animal_id)
+    # return redirect('animalmedrecs', animal_id=animal.animal_id)
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])

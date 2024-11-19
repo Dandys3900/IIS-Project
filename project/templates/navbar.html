@@ -136,21 +136,27 @@
             }
 
             function togglePwdChangeForm() {
-                form = document.getElementById("id_password2");
+                element1  = document.getElementById("id_password1");
+                element2  = document.getElementById("id_password2");
                 help_text = document.getElementById("id_password1_helptext").parentElement.nextSibling
-                if (form.classList.contains("d-none")) {
+
+                if (element1.classList.contains("d-none")) {
                     help_text.removeAttribute("hidden");
-                    form.classList.remove("d-none");
+                    element1.classList.remove("d-none");
+                    element2.classList.remove("d-none");
                 }
                 else {
                     help_text.setAttribute("hidden", "hidden");
-                    form.classList.add("d-none");
+                    element1.classList.add("d-none");
+                    element2.classList.add("d-none");
                 }
             }
 
             // Initially hide reset password hint text
             document.addEventListener("DOMContentLoaded", function() {
-                document.getElementById("id_password1_helptext").parentElement.nextSibling.setAttribute("hidden", "hidden");
+                element = document.getElementById("id_password1_helptext");
+                if (element)
+                    element.parentElement.nextSibling.setAttribute("hidden", "hidden");
             });
         </script>
     {% endblock extra_js %}

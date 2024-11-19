@@ -22,7 +22,7 @@
                     </thead>
                     <tbody>
                         {% for task in tasks %}
-                            <tr class="{% if task.is_done %} table-success {% endif %}">
+                            <tr class="{% if task.is_done %} table-success {% else %} table-danger {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
                                 <td>
