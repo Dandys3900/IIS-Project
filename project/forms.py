@@ -157,12 +157,7 @@ class DeleteUserForm(forms.Form):
     user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
 
-class UserInfoForm(EditUserForm):
-    # Field to show user's current password with ability to change it
-    password = forms.CharField(widget=forms.PasswordInput(attrs={
-        "class" : "form-control"
-    }), required=False)
-
+class UserInfoForm(SignUpForm):
     class Meta:
         model = CustomUser
         # List user attributes
@@ -171,19 +166,35 @@ class UserInfoForm(EditUserForm):
             "last_name",
             "email",
             "phone_number",
-            "password"
+            "password1",
+            "password2"
         )
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # From inherited fields, remove ones we don't need
-        del self.fields["userrole"]
-        del self.fields["reset_password"]
+        # Retrieve user being edited
+        self.user = kwargs.pop("user")
+        super(SignUpForm, self).__init__(*args, **kwargs)
+        # Fill form with user data
+        self.fields["first_name"].label= "First name"
+        self.fields["first_name"].initial = self.user.first_name
 
-        # Init password field
-        self.fields["password"].label= "Password"
-        # For security reasons, Django doesn't allow assigning direct value to the field
-        self.fields["password"].widget.attrs["placeholder"] = self.user.password
+        self.fields["last_name"].label= "Last name"
+        self.fields["last_name"].initial = self.user.last_name
+
+        self.fields["email"].label= "Email"
+        self.fields["email"].initial = self.user.email
+
+        self.fields["phone_number"].label= "Phone number"
+        self.fields["phone_number"].initial = self.user.phone_number
+
+        self.fields["password1"].widget.attrs["class"] = "form-control"
+        self.fields["password1"].widget.attrs["placeholder"] = self.user.password
+        self.fields["password1"].label = "Current password"
+
+        self.fields["password2"].widget.attrs["class"] = "form-control d-none"
+        self.fields["password2"].widget.attrs["placeholder"] = "Enter password again"
+        self.fields["password2"].label     = ""
+        self.fields["password2"].help_text = ""
 
 class UploadImageForm(forms.ModelForm):
     image = forms.ImageField(widget=forms.FileInput())

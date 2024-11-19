@@ -15,7 +15,7 @@
             </div>
         </div>
         <!-- Add animal button for carer -->
-        {% if user.userRole == "carer" or user.userRole == "admin" %}
+        {% if user.userRole == "carer" %}
             <a href="{% url 'createanimal' %}">
                 <button class="btn btn-primary position-relative top-0 start-50 translate-middle">Add animal</button>
             </a>
