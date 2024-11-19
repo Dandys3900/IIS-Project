@@ -109,7 +109,7 @@ CREATE TABLE Reservation (
      -- link to Animal, delete reservation if the animal is deleted
 
     caregiverID INT not NULL,
-    FOREIGN KEY(caregiverID) REFERENCES User(userID)
+    FOREIGN KEY(caregiverID) REFERENCES User(userID),
     -- link to User, reservation remains even if the caregiver is deleted
     confirmation VARCHAR(9) not NULL -- pending/declined/approved
 );
@@ -122,7 +122,7 @@ CREATE TABLE Walking (
     FOREIGN KEY(reservationID) REFERENCES Reservation(reservationID) ON DELETE CASCADE,
 
     volunteerID INT not NULL,
-    FOREIGN KEY(volunteerID) REFERENCES User(userID) ON DELETE CASCADE,
+    FOREIGN KEY(volunteerID) REFERENCES User(userID) ON DELETE CASCADE
         -- delete reservation if the volunteer is deleted
 );
 
@@ -194,35 +194,35 @@ VALUES
 -- -------------------------------- INSERT FOR RESERVATIONS -------------------------------- --
 
 -- Inserting reservations for animals
-INSERT INTO Reservation (start, end, animalID, caregiverID)
+INSERT INTO Reservation (start, end, animalID, caregiverID, confirmation)
 VALUES
 -- Reservation for Max (Jan Novák - ID 1)
-('2023-09-25 10:00:00', '2023-09-25 11:00:00', 1, 1),
-('2023-09-26 14:00:00', '2023-09-26 15:00:00', 1, 1),
+('2023-09-25 10:00:00', '2023-09-25 11:00:00', 1, 1, 'pending'),
+('2023-09-26 14:00:00', '2023-09-26 15:00:00', 1, 1, 'pending'),
 
 -- Reservation for Bella (Milan Vrbas - ID 2)
-('2023-09-25 16:00:00', '2023-09-25 17:00:00', 2, 2),
+('2023-09-25 16:00:00', '2023-09-25 17:00:00', 2, 2, 'pending'),
 
 -- Reservation for Rex (Jan Novák - ID 1)
-('2023-09-27 09:00:00', '2023-09-27 10:00:00', 3, 1),
+('2023-09-27 09:00:00', '2023-09-27 10:00:00', 3, 1, 'pending'),
 
 -- Reservation for Molly (Milan Vrbas - ID 2)
-('2023-09-26 09:00:00', '2023-09-26 10:00:00', 4, 2),
+('2023-09-26 09:00:00', '2023-09-26 10:00:00', 4, 2, 'pending'),
 
 -- Reservation for Jerry (Jan Novák - ID 1)
-('2023-09-28 11:00:00', '2023-09-28 12:00:00', 5, 1);
+('2023-09-28 11:00:00', '2023-09-28 12:00:00', 5, 1, 'pending');
 
 -- Inserting walks for animals
-INSERT INTO Walking (reservationID, volunteerID, confirmation)
+INSERT INTO Walking (reservationID, volunteerID)
 VALUES
 -- Walk for Max (Tomáš Daniel - ID 4)
-(1, 4, 'pending'),
+(1, 4),
 
 -- Walk for Bella (Eva Králová - ID 6)
-(3, 6, 'pending'),
+(3, 6),
 
 -- Walk for Rex (Jakub Janšta - ID 5)
-(4, 5, 'pending');
+(4, 5);
 
 -- Inserting CheckUps for animals
 INSERT INTO CheckUp (reservationID, veterinarianID)

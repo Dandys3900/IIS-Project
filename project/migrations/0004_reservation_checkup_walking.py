@@ -20,6 +20,7 @@ class Migration(migrations.Migration):
                 ('end_time', models.DateTimeField(db_column='end')),
                 ('animal_id', models.ForeignKey(db_column='animalID', on_delete=django.db.models.deletion.CASCADE, to='project.animal')),
                 ('caregiver', models.ForeignKey(db_column='caregiverID', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('confirmation', models.CharField(db_column='confirmation', max_length=9)),
             ],
             options={
                 'db_table': 'Reservation',
@@ -39,7 +40,6 @@ class Migration(migrations.Migration):
             name='Walking',
             fields=[
                 ('walk_id', models.OneToOneField(db_column='reservationID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='project.reservation')),
-                ('confirmation', models.CharField(db_column='confirmation', max_length=9)),
                 ('volunteer_id', models.ForeignKey(db_column='volunteerID', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
