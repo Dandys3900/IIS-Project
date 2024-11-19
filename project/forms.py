@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 from django import forms
@@ -338,3 +338,14 @@ class BookAnimalForm(forms.Form):
             reservation.save()
             walk.save()
         return walk
+
+class AnimalSpecieFilterForm(forms.Form):
+    specie_choice = forms.MultipleChoiceField(choices=[], required=False, widget=forms.SelectMultiple(attrs=SELECT_FORM_STYLE))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Get all unique species values from animals
+        species = [("", "All")]
+        species += [(breed, breed) for breed in Animal.objects.values_list("species", flat=True).distinct()]
+        print(species)
+        self.fields["specie_choice"].choices = species

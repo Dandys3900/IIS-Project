@@ -150,7 +150,9 @@
 
             // Initially hide reset password hint text
             document.addEventListener("DOMContentLoaded", function() {
-                document.getElementById("id_password1_helptext").parentElement.nextSibling.setAttribute("hidden", "hidden");
+                element = document.getElementById("id_password1_helptext");
+                if (element)
+                    element.parentElement.nextSibling.setAttribute("hidden", "hidden");
             });
         </script>
     {% endblock extra_js %}
