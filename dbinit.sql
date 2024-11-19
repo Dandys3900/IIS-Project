@@ -9,6 +9,7 @@
 DROP TABLE IF EXISTS Walking;
 DROP TABLE IF EXISTS CheckUp;
 DROP TABLE IF EXISTS Reservation;
+DROP TABLE IF EXISTS Task; -- DROP TABLE task added
 
 DROP TABLE IF EXISTS HealthRecord;
 DROP TABLE IF EXISTS AnimalPhoto;
@@ -153,7 +154,7 @@ VALUES
 (NULL, 'Petr', 'Svoboda', 'psvoboda', 'Petr*Heslo', 'petr.svoboda@email.com', '987654321', 'carer', FALSE), -- ID 3
 (NULL, 'Tomáš', 'Daniel', 'xDandys', 'Gym_Monster', 'tomas.daniel@centrum.cz', '731572983', 'admin', FALSE), -- ID 4
 (NULL, 'Janšta', 'Jakub', 'Kubalabambula', 'Godot#Master', 'jakub.jansta@gmail.com', '732315134', 'admin', FALSE), -- ID 5
-(NULL, 'Eva', 'Kralová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555', 'volunteer', FALSE), -- ID 6
+(NULL, 'Eva', 'Králová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555', 'volunteer', FALSE), -- ID 6
 (NULL, 'Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413', 'carer', FALSE); -- ID 7
 
 -- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- -

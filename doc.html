@@ -1,74 +1,143 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=iso-8859-2"/>
-    <title>Projekt IIS</title>
-    <style type="text/css">
-    	table { border-collapse: collapse; }
-    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
-    	dt { font-weight: bold; margin-top: 0.5em; }
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=iso-8859-2"/>
+		<!-- PŘEPNOUT VScode kódování na Central European iso-8859-2 -->
+		<title>Projekt IIS</title>
+		<style type="text/css">
+			table { border-collapse: collapse; }
+			td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+			dt { font-weight: bold; margin-top: 0.5em; }
+        	body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+			code { background: #f4f4f4; padding: 5px; border-radius: 4px; }
     </style>
-</head>
-<body>
+		</style>
+	</head>
 
-<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu 
-     podle použitého editoru -->
+	<body>
+		<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu podle použitého editoru -->
 
-<h1>Název zadání (editujte)</h1> <!-- Nahradte názvem svého zadání -->
+		<h1>Zvířecí útulek</h1> <!-- Nahradte názvem svého zadání -->
 
-<dl>
-	<dt>Autoři</dt>
-	<dd>První jméno <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor01@stud.fit.vutbr.cz">xautor01@stud.fit.vutbr.cz</a> -
-		popis činnosti v týmu
-	</dd>
-	<dd>Druhé jméno <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor02@stud.fit.vutbr.cz">xautor02@stud.fit.vutbr.cz</a> - 
-		popis činnosti v týmu
-	</dd>
-  <dd>Třetí jméno <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
-	    <a href="mailto:xautor03@stud.fit.vutbr.cz">xautor03@stud.fit.vutbr.cz</a> - 
-		popis činnosti v týmu
-	</dd>
-	<dt>URL aplikace</dt>
-	<dd><a href="http://www.stud.fit.vutbr.cz/~xautor01/IIS">http://www.stud.fit.vutbr.cz/~xautor01/IIS</a></dd>
-	<dd>(pokud má aplikace více vstupních stránek, napište obdobně další URL)</dd>
-</dl>
+		<dl>
+			<dt>Autoři</dt>
+			<dd>Tomáš Daniel <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+				<a href="mailto:xautor01@stud.fit.vutbr.cz">xautor01@stud.fit.vutbr.cz</a> -
+				popis činnosti v týmu TODO
+			</dd>
+			<dd>Jakub Janšta <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+				<a href="mailto:xautor02@stud.fit.vutbr.cz">xautor02@stud.fit.vutbr.cz</a> - 
+				popis činnosti v týmu TODO
+			</dd>
+		<dd>Milan Vrbas <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+				<a href="mailto:xautor03@stud.fit.vutbr.cz">xautor03@stud.fit.vutbr.cz</a> - 
+				popis činnosti v týmu TODO
+			</dd>
+			<dt>URL aplikace</dt>
+			<dd><a href="https://principal-thomasina-vut-fit-0029f885.koyeb.app/">https://principal-thomasina-vut-fit-0029f885.koyeb.app/</a></dd>
+		</dl>
 
-<h2>Uživatelé systému pro testování</h2>
-<p>Uveďte prosím existující zástupce <strong>všech rolí uživatelů</strong>.</p>
-<table>
-<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
-<tr><td>admin</td><td>admin</td><td>Administrátor</td></tr>
-<tr><td>prodavac</td><td>prodavac</td><td>Prodavač</td></tr>
-<tr><td>franta</td><td>franta</td><td>Zákazník</td></tr>
-</table>
+		<h2>Uživatelé systému pro testování</h2>
+		<!-- <p>Uveďte prosím existující zástupce <strong>všech rolí uživatelů</strong>.</p> -->
+		<table>
+			<tr><th>Login</th><th>Jméno a příjmení</th><th>Heslo</th><th>Role</th></tr>
 
-<p>(Diagram případů užití není nutné vkládat, pokud IS implementuje role a případy užití definované zadáním.)</p> 
+			<tr><td>xDandys</td><td>Tomáš Daniel</td><td>Gym_Monster</td><td>Administrátor</td></tr>
+			<tr><td>Kubalabambula</td><td>Jakub Janšta</td><td>Godot#Master</td><td>Administrátor</td></tr>
+			<tr><td>Milisaurus</td><td>Milan Vrbas</td><td>C!master7</td><td>Veterinář</td></tr>
+			<tr><td>psvoboda</td><td>Petr Svoboda</td><td>Petr*Heslo</td><td>Pečovatel</td></tr>
+			<tr><td>mnovotna</td><td>Marie Novotná</td><td>MarieHeslo420</td><td>Pečovatel</td></tr>
+			<tr><td>jnovak</td><td>Jan Novák</td><td>Heslo123</td><td>Dobrovolník</td></tr>
+			<tr><td>ekralova</td><td>Eva Králová</td><td>Kralova@</td><td>Dobrovolník</td></tr>
+		</table>
 
-<h3>Video</h3>
+		<!-- <p> (Diagram případů užití není nutné vkládat, pokud IS implementuje role a případy užití definované zadáním.) --- MÁME </p> -->
 
-<p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití definované zadáním (např. registrace uživatele, správa uživatelů a činnosti jednotlivých rolí). Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p> 
+		<h3>Video</h3>
 
-<h2>Implementace</h2>
-<p>Stručná dokumentace k implementaci, která popisuje, které části projektu (např. PHP skripty) implementují jednotlivé případy použití.</p>
+		<!-- <p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití 
+			definované zadáním (např. registrace uživatele, správa uživatelů a činnosti jednotlivých rolí). 
+			Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p> -->
 
-<h3>Databáze</h3>
+		<h2>Implementace</h2>
+		<!-- <p>Stručná dokumentace k implementaci, která popisuje, které části projektu (např. PHP skripty) implementují jednotlivé případy použití.</p> -->
+		<ul>
+			<li><i>project/models.py</i> - definice datových modelů pro celý systém, jelikož všechny operace vyžadují práci daty
+				<ul>
+					<li><strong>Administrátor</strong> - modely uživatelů k vytvoření a správě účtů pro pečovatele a veterináře</li>
+					<li><strong>Pečovatel</strong> - modely zvířat, pro přidávání nových záznamů o zvířatech, vedení jejich historie a správa rozvrhů pro venčení </li>
+					<li><strong>Veterinář</strong> - modely pro zdravotní záznamy a plánování vyšetření.</li>
+					<li><strong>Dobrovolník</strong> - modely rezervace venčení</li>
+				</ul>
+			</li>
 
-Zde vložte grafické schéma relační databáze (tabulek v databázi).
+			<li><i>project/views.py</i> - logika pro zpracování požadavků uživatelů
+				<ul>
+					<li><strong>Administrátor</strong> - správa uživatelů (vytváření, editace, mazání)</li>
+					<li><strong>Pečovatel</strong> - přidávání, úprava a mazání záznamů o zvířatech, správa rozvrhů venčení, schvalování rezervací a ověřování dobrovolníků</li>
+					<li><strong>Veterinář</strong> - správa zdravotních záznamů a vyřizování požadavků na vyšetření od pečovatelů</li>
+					<li><strong>Dobrovolník</strong> - rezervace zvířat na venčení a zobrazení historie svých minulých venčení</li>
+				</ul>
+			</li>
 
-<h2>Instalace</h2>
+			<li><i>project/urls.py</i> - zajišťuje mapování URL adres na jednotlivé funkce ve <i>views.py</i></li>
 
-Stručně popište: 
-<ul>
-<li>postup instalace na server,</li>
-<li>softwarové požadavky (verze PHP apod.),</li>
-<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
-</ul>
+			<li><i>project/forms.py</i> - definice formulářů pro zadávání nebo úpravu dat jednotlivými uživateli</li>
 
-<h2>Známé problémy</h2>
-<p>Zde popište, které body zadání nejsou implementovány a z jakého důvodu. Např. &bdquo;Z časových důvodů nebyla implementována správa uživatelů.&rdquo; Pomůžete tím zrychlit hodnocení, když neimplementované funkce nebudeme muset dlouze hledat.</p>
+			<li><i>project/templates</i> - tato složka obsahuje HTML šablony, které zobrazují data uživatelům</li>
+		</ul>
 
-</body>
+		<h3>Databáze</h3>
+		<p>Implementováno pomocí MySQL v <i>dbinit.sql</i></p>
+		<div style="text-align: left;">
+			<img src="./diagrams/ER-diagram.png" alt="ER diagram" width="735" height="774,5">
+		</div>
+
+		<h2>Instalace</h2>
+
+		<!-- Stručně popište: 
+		<ul>
+		<li>postup instalace na server,</li>
+		<li>softwarové požadavky (verze PHP apod.),</li>
+		<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
+		</ul> -->
+
+		<h3>Postup instalace na server</h3>
+		<!-- TODO --> TODO
+	
+		<h3>Softwarové požadavky</h3>
+		<ul>
+			<li><strong>Python:</strong> Verze 3.12.5</li>
+			<li><strong>Django:</strong> Verze 5.1.1</li>
+			<li><strong>MySQL:</strong> Verze 8.0</li>
+			<li> Pro další požadavky viz. <i>requirements.txt</i></li>
+		</ul>
+	
+		<h3>Postup konfigurace databáze</h3>
+		<!-- TODO --> TODO
+
+		<h3>Spuštění projektu lokálně</h3>
+		<ol>
+			<li><strong>Stažení a instalace Pythonu:</strong> <a href="https://www.python.org/downloads/release/python-3125/">Python 3.12.5</a></li>
+
+			<li><strong>Instalace závislostí:</strong> přesuňte se do složky projektu nainstalujte závislosti:
+				<code>pip install -r requirements.txt</code>
+			</li>
+			<li><strong>Spuštění serveru:</strong> server spustíte příkazem:
+				<code>python manage.py runserver</code>
+			</li>
+			<li><strong>Ověření funkčnosti:</strong> otevřete prohlížeč a navštivte adresu 
+				<code>http://127.0.0.1:8000/</code>
+			</li>
+		</ol>
+
+		<h2>Známé problémy</h2>
+		<!-- TODO --> TODO
+
+		<!-- <p>Zde popište, které body zadání nejsou implementovány a z jakého důvodu. Např. &bdquo;Z časových důvodů nebyla 
+			implementována správa uživatelů.&rdquo; Pomůžete tím zrychlit hodnocení, když neimplementované 
+			funkce nebudeme muset dlouze hledat.</p> -->
+
+	</body>
 </html>
