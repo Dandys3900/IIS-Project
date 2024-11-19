@@ -523,7 +523,6 @@ def animal_book(request, animal_id):
         # Reset given times and re-render
         form.data = form.data.copy()
         form.data["start_time"] = ""
-        # Render page
         return render(request, "animal_book.html", {
             "form"     : form,
             "animal"   : animal,
@@ -535,7 +534,6 @@ def animal_book(request, animal_id):
         form.data = form.data.copy()
         form.data["start_time"] = ""
         form.data["end_time"] = ""
-        # Render page
         return render(request, "animal_book.html", {
             "form"     : form,
             "animal"   : animal,
@@ -547,7 +545,6 @@ def animal_book(request, animal_id):
         form.data = form.data.copy()
         form.data["start_time"] = ""
         form.data["end_time"] = ""
-        # Render page
         return render(request, "animal_book.html", {
             "form"     : form,
             "animal"   : animal,
@@ -590,7 +587,7 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
         messages.error(request, "Cannot approve walk. Another booking is in conflict.")
         return redirect("walklist")
 
-    walk.confirmation = desired_confirmation
+    walk.walk_id.confirmation = desired_confirmation
     walk.save()
     messages.success(request, f"Booking confirmation changed to '{desired_confirmation}'.")
     return redirect("walklist")
@@ -682,9 +679,9 @@ def create_timetable(animal, min_hour, max_hour):
         day_key = f"{str(reservation.start_time.date())} ({reservation.start_time.strftime('%A')})"
         # Make day empty if not exists
         if not day_key in timetable["days"].keys():
-            timetable["days"][day_key] = [False for _ in range(min_hour, max_hour)]
+            timetable["days"][day_key] = ["none" for _ in range(min_hour, max_hour)]
         # Fill the day hours with reservation times
         for hour in range(min_hour, max_hour):
             if hour >= reservation.start_time.hour and hour < reservation.end_time.hour:
-                timetable["days"][day_key][hour-min_hour] = True
+                timetable["days"][day_key][hour-min_hour] = reservation.confirmation if reservation.confirmation else "none"
     return timetable

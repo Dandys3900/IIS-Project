@@ -331,7 +331,7 @@ class BookAnimalForm(forms.Form):
         reservation.animal_id = self.animal
         reservation.caregiver = self.user # HACK - caregiver cannot be NULL, but caregiver is irrelevant for this table entry
         walk.volunteer_id = self.user
-        walk.confirmation = "pending"
+        walk.walk_id.confirmation = "pending"
         walk.walk_id = reservation
 
         if commit:

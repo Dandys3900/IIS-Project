@@ -111,6 +111,7 @@ CREATE TABLE Reservation (
     caregiverID INT not NULL,
     FOREIGN KEY(caregiverID) REFERENCES User(userID)
     -- link to User, reservation remains even if the caregiver is deleted
+    confirmation VARCHAR(9) not NULL -- pending/declined/approved
 );
 
 -- (specialization/generalization -> Reservation) --
@@ -123,7 +124,6 @@ CREATE TABLE Walking (
     volunteerID INT not NULL,
     FOREIGN KEY(volunteerID) REFERENCES User(userID) ON DELETE CASCADE,
         -- delete reservation if the volunteer is deleted
-    confirmation VARCHAR(9) not NULL -- pending/declined/approved
 );
 
 -- (specialization/generalization -> Reservation) --

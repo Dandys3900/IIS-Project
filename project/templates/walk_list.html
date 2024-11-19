@@ -27,15 +27,15 @@
                                 <td>{{ walk.walk_id.animal_id.species }}</td>
                                 <td>{{ walk.walk_id.start_time.date }}</td>
                                 <td>{{ walk.walk_id.start_time.time }}-{{ walk.walk_id.end_time.time }}</td>
-                                <td>{{ walk.confirmation }}</td>
+                                <td>{{ walk.walk_idconfirmation }}</td>
                                 <td class="position-relative" style="z-index: 2;">
                                 {% if user.userRole == "carer" %}
-                                    {% if walk.confirmation == "pending" %}
+                                    {% if walk.walk_id.confirmation == "pending" %}
                                         <a href="{% url 'walk_change_confirmation' walk.walk_id.reservationID 'approved' %}" class="btn btn-primary">Approve</a>
                                         <a href="{% url 'walk_change_confirmation' walk.walk_id.reservationID 'declined' %}" class="btn btn-primary">Decline</a>
-                                    {% elif walk.confirmation == "approved" %}
+                                    {% elif walk.walk_id.confirmation == "approved" %}
                                         <a href="{% url 'walk_change_confirmation' walk.walk_id.reservationID 'pending' %}" class="btn btn-primary">Unapprove</a>
-                                    {% elif walk.confirmation == "declined" %}
+                                    {% elif walk.walk_id.confirmation == "declined" %}
                                         <a href="{% url 'walk_change_confirmation' walk.walk_id.reservationID 'pending' %}" class="btn btn-primary">Undecline</a>
                                     {% endif %}
                                 {% elif user.userRole == "volunteer" %}

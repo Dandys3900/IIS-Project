@@ -117,6 +117,7 @@ class Reservation(models.Model):
     end_time = models.DateTimeField(db_column="end")
     animal_id = models.ForeignKey(Animal, on_delete=models.CASCADE, db_column="animalID")
     caregiver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="caregiverID")
+    confirmation = models.CharField(max_length=9, db_column="confirmation")
 
     class Meta:
         db_table = "Reservation"
@@ -132,7 +133,6 @@ class Reservation(models.Model):
 class Walking(models.Model):
     walk_id = models.OneToOneField(Reservation, primary_key=True, on_delete=models.CASCADE, db_column="reservationID")
     volunteer_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="volunteerID")
-    confirmation = models.CharField(max_length=9, db_column="confirmation")
 
     class Meta:
         db_table = "Walking"
