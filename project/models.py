@@ -11,14 +11,14 @@ class CustomUserManager(BaseUserManager):
         # Create model
         user = self.model(
             username     = username,
-            # Store passwords in plain version
-            password     = password,
             first_name   = extra_fields.get("first_name"),
             last_name    = extra_fields.get("last_name"),
             email        = self.normalize_email(extra_fields.get("email")),
             phone_number = extra_fields.get("phone_number"),
             userrole     = extra_fields.get("userrole")
         )
+        # Set user's password
+        user.set_password(password)
         # Save user into database
         user.save(using=self._db)
         return user
@@ -33,7 +33,7 @@ class CustomUser(AbstractBaseUser):
     username     = models.CharField(max_length=255,   db_column="username", unique=True)
     password     = models.CharField(max_length=128,   db_column="userPassword")
     email        = models.CharField(max_length=255,   db_column="email", unique=True)
-    phone_number = models.CharField(max_length=13,     db_column="phoneNumber")
+    phone_number = models.CharField(max_length=13,    db_column="phoneNumber")
     userrole     = models.CharField(max_length=20,    db_column="userRole")
     verified     = models.BooleanField(default=False, db_column="verified")
 
@@ -52,10 +52,6 @@ class CustomUser(AbstractBaseUser):
     class Meta:
         # Specify table for storing users
         db_table = "User"
-
-    def save(self, *args, **kwargs):
-        # Avoid passwords hashing when saving into DB
-        super().save(*args, **kwargs)
 
     # Method for determining role of currently logged user
     def userRole(self):

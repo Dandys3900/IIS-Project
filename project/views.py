@@ -14,14 +14,17 @@ MAX_IMG_SIZE = 2*1024*1024
 
 # Home view
 def home(request):
-    form = AnimalSpecieFilterForm(request.GET or None)
-    # Get search query if any
-    search_query = request.GET.get("query")
+    form = AnimalSearchForm(request.GET)
+    animals = Animal.objects.all()
 
-    if search_query and form.is_valid:
-        target_specie = form.cleaned_data["specie_choice"]
-        print(target_specie)
-        animals = Animal.objects.filter(name__icontains=search_query, species=target_specie, is_active=True)
+    if form.is_valid():
+        search_query = form.cleaned_data["search_bar"]
+        search_specie = form.cleaned_data["specie_choice"]
+
+        if search_query:
+            animals = Animal.objects.filter(name__icontains=search_query, is_active=True)
+        if search_specie:
+            animals = Animal.objects.filter(species__in=search_specie)
     else:
         animals = Animal.objects.filter(is_active=True).order_by("animal_id")
 

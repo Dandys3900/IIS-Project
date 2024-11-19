@@ -7,12 +7,17 @@
                 Animal Shelter at VUT FIT
             </h1>
             <!-- Search bar -->
-            <div class="col-md-5" style="margin-top: 1em; margin-bottom: 2em;">
-                <form class="row-cols-md-3">
-                        <input class="form-control me-2" type="search" placeholder="Search animal" aria-label="Search" name="query" value="{{ request.GET.query }}">
-                        <!-- Render form -->
-                        {{ form.as_p }}
+            <div class="col-auto" style="margin-top: 1em; margin-bottom: 2em;">
+                <form method="GET">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            {{ form.search_bar }}
+                        </div>
+                        <div class="me-3">
+                            {{ form.specie_choice }}
+                        </div>
                         <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
                 </form>
             </div>
         </div>

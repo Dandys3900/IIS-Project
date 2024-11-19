@@ -23,12 +23,12 @@ SELECT_FORM_STYLE = {
 }
 
 phone_regex = RegexValidator(
-    regex=r'^\+420[0-9]{9}$',
+    regex=r"^\+420[0-9]{9}$",
     message="Enter phone number in correct format +420XXXYYYZZZ."
 )
 
 email_regex = RegexValidator(
-    regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    regex=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
     message="Email should have format: account@server.domain"
 )
 
@@ -149,7 +149,7 @@ class EditUserForm(forms.ModelForm):
 
     def save(self):
         if self.cleaned_data.get("reset_password"):
-            self.user.password = "password1234"
+            self.user.set_password("password1234")
 
         self.user.save()
 
@@ -187,12 +187,12 @@ class UserInfoForm(SignUpForm):
         self.fields["phone_number"].label= "Phone number"
         self.fields["phone_number"].initial = self.user.phone_number
 
-        self.fields["password1"].widget.attrs["class"] = "form-control"
-        self.fields["password1"].widget.attrs["placeholder"] = self.user.password
-        self.fields["password1"].label = "Current password"
+        self.fields["password1"].widget.attrs["class"] = "form-control d-none"
+        self.fields["password1"].widget.attrs["placeholder"] = "Enter new password"
+        self.fields["password1"].label = ""
 
         self.fields["password2"].widget.attrs["class"] = "form-control d-none"
-        self.fields["password2"].widget.attrs["placeholder"] = "Enter password again"
+        self.fields["password2"].widget.attrs["placeholder"] = "Enter new password again"
         self.fields["password2"].label     = ""
         self.fields["password2"].help_text = ""
 
@@ -339,13 +339,22 @@ class BookAnimalForm(forms.Form):
             walk.save()
         return walk
 
-class AnimalSpecieFilterForm(forms.Form):
-    specie_choice = forms.MultipleChoiceField(choices=[], required=False, widget=forms.SelectMultiple(attrs=SELECT_FORM_STYLE))
+class AnimalSearchForm(forms.Form):
+    # Search bar for animal
+    search_bar = forms.CharField(
+        required=False,
+        label="",
+        widget=forms.TextInput(attrs={
+            "class": "form-control me-2",
+            "placeholder": "Search animal",
+            "aria-label": "Search"
+        }),
+    )
+    # Selection for animal specie
+    specie_choice = forms.MultipleChoiceField(choices=[], required=False, widget=forms.CheckboxSelectMultiple(), label="")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Get all unique species values from animals
-        species = [("", "All")]
-        species += [(breed, breed) for breed in Animal.objects.values_list("species", flat=True).distinct()]
-        print(species)
+        species = [(breed, breed) for breed in Animal.objects.filter(is_active=True).values_list("species", flat=True).distinct()]
         self.fields["specie_choice"].choices = species
