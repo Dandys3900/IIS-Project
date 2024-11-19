@@ -23,8 +23,8 @@ SELECT_FORM_STYLE = {
 }
 
 phone_regex = RegexValidator(
-    regex=r'^[0-9]{9}$',
-    message="Phone number should contain cifres only."
+    regex=r'^\+420[0-9]{9}$',
+    message="Enter phone number in correct format +420XXXYYYZZZ."
 )
 
 email_regex = RegexValidator(
@@ -64,7 +64,7 @@ class SignUpForm(UserCreationForm):
     first_name   = createField(255, "first_name", "Enter firstname")
     last_name    = createField(255, "last_name", "Enter lastname")
     email        = createField(255, "email", "Enter email (account@server.domain)", validators=[email_regex])
-    phone_number = createField(9, "phone_number", "Enter phone number", validators=[phone_regex])
+    phone_number = createField(13, "phone_number", "Enter phone number (+420XXXYYYZZZ)", validators=[phone_regex])
 
     # New user model class
     class Meta:
@@ -117,7 +117,7 @@ class EditUserForm(forms.ModelForm):
     first_name = createField(255, "first_name", "Firstname")
     last_name = createField(255, "last_name", "Lastname")
     email = createField(255, "email", "Email (account@server.domain)", validators=[email_regex])
-    phone_number = createField(9, "phone_number", "Phone number", validators=[phone_regex])
+    phone_number = createField(13, "phone_number", "Phone number (+420XXXYYYZZZ)", validators=[phone_regex])
     userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role", widget=forms.Select(attrs=SELECT_FORM_STYLE))
     reset_password = forms.BooleanField(label="Reset user password", required=False)
 

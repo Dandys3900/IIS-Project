@@ -26,19 +26,19 @@
                 </div>
             </div>
             <!-- Animal images -->
-                <div class="col">
-                    <div class="d-flex flex-row flex-wrap">
-                        {% if animal and animal.photos.exists %}
-                            {% for photo in animal.photos.all %}
-                                {% if photo.image %}
-                                    <img src="{{ photo.image.url }}" class="img-fluid" style="width: 50%; height: auto;">
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <img src="/media/generic_animal.png" class="img-fluid" style="width: 50%; height: auto;"/>
-                        {% endif %}
-                    </div>
+            <div class="col">
+                <div class="d-flex flex-row flex-wrap">
+                    {% if animal and animal.photos.exists %}
+                        {% for photo in animal.photos.all %}
+                            {% if photo.image %}
+                                <img src="{{ photo.image.url }}" class="img-fluid" style="width: 50%; height: auto;">
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <img src="/media/generic_animal.png" class="img-fluid" style="width: 50%; height: auto;"/>
+                    {% endif %}
                 </div>
+            </div>
         </div>
         <hr>
             <h1 class="mt-4">
@@ -93,7 +93,7 @@
                             </div>
                         </div>
                     </div>
-                {% else %}
+                {% elif not user %}
                     <br>
                     <br>
                     <label>

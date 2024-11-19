@@ -2,34 +2,44 @@
 
 {% block content %}
     <div class="container">
-        <h1 class="card-title text-center">Animals</h1>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Specie</th>
-                    <th>Breed</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for animal in animals %}
-                    <tr class="{% if animal.animal_id in todo_animals %}table-warning{% endif %}">
-                        <td>{{ animal.animal_id }}</td>
-                        <td>{{ animal.name }}</td>
-                        <td>{{ animal.species }}</td>
-                        <td>{{ animal.breed }}</td>
-                        <td>
-                            {% if user.userRole == "vet" %}
-                                <a href="{% url 'animalmedrecs' animal.animal_id %}" class="btn btn-primary">View details</a>
-                            {% elif user.userRole == "carer" %}
-                                <a href="{% url 'animalvettasks' animal.animal_id %}" class="btn btn-primary">Manage tasks</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <h1 class="card-title text-center mt-3 mb-3">Animals</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-9">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Specie</th>
+                            <th>Breed</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for animal in animals %}
+                            <tr class="
+                                {% if animal.animal_id in todo_animals %}
+                                    table-warning
+                                {% elif not animal.is_active %}
+                                    table-secondary
+                                {% endif %}"
+                            >
+                                <td>{{ animal.animal_id }}</td>
+                                <td>{{ animal.name }}</td>
+                                <td>{{ animal.species }}</td>
+                                <td>{{ animal.breed }}</td>
+                                <td>
+                                    {% if user.userRole == "vet" %}
+                                        <a href="{% url 'animalmedrecs' animal.animal_id %}" class="btn btn-primary">View details</a>
+                                    {% elif user.userRole == "carer" %}
+                                        <a href="{% url 'animalvettasks' animal.animal_id %}" class="btn btn-primary">Manage tasks</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}
