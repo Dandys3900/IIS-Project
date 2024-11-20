@@ -188,7 +188,8 @@ def client_details(request):
         if userinfo_form.is_valid():
             userinfo_form.save()
         else:
-            messages.error(request, userinfo_form.errors)
+            error_messages = [error for errors in userinfo_form.errors.values() for error in errors]
+            messages.error(request, " ".join(error_messages))
     # Redirect to page user is currently on
     return redirect(request.META.get("HTTP_REFERER"))
 
@@ -206,7 +207,8 @@ def client_changepwd(request):
             # Re-authenticate user and update session hash to prevent logout
             update_session_auth_hash(request, changepwd_form.user)
         else:
-            messages.error(request, changepwd_form.errors)
+            error_messages = [error for errors in changepwd_form.errors.values() for error in errors]
+            messages.error(request, " ".join(error_messages))
     # Redirect to page user is currently on
     return redirect(request.META.get("HTTP_REFERER"))
 
