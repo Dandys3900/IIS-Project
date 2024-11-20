@@ -1,5 +1,5 @@
 from .forms import UserInfoForm
-from .models import CustomUser, Walking
+from .models import CustomUser, Reservation
 
 def userdetails_form(request):
     form = None
@@ -15,7 +15,7 @@ def userdetails_form(request):
             pendingTasksCount = user.assigned_tasks.filter(is_done=False).count()
         elif user.userRole() == "carer":
             pending_volunteers = CustomUser.objects.filter(userrole="volunteer", verified=False).count()
-            pending_walks = Walking.objects.filter(walk_id__confirmation="pending").count()
+            pending_walks = Reservation.objects.filter(type="walk", confirmation="pending").count()
     # Return form
     return {
         "userdetails_form"   : form,

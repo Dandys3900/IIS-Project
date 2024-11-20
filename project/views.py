@@ -567,7 +567,7 @@ def animal_book(request, animal_id):
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])
-    walks = Walking.objects.all()
+    walks = Reservation.objects.all().filter(type="walk")
     if request.user.userrole == "volunteer":
         walks = walks.filter(volunteer_id=request.user.user_id)
     return render(request, "walk_list.html", {
@@ -581,7 +581,7 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
         return redirect("walklist")
 
     try: # Get walk to be edited
-        walk = Walking.objects.get(walk_id=walk_id)
+        walk = Reservation.objects.get(reservation_id=walk_id)
     except Exception as e:
         messages.error(request, f"Error while changing booking confirmation: {e}.")
         return redirect("walklist")
@@ -604,7 +604,7 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
 def walk_delete(request, walk_id):
     role_required(request, ["volunteer"])
     try: # Get walk to be edited
-        walk = Walking.objects.get(walk_id=walk_id)
+        walk = Reservation.objects.get(reservation_id=walk_id)
     except Exception as e:
         messages.error(request, f"Error while deleting walk booking: {e}.")
         return redirect("walklist")

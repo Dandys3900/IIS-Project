@@ -316,30 +316,26 @@ class BookAnimalForm(forms.Form):
         super().__init__(*args, **kwargs)
 
     class Meta:
-        model = Walking
+        model = Reservation
         fields = ()
 
     def save(self, commit=True):
         reservation = Reservation()
-        walk = Walking()
         # Combine date and time into datetime
         date = self.cleaned_data["date"]
         start_time = self.cleaned_data["start_time"]
         end_time = self.cleaned_data["end_time"]
         # Set fields
-        walk.volunteer_id = self.user
+        reservation.owner = self.user
+        reservation.animal = self.animal
+        reservation.type = "walk"
         reservation.start_time = datetime.combine(date, start_time).replace(tzinfo=timezone.utc)
         reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
-        reservation.animal_id = self.animal
-        reservation.caregiver = self.user # HACK - caregiver cannot be NULL, but caregiver is irrelevant for this table entry
         reservation.confirmation = "pending"
-        # reference Reservation in Walking
-        walk.walk_id = reservation
 
         if commit:
             reservation.save()
-            walk.save()
-        return walk
+        return reservation
 
 class AnimalSearchForm(forms.Form):
     # Search bar for animal
