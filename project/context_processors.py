@@ -1,8 +1,9 @@
-from .forms import UserInfoForm
+from .forms import UserInfoForm, UserPasswordChangeForm
 from .models import CustomUser, Walking
 
 def userdetails_form(request):
-    form = None
+    userform = None
+    pwdform  = None
     user = request.user
     pendingTasksCount  = 0
     pending_volunteers = 0
@@ -10,7 +11,9 @@ def userdetails_form(request):
 
     # Create form for logged-in user only
     if user and user.is_authenticated:
-        form = UserInfoForm(user=user)
+        userform = UserInfoForm(user=user, instance=user)
+        pwdform  = UserPasswordChangeForm(user=user)
+
         if user.userRole() == "vet":
             pendingTasksCount = user.assigned_tasks.filter(is_done=False).count()
         elif user.userRole() == "carer":
@@ -18,7 +21,8 @@ def userdetails_form(request):
             pending_walks = Walking.objects.filter(confirmation="pending").count()
     # Return form
     return {
-        "userdetails_form"   : form,
+        "userdetails_form"   : userform,
+        "userpwd_form"       : pwdform,
         "assigned_tasks"     : pendingTasksCount,
         "pending_volunteers" : pending_volunteers,
         "pending_walks"      : pending_walks,

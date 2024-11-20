@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 from django import forms
@@ -157,44 +157,55 @@ class DeleteUserForm(forms.Form):
     user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
 
-class UserInfoForm(SignUpForm):
+class UserInfoForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        # List user attributes
         fields = (
             "first_name",
             "last_name",
             "email",
-            "phone_number",
-            "password1",
-            "password2"
+            "phone_number"
         )
 
     def __init__(self, *args, **kwargs):
         # Retrieve user being edited
         self.user = kwargs.pop("user")
-        super(SignUpForm, self).__init__(*args, **kwargs)
+        super(UserInfoForm, self).__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.required = True
+
         # Fill form with user data
+        self.fields["first_name"].widget.attrs["class"] = "form-control"
         self.fields["first_name"].label= "First name"
         self.fields["first_name"].initial = self.user.first_name
 
+        self.fields["last_name"].widget.attrs["class"] = "form-control"
         self.fields["last_name"].label= "Last name"
         self.fields["last_name"].initial = self.user.last_name
 
+        self.fields["email"].widget.attrs["class"] = "form-control"
         self.fields["email"].label= "Email"
         self.fields["email"].initial = self.user.email
 
+        self.fields["phone_number"].widget.attrs["class"] = "form-control"
         self.fields["phone_number"].label= "Phone number"
         self.fields["phone_number"].initial = self.user.phone_number
 
-        self.fields["password1"].widget.attrs["class"] = "form-control d-none"
-        self.fields["password1"].widget.attrs["placeholder"] = "Enter new password"
-        self.fields["password1"].label = ""
+class UserPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super(PasswordChangeForm, self).__init__(*args, **kwargs)
+        self.fields["old_password"].widget.attrs["class"] = "form-control"
+        self.fields["old_password"].label= ""
+        self.fields["old_password"].widget.attrs["placeholder"] = "Current password"
 
-        self.fields["password2"].widget.attrs["class"] = "form-control d-none"
-        self.fields["password2"].widget.attrs["placeholder"] = "Enter new password again"
-        self.fields["password2"].label     = ""
-        self.fields["password2"].help_text = ""
+        self.fields["new_password1"].widget.attrs["class"] = "form-control"
+        self.fields["new_password1"].label= ""
+        self.fields["new_password1"].widget.attrs["placeholder"] = "New password"
+
+        self.fields["new_password2"].widget.attrs["class"] = "form-control"
+        self.fields["new_password2"].label= ""
+        self.fields["new_password2"].widget.attrs["placeholder"] = "Confirm new password"
 
 class UploadImageForm(forms.ModelForm):
     image = forms.ImageField(widget=forms.FileInput())

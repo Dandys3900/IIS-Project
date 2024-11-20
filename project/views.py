@@ -182,14 +182,19 @@ def client_details(request):
     # Security: only logged user can view this
     role_required(request)
 
-    form = UserInfoForm(user=request.user)
+    userinfo_form = UserInfoForm(user=request.user, instance=request.user)
+    changepwd_form = UserPasswordChangeForm(user=request.user)
+
     if request.method == "POST":
-        form = UserInfoForm(request.POST, instance=request.user, user=request.user)
-        if form.is_valid():
-            # Save changes in user profile
-            form.save()
+        userinfo_form = UserInfoForm(request.POST, user=request.user, instance=request.user)
+        changepwd_form = UserPasswordChangeForm(user=request.user, data=request.POST)
+
+        if userinfo_form.is_valid():
+            userinfo_form.save()
+        if changepwd_form.is_valid():
+            changepwd_form.save()
             # Re-authenticate user and update session hash to prevent logout
-            update_session_auth_hash(request, request.user)
+            update_session_auth_hash(request, changepwd_form.user)
     # Redirect to page user is currently on
     return redirect(request.META.get("HTTP_REFERER"))
 
