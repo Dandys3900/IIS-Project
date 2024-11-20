@@ -15,18 +15,16 @@ MAX_IMG_SIZE = 2*1024*1024
 # Home view
 def home(request):
     form = AnimalSearchForm(request.GET)
-    animals = Animal.objects.all()
+    animals = Animal.objects.filter(is_active=True).order_by("animal_id")
 
     if form.is_valid():
         search_query = form.cleaned_data["search_bar"]
         search_specie = form.cleaned_data["specie_choice"]
 
         if search_query:
-            animals = Animal.objects.filter(name__icontains=search_query, is_active=True)
+            animals = animals.filter(name__icontains=search_query, is_active=True)
         if search_specie:
-            animals = Animal.objects.filter(species__in=search_specie)
-    else:
-        animals = Animal.objects.filter(is_active=True).order_by("animal_id")
+            animals = animals.filter(species__in=search_specie)
 
     return render(request, "home.html", {
         "animals" : animals,
@@ -183,18 +181,32 @@ def client_details(request):
     role_required(request)
 
     userinfo_form = UserInfoForm(user=request.user, instance=request.user)
-    changepwd_form = UserPasswordChangeForm(user=request.user)
 
     if request.method == "POST":
         userinfo_form = UserInfoForm(request.POST, user=request.user, instance=request.user)
-        changepwd_form = UserPasswordChangeForm(user=request.user, data=request.POST)
 
         if userinfo_form.is_valid():
             userinfo_form.save()
+        else:
+            messages.error(request, userinfo_form.errors)
+    # Redirect to page user is currently on
+    return redirect(request.META.get("HTTP_REFERER"))
+
+def client_changepwd(request):
+    # Security: only logged user can view this
+    role_required(request)
+
+    changepwd_form = UserPasswordChangeForm(user=request.user)
+
+    if request.method == "POST":
+        changepwd_form = UserPasswordChangeForm(user=request.user, data=request.POST)
+
         if changepwd_form.is_valid():
             changepwd_form.save()
             # Re-authenticate user and update session hash to prevent logout
             update_session_auth_hash(request, changepwd_form.user)
+        else:
+            messages.error(request, changepwd_form.errors)
     # Redirect to page user is currently on
     return redirect(request.META.get("HTTP_REFERER"))
 

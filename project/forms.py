@@ -158,6 +158,11 @@ class DeleteUserForm(forms.Form):
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
 
 class UserInfoForm(forms.ModelForm):
+    first_name = createField(255, "first_name", "Firstname")
+    last_name = createField(255, "last_name", "Lastname")
+    email = createField(255, "email", "Email (account@server.domain)", validators=[email_regex])
+    phone_number = createField(13, "phone_number", "Phone number (+420XXXYYYZZZ)", validators=[phone_regex])
+
     class Meta:
         model = CustomUser
         fields = (
@@ -171,9 +176,6 @@ class UserInfoForm(forms.ModelForm):
         # Retrieve user being edited
         self.user = kwargs.pop("user")
         super(UserInfoForm, self).__init__(*args, **kwargs)
-
-        for field in self.fields.values():
-            field.required = True
 
         # Fill form with user data
         self.fields["first_name"].widget.attrs["class"] = "form-control"

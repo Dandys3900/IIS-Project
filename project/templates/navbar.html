@@ -104,7 +104,7 @@
                                             <button type="submit" class="btn btn-primary btn-block">Save</button>
                                         </form>
                                         <br>
-                                        <form id="pwchangeform" method="POST" action="{% url 'userdetails' %}">
+                                        <form id="pwchangeform" method="POST" action="{% url 'userchangepwd' %}">
                                             <!-- Django requires this token for enhanced security -->
                                             {% csrf_token %}
                                             <!-- Render form -->
