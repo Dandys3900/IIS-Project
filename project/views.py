@@ -606,16 +606,16 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
         return redirect("walklist")
 
     # Forbid changing of already ongoing booking
-    if walk.walk_id.start_time < datetime.now().replace(tzinfo=timezone.utc):
+    if walk.start_time < datetime.now().replace(tzinfo=timezone.utc):
         messages.error(request, "Cannot modify an already finished/ongoing walk.")
         return redirect("walklist")
 
     # Forbid confirming two bookings at the same time
-    if desired_confirmation == "approved" and walk.walk_id.has_conflict():
+    if desired_confirmation == "approved" and walk.has_conflict():
         messages.error(request, "Cannot approve walk. Another booking is in conflict.")
         return redirect("walklist")
 
-    walk.walk_id.confirmation = desired_confirmation
+    walk.confirmation = desired_confirmation
     walk.save()
     messages.success(request, f"Booking confirmation changed to '{desired_confirmation}'.")
     return redirect("walklist")
@@ -632,7 +632,7 @@ def walk_delete(request, walk_id):
     #     messages.error(request, "Cannot cancel a walk that does not belong to you.")
     #     return redirect("walklist")
 
-    if walk.walk_id.start_time < datetime.now().replace(tzinfo=timezone.utc):
+    if walk.start_time < datetime.now().replace(tzinfo=timezone.utc):
         messages.error(request, "Cannot cancel an already finished/ongoing walk.")
         return redirect("walklist")
 
