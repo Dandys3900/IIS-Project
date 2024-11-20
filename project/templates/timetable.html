@@ -1,0 +1,31 @@
+{% if timetable %}
+<div class="col-md-9">
+		<h1 class="mt-4">
+			Current bookings for {{ timetable.animal.name }}:
+			{% if timetable.days|length == 0 %}
+				<b>None</b>
+			{% endif %}
+		</h1>
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>Day</th>
+					{% for hour in timetable.hours %}
+						<th>{{ hour }}:00-{{ hour|add:1 }}:00</th>
+					{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for day, hours in timetable.days.items %}
+					<tr>
+						<td>{{ day }}</td>
+						{% for hour_state in hours %}
+							<td style="background-color: {% if hour_state == 'confirmed' %} red {% elif hour_state == 'pending' %} orange {% else %} green {% endif %};">
+							</td>
+						{% endfor %}
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endif %}

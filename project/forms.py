@@ -293,7 +293,8 @@ class CreateAnimalTaskForm(forms.ModelForm):
         fields = (
             "detail",
         )
-
+    
+    
 
 class BookAnimalForm(forms.Form):
     date = forms.DateField(
@@ -326,12 +327,13 @@ class BookAnimalForm(forms.Form):
         start_time = self.cleaned_data["start_time"]
         end_time = self.cleaned_data["end_time"]
         # Set fields
+        walk.volunteer_id = self.user
         reservation.start_time = datetime.combine(date, start_time).replace(tzinfo=timezone.utc)
         reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
         reservation.animal_id = self.animal
         reservation.caregiver = self.user # HACK - caregiver cannot be NULL, but caregiver is irrelevant for this table entry
-        walk.volunteer_id = self.user
-        walk.walk_id.confirmation = "pending"
+        reservation.confirmation = "pending"
+        # reference Reservation in Walking
         walk.walk_id = reservation
 
         if commit:
