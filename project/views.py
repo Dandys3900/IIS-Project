@@ -429,7 +429,7 @@ def animal_vetrecord(request, animal_id):
     timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
 
     animal_task_form = CreateAnimalTaskForm()
-    book_animal_form = BookAnimalForm(animal=animal, user=request.user, confirmation="approved")
+    book_animal_form = BookAnimalForm(animal=animal, user=request.user, type="checkup")
 
     if request.method == "GET":
         # Render page
@@ -442,7 +442,7 @@ def animal_vetrecord(request, animal_id):
         })
 
     animal_task_form = CreateAnimalTaskForm(request.POST)
-    book_animal_form = BookAnimalForm(request.POST, animal=animal, user=request.user, confirmation="approved")
+    book_animal_form = BookAnimalForm(request.POST, animal=animal, user=request.user, type="checkup")
 
     if not (animal_task_form.is_valid() and book_animal_form.is_valid()):
         messages.error(request, "Invalid form.")
