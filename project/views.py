@@ -11,6 +11,8 @@ from datetime import datetime, timezone, date
 
 # Define max. size for uploaded image to 2MB
 MAX_IMG_SIZE = 2*1024*1024
+MIN_HOUR = 8
+MAX_HOUR = 18
 
 # Home view
 def home(request):
@@ -443,25 +445,34 @@ def animal_vetrecord(request, animal_id):
         messages.error(request, f"Error while getting animal: {e}")
         return redirect("home")
 
-    form = CreateAnimalTaskForm()
+    timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
+
+    animal_task_form = CreateAnimalTaskForm()
+    book_animal_form = BookAnimalForm(animal=animal, user=request.user, type="checkup")
 
     if request.method == "GET":
         # Render page
         return render(request, "animal_tasks.html", {
             "animal" : animal,
             "tasks"  : animal_tasks,
-            "form"   : form
+            "animal_task_form"   : animal_task_form,
+            "book_animal_form"  : book_animal_form,
+            "timetable": timetable,
         })
 
-    form = CreateAnimalTaskForm(request.POST)
+    animal_task_form = CreateAnimalTaskForm(request.POST)
+    book_animal_form = BookAnimalForm(request.POST, animal=animal, user=request.user, type="checkup")
 
-    if not form.is_valid():
+    if not (animal_task_form.is_valid() and book_animal_form.is_valid()):
         messages.error(request, "Invalid form.")
         return redirect("animalvettasks", animal_id=animal.animal_id)
 
-    vet_task = form.save(commit=False)
+    vet_task = animal_task_form.save(commit=False)
+    reservation = book_animal_form.save(commit=False)
     vet_task.animal_id = animal
-    vet_task.veterinarian = form.cleaned_data["target_vet"]
+    vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
+    reservation.veterinarian = animal_task_form.cleaned_data["target_vet"]
+    reservation.save()
     vet_task.save()
     # Notify user
     messages.success(request, "Task created succesfully")
@@ -510,8 +521,6 @@ def verify_volunteer(request, volunteer_id):
         return redirect("volunteerslist")
 
 def animal_book(request, animal_id):
-    MIN_HOUR = 8
-    MAX_HOUR = 18
     try: # Get animal
         animal = Animal.objects.get(animal_id=animal_id)
     except Exception as e:
@@ -577,7 +586,7 @@ def animal_book(request, animal_id):
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])
-    walks = Walking.objects.all()
+    walks = Reservation.objects.all().filter(type="walk")
     if request.user.userrole == "volunteer":
         walks = walks.filter(volunteer_id=request.user.user_id)
     return render(request, "walk_list.html", {
@@ -591,7 +600,7 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
         return redirect("walklist")
 
     try: # Get walk to be edited
-        walk = Walking.objects.get(walk_id=walk_id)
+        walk = Reservation.objects.get(reservation_id=walk_id)
     except Exception as e:
         messages.error(request, f"Error while changing booking confirmation: {e}.")
         return redirect("walklist")
@@ -614,7 +623,7 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
 def walk_delete(request, walk_id):
     role_required(request, ["volunteer"])
     try: # Get walk to be edited
-        walk = Walking.objects.get(walk_id=walk_id)
+        walk = Reservation.objects.get(reservation_id=walk_id)
     except Exception as e:
         messages.error(request, f"Error while deleting walk booking: {e}.")
         return redirect("walklist")
@@ -689,6 +698,7 @@ def create_timetable(animal, min_hour, max_hour):
     #   day - formatted day name + date
     #       reservations - array of hours with state for each hour
     timetable = {
+        "animal": animal,
         "hours": range(min_hour, max_hour),
         "days": {},
     }

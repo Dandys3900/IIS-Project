@@ -112,12 +112,13 @@ class AnimalTask(models.Model):
         db_table = "Task"
 
 class Reservation(models.Model):
-    reservationID = models.AutoField(primary_key=True, db_column="reservationID")
+    reservation_id = models.AutoField(primary_key=True, db_column="reservationID")
     start_time = models.DateTimeField(db_column="start")
     end_time = models.DateTimeField(db_column="end")
-    animal_id = models.ForeignKey(Animal, on_delete=models.CASCADE, db_column="animalID")
-    caregiver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="caregiverID")
-    confirmation = models.CharField(max_length=9, db_column="confirmation")
+    type = models.CharField(max_length=16, db_column="type")
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE, db_column="animalID")
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="ownerID")
+    confirmation = models.CharField(max_length=16, db_column="confirmation")
 
     class Meta:
         db_table = "Reservation"
@@ -127,29 +128,5 @@ class Reservation(models.Model):
             animal_id=self.animal_id,      # Only consider reservations for the same animal
             start_time__lt=self.end_time,  # Check overlap: starts before this ends
             end_time__gt=self.start_time,  # Check overlap: ends after this starts
-            walking__confirmation="approved"
+            confirmation="approved"
         ).exclude(reservationID=self.reservationID).exists()
-
-class Walking(models.Model):
-    walk_id = models.OneToOneField(Reservation, primary_key=True, on_delete=models.CASCADE, db_column="reservationID")
-    volunteer_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="volunteerID")
-
-    class Meta:
-        db_table = "Walking"
-    
-    def delete(self, *args, **kwargs):
-        # Delete the related Reservation before deleting this instance
-        self.walk_id.delete()
-        super().delete(*args, **kwargs)
-
-class CheckUp(models.Model):
-    checkup_id = models.OneToOneField(Reservation, primary_key=True, on_delete=models.CASCADE, db_column="reservationID")
-    veterinarian = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="veterinarianID")
-
-    class Meta:
-        db_table = "CheckUp"
-    
-    def delete(self, *args, **kwargs):
-        # Delete the related Reservation before deleting this instance
-        self.walk_id.delete()
-        super().delete(*args, **kwargs)

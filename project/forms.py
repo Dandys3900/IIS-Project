@@ -306,7 +306,8 @@ class CreateAnimalTaskForm(forms.ModelForm):
         fields = (
             "detail",
         )
-
+    
+    
 
 class BookAnimalForm(forms.Form):
     date = forms.DateField(
@@ -325,32 +326,30 @@ class BookAnimalForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.animal = kwargs.pop("animal") # Retrieve animal being booked
         self.user = kwargs.pop("user") # Retrieve volunteer
+        self.type = kwargs.pop("type") if "type" in kwargs else "walk" # Retrieve confirmation
         super().__init__(*args, **kwargs)
 
     class Meta:
-        model = Walking
+        model = Reservation
         fields = ()
 
     def save(self, commit=True):
         reservation = Reservation()
-        walk = Walking()
         # Combine date and time into datetime
         date = self.cleaned_data["date"]
         start_time = self.cleaned_data["start_time"]
         end_time = self.cleaned_data["end_time"]
         # Set fields
+        reservation.owner = self.user
+        reservation.animal = self.animal
+        reservation.type = self.type
         reservation.start_time = datetime.combine(date, start_time).replace(tzinfo=timezone.utc)
         reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
-        reservation.animal_id = self.animal
-        reservation.caregiver = self.user # HACK - caregiver cannot be NULL, but caregiver is irrelevant for this table entry
-        walk.volunteer_id = self.user
-        walk.walk_id.confirmation = "pending"
-        walk.walk_id = reservation
+        reservation.confirmation = "pending" if self.type == "walk" else "approved"
 
         if commit:
             reservation.save()
-            walk.save()
-        return walk
+        return reservation
 
 class AnimalSearchForm(forms.Form):
     # Search bar for animal

@@ -9,7 +9,7 @@
                 <h4>Species:</h4> {{ animal.species }}
                 <h4>Breed:</h4> {{ animal.breed }}
                 <h4>Description:</h4> {{ animal.description }}
-
+                {% include "timetable.html" %}
                 <h2 class="mt-4">Tasks for animal</h2>
                 <table class="table">
                     <thead>
@@ -44,7 +44,8 @@
                             <!-- Django requires this token for enhanced security -->
                             {% csrf_token %}
                             <!-- Render form -->
-                            {{ form.as_p }}
+                            {{ animal_task_form.as_p }}
+                            {{ book_animal_form.as_p }}
                             <button type="submit" class="btn btn-primary btn-block">Create</button>
                         </form>
                     </div>
@@ -52,4 +53,24 @@
             </div>
         </div>
     </div>
+    
+    {% block extra_js %}
+        <script>
+            // timeslot has a scale of 1h
+            function reset_minutes(e) {
+                let hour = e.target.value.split(":")[0];
+                e.target.value = `${hour}:00`;
+            }
+
+            // Avoid user to select past date for walk(s)
+            document.addEventListener("DOMContentLoaded", function() {
+                var today = new Date().toISOString().split("T")[0];
+                document.getElementById("date_input").setAttribute("min", today);
+            });
+
+            document.getElementById("start_time").addEventListener("input", reset_minutes);
+            document.getElementById("end_time").addEventListener("input", reset_minutes);
+        </script>
+    {% endblock extra_js %}
+    
 {% endblock %}
