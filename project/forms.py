@@ -313,6 +313,7 @@ class BookAnimalForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.animal = kwargs.pop("animal") # Retrieve animal being booked
         self.user = kwargs.pop("user") # Retrieve volunteer
+        self.confirmation = kwargs.pop("confirmation") if "confirmation" in kwargs else "pending" # Retrieve confirmation
         super().__init__(*args, **kwargs)
 
     class Meta:
@@ -331,7 +332,7 @@ class BookAnimalForm(forms.Form):
         reservation.type = "walk"
         reservation.start_time = datetime.combine(date, start_time).replace(tzinfo=timezone.utc)
         reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
-        reservation.confirmation = "pending"
+        reservation.confirmation = self.confirmation
 
         if commit:
             reservation.save()

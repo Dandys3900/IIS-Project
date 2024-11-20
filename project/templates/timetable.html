@@ -20,7 +20,7 @@
 					<tr>
 						<td>{{ day }}</td>
 						{% for hour_state in hours %}
-							<td style="background-color: {% if hour_state == 'confirmed' %} red {% elif hour_state == 'pending' %} orange {% else %} green {% endif %};">
+							<td style="background-color: {% if hour_state == 'approved' %} red {% elif hour_state == 'pending' %} orange {% else %} green {% endif %};">
 							</td>
 						{% endfor %}
 					</tr>

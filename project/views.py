@@ -429,7 +429,7 @@ def animal_vetrecord(request, animal_id):
     timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
 
     animal_task_form = CreateAnimalTaskForm()
-    book_animal_form = BookAnimalForm(animal=animal, user=request.user)
+    book_animal_form = BookAnimalForm(animal=animal, user=request.user, confirmation="approved")
 
     if request.method == "GET":
         # Render page
@@ -442,7 +442,7 @@ def animal_vetrecord(request, animal_id):
         })
 
     animal_task_form = CreateAnimalTaskForm(request.POST)
-    book_animal_form = BookAnimalForm(request.POST, animal=animal, user=request.user)
+    book_animal_form = BookAnimalForm(request.POST, animal=animal, user=request.user, confirmation="approved")
 
     if not (animal_task_form.is_valid() and book_animal_form.is_valid()):
         messages.error(request, "Invalid form.")
@@ -693,6 +693,5 @@ def create_timetable(animal, min_hour, max_hour):
         # Fill the day hours with reservation times
         for hour in range(min_hour, max_hour):
             if hour >= reservation.start_time.hour and hour < reservation.end_time.hour:
-                # timetable["days"][day_key][hour-min_hour] =  "confirmed"
                 timetable["days"][day_key][hour-min_hour] = reservation.confirmation if reservation.confirmation else "none"
     return timetable
