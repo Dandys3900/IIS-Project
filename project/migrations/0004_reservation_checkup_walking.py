@@ -15,35 +15,16 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Reservation',
             fields=[
-                ('reservationID', models.AutoField(db_column='reservationID', primary_key=True, serialize=False)),
+                ('reservation_id', models.AutoField(db_column='reservationID', primary_key=True, serialize=False)),
                 ('start_time', models.DateTimeField(db_column='start')),
                 ('end_time', models.DateTimeField(db_column='end')),
-                ('animal_id', models.ForeignKey(db_column='animalID', on_delete=django.db.models.deletion.CASCADE, to='project.animal')),
-                ('caregiver', models.ForeignKey(db_column='caregiverID', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('confirmation', models.CharField(db_column='confirmation', max_length=9)),
+                ('type', models.CharField(db_column='type', max_length=16)),
+                ('animal', models.ForeignKey(db_column='animalID', on_delete=django.db.models.deletion.CASCADE, to='project.animal')),
+                ('owner', models.ForeignKey(db_column='ownerID', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('confirmation', models.CharField(db_column='confirmation', max_length=16)),
             ],
             options={
                 'db_table': 'Reservation',
-            },
-        ),
-        migrations.CreateModel(
-            name='CheckUp',
-            fields=[
-                ('checkup_id', models.OneToOneField(db_column='reservationID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='project.reservation')),
-                ('veterinarian', models.ForeignKey(db_column='veterinarianID', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'db_table': 'CheckUp',
-            },
-        ),
-        migrations.CreateModel(
-            name='Walking',
-            fields=[
-                ('walk_id', models.OneToOneField(db_column='reservationID', on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='project.reservation')),
-                ('volunteer_id', models.ForeignKey(db_column='volunteerID', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'db_table': 'Walking',
             },
         ),
     ]
