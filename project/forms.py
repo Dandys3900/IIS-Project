@@ -351,6 +351,8 @@ class BookAnimalForm(forms.Form):
         reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
         reservation.confirmation = "pending" if self.type == "walk" else "approved"
 
+        if reservation.has_conflict():
+            return None
         if commit:
             reservation.save()
         return reservation
