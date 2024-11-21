@@ -54,6 +54,13 @@
                 if (action === 'upload' && fileInput.files.length === 0)
                     event.preventDefault();
             }
+
+            // Avoid user to select future dates for animal
+            document.addEventListener("DOMContentLoaded", function() {
+                var today = new Date().toISOString().split("T")[0];
+                document.getElementById("birth_date").setAttribute("max", today);
+                document.getElementById("arrival_date").setAttribute("max", today);
+            });
         </script>
     {% endblock extra_js %}
 {% endblock %}

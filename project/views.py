@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib import messages
@@ -5,26 +6,31 @@ from django.utils.safestring import mark_safe
 from django.core.exceptions import PermissionDenied
 from .forms import *
 from .models import *
+from time import gmtime, strftime
+from datetime import datetime, timezone, date
 
 # Define max. size for uploaded image to 2MB
 MAX_IMG_SIZE = 2*1024*1024
+MIN_HOUR = 8
+MAX_HOUR = 18
 
 # Home view
 def home(request):
-    # Get search query if any
-    search_query = request.GET.get("query")
+    form = AnimalSearchForm(request.GET)
+    animals = Animal.objects.filter(is_active=True).order_by("animal_id")
 
-    if search_query:
-        animals = Animal.objects.filter(name__icontains=search_query, is_active=True)
-    else:
-        animals = Animal.objects.filter(is_active=True).order_by("animal_id")
+    if form.is_valid():
+        search_query = form.cleaned_data["search_bar"]
+        search_specie = form.cleaned_data["specie_choice"]
 
-    # User is trying to upload animal schedule
-    if request.method == "POST":
-        # TODO: Add form for animal schedule and its handling
-        pass
+        if search_query:
+            animals = animals.filter(name__icontains=search_query, is_active=True)
+        if search_specie:
+            animals = animals.filter(species__in=search_specie)
+
     return render(request, "home.html", {
-        "animals" : animals
+        "animals" : animals,
+        "form" : form
     })
 
 # Perform client login
@@ -176,14 +182,35 @@ def client_details(request):
     # Security: only logged user can view this
     role_required(request)
 
-    form = UserInfoForm(user=request.user)
+    userinfo_form = UserInfoForm(instance=request.user)
+
     if request.method == "POST":
-        form = UserInfoForm(request.POST, instance=request.user, user=request.user)
-        if form.is_valid():
-            # Save changes in user profile
-            form.save()
+        userinfo_form = UserInfoForm(request.POST, instance=request.user)
+
+        if userinfo_form.is_valid():
+            userinfo_form.save()
+        else:
+            error_messages = [error for errors in userinfo_form.errors.values() for error in errors]
+            messages.error(request, " ".join(error_messages))
+    # Redirect to page user is currently on
+    return redirect(request.META.get("HTTP_REFERER"))
+
+def client_changepwd(request):
+    # Security: only logged user can view this
+    role_required(request)
+
+    changepwd_form = UserPasswordChangeForm(user=request.user)
+
+    if request.method == "POST":
+        changepwd_form = UserPasswordChangeForm(user=request.user, data=request.POST)
+
+        if changepwd_form.is_valid():
+            changepwd_form.save()
             # Re-authenticate user and update session hash to prevent logout
-            update_session_auth_hash(request, request.user)
+            update_session_auth_hash(request, changepwd_form.user)
+        else:
+            error_messages = [error for errors in changepwd_form.errors.values() for error in errors]
+            messages.error(request, " ".join(error_messages))
     # Redirect to page user is currently on
     return redirect(request.META.get("HTTP_REFERER"))
 
@@ -207,7 +234,25 @@ def animal_create(request):
 
     if not form.is_valid() or not formset.is_valid():
         messages.error(request, "Invalid form.")
-        return redirect("createanimal")
+        # Re-render page
+        return render(request, "animal.html", {
+            "form"    : form,
+            "formset" : formset
+        })
+
+    # Check for valid date combination
+    if form.cleaned_data["birth_date"]:
+        if form.cleaned_data["birth_date"] > form.cleaned_data["arrival_date"]:
+            messages.error(request, "Invalid date combination entered.")
+            # Reset given dates
+            form.data = form.data.copy()
+            form.data["birth_date"] = ""
+            form.data["arrival_date"] = ""
+            # Re-render page
+            return render(request, "animal.html", {
+                "form"    : form,
+                "formset" : formset
+            })
 
     animal = form.save()
     photos = formset.save(commit=False) or []
@@ -254,7 +299,27 @@ def animal_edit(request, animal_id):
 
     if not form.is_valid() or not formset.is_valid():
         messages.error(request, "Invalid form.")
-        return redirect("editanimal", anima_id=animal.animal_id)
+        # Re-render page
+        return render(request, "animal.html", {
+            "form"    : form,
+            "formset" : formset,
+            "animal"  : animal
+        })
+
+    # Check for valid date combination
+    if form.cleaned_data["birth_date"]:
+        if form.cleaned_data["birth_date"] > form.cleaned_data["arrival_date"]:
+            messages.error(request, "Invalid date combination entered.")
+            # Reset given dates
+            form.data = form.data.copy()
+            form.data["birth_date"] = ""
+            form.data["arrival_date"] = ""
+            # Re-render page
+            return render(request, "animal.html", {
+                "form"    : form,
+                "formset" : formset,
+                "animal"  : animal
+            })
 
     photos = formset.save(commit=False) or []
     # Store photos for animal (if any)
@@ -309,6 +374,8 @@ def image_delete(request, animal_id, image_id):
 
     # Store animal_id to return back
     animal_id = photo.animal_id.animal_id
+    # Remove photo from filesystem first
+    os.remove(photo.image.path)
     # Delete photo
     photo.delete()
     return redirect("editanimal", animal_id=animal_id)
@@ -318,9 +385,16 @@ def animals_list(request):
     role_required(request, ["carer", "vet"])
 
     animals = Animal.objects.all().order_by("animal_id")
+    # Create list of all animals having todo tasks for logged-in vet to highlight them in table
+    todo_animals = []
+    for animal in animals:
+        tasks_count = request.user.assigned_tasks.filter(is_done=False, animal_id=animal.animal_id).count()
+        if request.user.userRole() == "vet" and tasks_count != 0:
+            todo_animals.append(animal.animal_id)
     # Render page
     return render(request, "animal_list.html", {
-        "animals" : animals
+        "animals"     : animals,
+        "todo_animals": todo_animals
     })
 
 def animal_medrecord(request, animal_id):
@@ -371,25 +445,34 @@ def animal_vetrecord(request, animal_id):
         messages.error(request, f"Error while getting animal: {e}")
         return redirect("home")
 
-    form = CreateAnimalTaskForm()
+    timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
+
+    animal_task_form = CreateAnimalTaskForm()
+    book_animal_form = BookAnimalForm(animal=animal, user=request.user, type="checkup")
 
     if request.method == "GET":
         # Render page
         return render(request, "animal_tasks.html", {
             "animal" : animal,
             "tasks"  : animal_tasks,
-            "form"   : form
+            "animal_task_form"   : animal_task_form,
+            "book_animal_form"  : book_animal_form,
+            "timetable": timetable,
         })
 
-    form = CreateAnimalTaskForm(request.POST)
+    animal_task_form = CreateAnimalTaskForm(request.POST)
+    book_animal_form = BookAnimalForm(request.POST, animal=animal, user=request.user, type="checkup")
 
-    if not form.is_valid():
+    if not (animal_task_form.is_valid() and book_animal_form.is_valid()):
         messages.error(request, "Invalid form.")
         return redirect("animalvettasks", animal_id=animal.animal_id)
 
-    vet_task = form.save(commit=False)
+    vet_task = animal_task_form.save(commit=False)
+    reservation = book_animal_form.save(commit=False)
     vet_task.animal_id = animal
-    vet_task.veterinarian = form.cleaned_data["target_vet"]
+    vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
+    reservation.veterinarian = animal_task_form.cleaned_data["target_vet"]
+    reservation.save()
     vet_task.save()
     # Notify user
     messages.success(request, "Task created succesfully")
@@ -438,8 +521,123 @@ def verify_volunteer(request, volunteer_id):
         return redirect("volunteerslist")
 
 def animal_book(request, animal_id):
-    # TODO: Show book form, reuse animal.html logic to display both animal info and its photos and add schedule
-    pass
+    try: # Get animal
+        animal = Animal.objects.get(animal_id=animal_id)
+    except Exception as e:
+        messages.error(request, f"Error while booking animal: {e}")
+        return redirect("bookanimal", animal_id)
+
+    form = BookAnimalForm(animal=animal, user=request.user)
+    timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
+    if request.method == "GET":
+        # Render page
+        return render(request, "animal_book.html", {
+            "form"     : form,
+            "animal"   : animal,
+            "timetable": timetable,
+        })
+
+    if request.user and not request.user.verified: # Unverified volunteer
+        messages.warning(request, "To take an animal for a walk, you need to be verified. Contact a carer to be verified.")
+        return redirect("bookanimal", animal_id)
+
+    form = BookAnimalForm(data=request.POST, animal=animal, user=request.user)
+    if not form.is_valid():
+        messages.error(request, "Could not book a walk.")
+        return redirect("bookanimal", animal_id)
+
+    if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) < datetime.now().time().replace(tzinfo=timezone.utc):
+        messages.error(request, "Error while booking animal: Cannot book animal in the past time.")
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        return render(request, "animal_book.html", {
+            "form"     : form,
+            "animal"   : animal,
+            "timetable": timetable,
+        })
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) >= form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
+        messages.error(request, "Error while booking animal: Cannot book animal for a negative or zero time.")
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        form.data["end_time"] = ""
+        return render(request, "animal_book.html", {
+            "form"     : form,
+            "animal"   : animal,
+            "timetable": timetable,
+        })
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < MIN_HOUR or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > MAX_HOUR:
+        messages.error(request, f"Error while booking animal: Shelter is open from {MIN_HOUR}:00 - {MAX_HOUR}:00.")
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        form.data["end_time"] = ""
+        return render(request, "animal_book.html", {
+            "form"     : form,
+            "animal"   : animal,
+            "timetable": timetable,
+        })
+
+    form.save()
+    messages.success(request, "Walk booked.")
+    return redirect("bookanimal", animal_id)
+
+def walk_list(request):
+    role_required(request, ["carer", "volunteer"])
+    walks = Reservation.objects.all().filter(type="walk")
+    if request.user.userrole == "volunteer":
+        walks = walks.filter(volunteer_id=request.user.user_id)
+    return render(request, "walk_list.html", {
+        "walks" : walks
+    })
+
+def walk_change_confirmation(request, walk_id, desired_confirmation):
+    role_required(request, ["carer"])
+    if not desired_confirmation in ["pending", "approved", "declined"]:
+        messages.error(request, f"Booking confirmation could not be changed to '{desired_confirmation}'. Bad choice.")
+        return redirect("walklist")
+
+    try: # Get walk to be edited
+        walk = Reservation.objects.get(reservation_id=walk_id)
+    except Exception as e:
+        messages.error(request, f"Error while changing booking confirmation: {e}.")
+        return redirect("walklist")
+
+    # Forbid changing of already ongoing booking
+    if walk.start_time < datetime.now().replace(tzinfo=timezone.utc):
+        messages.error(request, "Cannot modify an already finished/ongoing walk.")
+        return redirect("walklist")
+
+    # Forbid confirming two bookings at the same time
+    if desired_confirmation == "approved" and walk.has_conflict():
+        messages.error(request, "Cannot approve walk. Another booking is in conflict.")
+        return redirect("walklist")
+
+    walk.confirmation = desired_confirmation
+    walk.save()
+    messages.success(request, f"Booking confirmation changed to '{desired_confirmation}'.")
+    return redirect("walklist")
+
+def walk_delete(request, walk_id):
+    role_required(request, ["volunteer"])
+    try: # Get walk to be edited
+        walk = Reservation.objects.get(reservation_id=walk_id)
+    except Exception as e:
+        messages.error(request, f"Error while deleting walk booking: {e}.")
+        return redirect("walklist")
+
+    if walk.volunteer_id != request.user.user_id:
+        messages.error(request, "Cannot cancel a walk that does not belong to you.")
+        return redirect("walklist")
+
+    if walk.start_time < datetime.now().replace(tzinfo=timezone.utc):
+        messages.error(request, "Cannot cancel an already finished/ongoing walk.")
+        return redirect("walklist")
+
+    walk.delete()
+    messages.success(request, "Walk booking deleted.")
+    return redirect("walklist")
 
 ######################################################
 ################## HELPER FUNCTIONS ##################
@@ -492,3 +690,26 @@ def handle_registration(request, form, doLogin):
             return True
         messages.error(request, mark_safe(f"User <strong>{username}</strong> already exists!"))
     return False
+
+def create_timetable(animal, min_hour, max_hour):
+    # hours - hour range
+    # days - days with reservations
+    #   day - formatted day name + date
+    #       reservations - array of hours with state for each hour
+    timetable = {
+        "animal": animal,
+        "hours": range(min_hour, max_hour),
+        "days": {},
+    }
+    # Get all booking for selected animal (don't take past bookings)
+    reservations = Reservation.objects.filter(animal_id=animal, start_time__date__gte=date.today()).order_by("start_time")
+    for reservation in reservations:
+        day_key = f"{str(reservation.start_time.date())} ({reservation.start_time.strftime('%A')})"
+        # Make day empty if not exists
+        if not day_key in timetable["days"].keys():
+            timetable["days"][day_key] = ["none" for _ in range(min_hour, max_hour)]
+        # Fill the day hours with reservation times
+        for hour in range(min_hour, max_hour):
+            if hour >= reservation.start_time.hour and hour < reservation.end_time.hour:
+                timetable["days"][day_key][hour-min_hour] = reservation.confirmation if reservation.confirmation else "none"
+    return timetable

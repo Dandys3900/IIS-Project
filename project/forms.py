@@ -1,8 +1,9 @@
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 from django import forms
 from .models import *
+from datetime import datetime, timezone, date
 
 ROLE_CHOICES = [
     ("admin", "Administrator"),
@@ -22,12 +23,12 @@ SELECT_FORM_STYLE = {
 }
 
 phone_regex = RegexValidator(
-    regex=r'^[0-9]{9}$',
-    message="Phone number should contain cifres only."
+    regex=r"^\+420[0-9]{9}$",
+    message="Enter phone number in correct format +420XXXYYYZZZ."
 )
 
 email_regex = RegexValidator(
-    regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    regex=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
     message="Email should have format: account@server.domain"
 )
 
@@ -62,8 +63,8 @@ class SignUpForm(UserCreationForm):
     # Get new user information
     first_name   = createField(255, "first_name", "Enter firstname")
     last_name    = createField(255, "last_name", "Enter lastname")
-    email        = createField(255, "email", "Enter email", validators=[email_regex])
-    phone_number = createField(9, "phone_number", "Enter phone number", validators=[phone_regex])
+    email        = createField(255, "email", "Enter email (account@server.domain)", validators=[email_regex])
+    phone_number = createField(13, "phone_number", "Enter phone number (+420XXXYYYZZZ)", validators=[phone_regex])
 
     # New user model class
     class Meta:
@@ -115,8 +116,8 @@ class EditUserSelectForm(forms.Form):
 class EditUserForm(forms.ModelForm):
     first_name = createField(255, "first_name", "Firstname")
     last_name = createField(255, "last_name", "Lastname")
-    email = createField(255, "email", "Email", validators=[email_regex])
-    phone_number = createField(9, "phone_number", "Phone number", validators=[phone_regex])
+    email = createField(255, "email", "Email (account@server.domain)", validators=[email_regex])
+    phone_number = createField(13, "phone_number", "Phone number (+420XXXYYYZZZ)", validators=[phone_regex])
     userrole = forms.ChoiceField(choices=ROLE_CHOICES, required=True, label="Role", widget=forms.Select(attrs=SELECT_FORM_STYLE))
     reset_password = forms.BooleanField(label="Reset user password", required=False)
 
@@ -148,7 +149,7 @@ class EditUserForm(forms.ModelForm):
 
     def save(self):
         if self.cleaned_data.get("reset_password"):
-            self.user.password = "password1234"
+            self.user.set_password("password1234")
 
         self.user.save()
 
@@ -156,33 +157,55 @@ class DeleteUserForm(forms.Form):
     user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
 
-class UserInfoForm(EditUserForm):
-    # Field to show user's current password with ability to change it
-    password = forms.CharField(widget=forms.PasswordInput(attrs={
-        "class" : "form-control"
-    }), required=False)
+class UserInfoForm(forms.ModelForm):
+    first_name = createField(255, "first_name", "Firstname")
+    last_name = createField(255, "last_name", "Lastname")
+    email = createField(255, "email", "Email (account@server.domain)", validators=[email_regex])
+    phone_number = createField(13, "phone_number", "Phone number (+420XXXYYYZZZ)", validators=[phone_regex])
 
     class Meta:
         model = CustomUser
-        # List user attributes
         fields = (
             "first_name",
             "last_name",
             "email",
-            "phone_number",
-            "password"
+            "phone_number"
         )
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # From inherited fields, remove ones we don't need
-        del self.fields["userrole"]
-        del self.fields["reset_password"]
+        super(UserInfoForm, self).__init__(*args, **kwargs)
 
-        # Init password field
-        self.fields["password"].label= "Password"
-        # For security reasons, Django doesn't allow assigning direct value to the field
-        self.fields["password"].widget.attrs["placeholder"] = self.user.password
+        # Fill form with user data
+        self.fields["first_name"].widget.attrs["class"] = "form-control"
+        self.fields["first_name"].label= "First name"
+        self.fields["first_name"].initial = self.instance.first_name
+
+        self.fields["last_name"].widget.attrs["class"] = "form-control"
+        self.fields["last_name"].label= "Last name"
+        self.fields["last_name"].initial = self.instance.last_name
+
+        self.fields["email"].widget.attrs["class"] = "form-control"
+        self.fields["email"].label= "Email"
+        self.fields["email"].initial = self.instance.email
+
+        self.fields["phone_number"].widget.attrs["class"] = "form-control"
+        self.fields["phone_number"].label= "Phone number"
+        self.fields["phone_number"].initial = self.instance.phone_number
+
+class UserPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super(PasswordChangeForm, self).__init__(*args, **kwargs)
+        self.fields["old_password"].widget.attrs["class"] = "form-control"
+        self.fields["old_password"].label= ""
+        self.fields["old_password"].widget.attrs["placeholder"] = "Current password"
+
+        self.fields["new_password1"].widget.attrs["class"] = "form-control"
+        self.fields["new_password1"].label= ""
+        self.fields["new_password1"].widget.attrs["placeholder"] = "New password"
+
+        self.fields["new_password2"].widget.attrs["class"] = "form-control"
+        self.fields["new_password2"].label= ""
+        self.fields["new_password2"].widget.attrs["placeholder"] = "Confirm new password"
 
 class UploadImageForm(forms.ModelForm):
     image = forms.ImageField(widget=forms.FileInput())
@@ -194,18 +217,29 @@ class UploadImageForm(forms.ModelForm):
         )
 
 class CreateAnimalForm(forms.ModelForm):
-    # Specify attributes for custom widgets
-    attrs = {
-        "type"  : "date",
-        "class" : "form-control"
-    }
-
     name         = createField(255, "name", "Enter animal name")
     species      = createField(255, "species", "Enter specie")
     breed        = createField(255, "breed", "Enter animal breed")
     gender       = forms.ChoiceField(choices=GENDER_CHOICES, required=True, label="Select gender", widget=forms.Select(attrs=SELECT_FORM_STYLE))
-    birth_date   = forms.DateField(required=False, widget=forms.DateInput(attrs=attrs), label="Enter birth date (if known)")
-    arrival_date = forms.DateField(required=True, widget=forms.DateInput(attrs=attrs), label="Enter arrival date")
+    birth_date   = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            "class": "form-control",
+            "type" : "date",
+            "id"   : "birth_date"
+        }),
+        label="Enter birth date (if known)"
+    )
+    arrival_date = forms.DateField(
+        initial=date.today,
+        required=True,
+        widget=forms.DateInput(attrs={
+            "class": "form-control",
+            "type" : "date",
+            "id"   : "arrival_date"
+        }),
+        label="Enter arrival date"
+    )
     description  = forms.CharField(widget=forms.Textarea(attrs={
         "class" : "form-control"
     }), required=True, label="Animal description")
@@ -270,3 +304,65 @@ class CreateAnimalTaskForm(forms.ModelForm):
         fields = (
             "detail",
         )
+
+class BookAnimalForm(forms.Form):
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date", "id": "date_input"}),
+        label="Date",
+    )
+    start_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={"type": "time", "id": "start_time"}),
+        label="Start time",
+    )
+    end_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={"type": "time", "id": "end_time"}),
+        label="End time",
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.animal = kwargs.pop("animal") # Retrieve animal being booked
+        self.user = kwargs.pop("user") # Retrieve volunteer
+        self.type = kwargs.pop("type") if "type" in kwargs else "walk" # Retrieve confirmation
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = Reservation
+        fields = ()
+
+    def save(self, commit=True):
+        reservation = Reservation()
+        # Combine date and time into datetime
+        date = self.cleaned_data["date"]
+        start_time = self.cleaned_data["start_time"]
+        end_time = self.cleaned_data["end_time"]
+        # Set fields
+        reservation.owner = self.user
+        reservation.animal = self.animal
+        reservation.type = self.type
+        reservation.start_time = datetime.combine(date, start_time).replace(tzinfo=timezone.utc)
+        reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
+        reservation.confirmation = "pending" if self.type == "walk" else "approved"
+
+        if commit:
+            reservation.save()
+        return reservation
+
+class AnimalSearchForm(forms.Form):
+    # Search bar for animal
+    search_bar = forms.CharField(
+        required=False,
+        label="",
+        widget=forms.TextInput(attrs={
+            "class": "form-control me-2",
+            "placeholder": "Search animal",
+            "aria-label": "Search"
+        }),
+    )
+    # Selection for animal specie
+    specie_choice = forms.MultipleChoiceField(choices=[], required=False, widget=forms.CheckboxSelectMultiple(), label="")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Get all unique species values from animals
+        species = [(breed, breed) for breed in Animal.objects.filter(is_active=True).values_list("species", flat=True).distinct()]
+        self.fields["specie_choice"].choices = species

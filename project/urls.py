@@ -21,6 +21,8 @@ urlpatterns = [
     path('deleteuser/', views.client_delete, name='deleteuser'),
     # Logged user details page
     path('userdetails/', views.client_details, name='userdetails'),
+    # Logged user change password
+    path('userchangepwd/', views.client_changepwd, name='userchangepwd'),
     # Creating new animal
     path('createanimal/', views.animal_create, name='createanimal'),
     # Editing animal
@@ -42,5 +44,11 @@ urlpatterns = [
     # Verifying selected volunteer
     path('volunteerverify/<int:volunteer_id>', views.verify_volunteer, name='volunteerverify'),
     # Book animal for walk
-    path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal')
+    path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal'),
+	# Manage walk bookings
+	path('walklist/', views.walk_list, name='walklist'),
+	# Change booking confirmation
+	path('walklist/<int:walk_id>/<str:desired_confirmation>/', views.walk_change_confirmation, name='walk_change_confirmation'),
+    # Delete booking confirmation
+	path('walk_delete/<int:walk_id>', views.walk_delete, name='walk_delete'),
 ]

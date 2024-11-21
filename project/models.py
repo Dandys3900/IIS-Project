@@ -11,14 +11,14 @@ class CustomUserManager(BaseUserManager):
         # Create model
         user = self.model(
             username     = username,
-            # Store passwords in plain version
-            password     = password,
             first_name   = extra_fields.get("first_name"),
             last_name    = extra_fields.get("last_name"),
             email        = self.normalize_email(extra_fields.get("email")),
             phone_number = extra_fields.get("phone_number"),
             userrole     = extra_fields.get("userrole")
         )
+        # Set user's password
+        user.set_password(password)
         # Save user into database
         user.save(using=self._db)
         return user
@@ -33,7 +33,7 @@ class CustomUser(AbstractBaseUser):
     username     = models.CharField(max_length=255,   db_column="username", unique=True)
     password     = models.CharField(max_length=128,   db_column="userPassword")
     email        = models.CharField(max_length=255,   db_column="email", unique=True)
-    phone_number = models.CharField(max_length=9,     db_column="phoneNumber")
+    phone_number = models.CharField(max_length=13,    db_column="phoneNumber")
     userrole     = models.CharField(max_length=20,    db_column="userRole")
     verified     = models.BooleanField(default=False, db_column="verified")
 
@@ -52,10 +52,6 @@ class CustomUser(AbstractBaseUser):
     class Meta:
         # Specify table for storing users
         db_table = "User"
-
-    def save(self, *args, **kwargs):
-        # Avoid passwords hashing when saving into DB
-        super().save(*args, **kwargs)
 
     # Method for determining role of currently logged user
     def userRole(self):
@@ -114,3 +110,23 @@ class AnimalTask(models.Model):
     class Meta:
         # Specify table for storing animal task for veterinarians
         db_table = "Task"
+
+class Reservation(models.Model):
+    reservation_id = models.AutoField(primary_key=True, db_column="reservationID")
+    start_time = models.DateTimeField(db_column="start")
+    end_time = models.DateTimeField(db_column="end")
+    type = models.CharField(max_length=16, db_column="type")
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE, db_column="animalID")
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, db_column="ownerID")
+    confirmation = models.CharField(max_length=16, db_column="confirmation")
+
+    class Meta:
+        db_table = "Reservation"
+
+    def has_conflict(self):
+        return Reservation.objects.filter(
+            animal_id=self.animal_id,      # Only consider reservations for the same animal
+            start_time__lt=self.end_time,  # Check overlap: starts before this ends
+            end_time__gt=self.start_time,  # Check overlap: ends after this starts
+            confirmation="approved"
+        ).exclude(reservation_id=self.reservation_id).exists()

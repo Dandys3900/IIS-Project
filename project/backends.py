@@ -11,7 +11,7 @@ class CustomBackend(BaseBackend):
             # Try to find requested user in database
             foundUser = userModel.objects.get(username=username)
             # Check if passwords matches
-            if foundUser.password == password:
+            if foundUser.check_password(password):
                 return foundUser
             return None
         except CustomUser.DoesNotExist:

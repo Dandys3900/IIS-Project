@@ -6,15 +6,11 @@
 
 -- It is important to maintain correct order of DROP TABLE (dependencies)
 
-DROP TABLE IF EXISTS Walking;
-DROP TABLE IF EXISTS CheckUp;
 DROP TABLE IF EXISTS Reservation;
-DROP TABLE IF EXISTS Task; -- DROP TABLE task added
-
+DROP TABLE IF EXISTS Task;
 DROP TABLE IF EXISTS HealthRecord;
 DROP TABLE IF EXISTS AnimalPhoto;
 DROP TABLE IF EXISTS Animal;
-
 DROP TABLE IF EXISTS User;
 
 -- ----------------------------------------------------------------------------------------- --
@@ -30,7 +26,7 @@ CREATE TABLE User (
     username VARCHAR(255) not NULL,
     userPassword VARCHAR(24) not NULL,
     email VARCHAR(255) not NULL,
-    phoneNumber VARCHAR(9) not NULL, -- phoneNumber prefix not included
+    phoneNumber VARCHAR(13) not NULL, -- in format +420XXXYYYZZZ
     userRole VARCHAR(20) not NULL,
     verified BOOLEAN not NULL, -- relevant only for volunteers
 
@@ -100,42 +96,22 @@ CREATE TABLE Task (
 
 CREATE TABLE Reservation (
     reservationID INT AUTO_INCREMENT not NULL,
+    PRIMARY KEY(reservationID),
+
     start DATETIME not NULL, -- date + time
     end DATETIME not NULL, -- date + time
 
-    PRIMARY KEY(reservationID),
+    type VARCHAR(16) not NULL, -- walk/checkup/...
 
     animalID INT not NULL,
     FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE,
      -- link to Animal, delete reservation if the animal is deleted
 
-    caregiverID INT not NULL,
-    FOREIGN KEY(caregiverID) REFERENCES User(userID)
-    -- link to User, reservation remains even if the caregiver is deleted
-);
+    ownerID INT not NULL,
+    FOREIGN KEY(ownerID) REFERENCES User(userID),
+    -- link to User, reservation remains even if the owner is deleted
 
--- (specialization/generalization -> Reservation) --
-CREATE TABLE Walking (
-    reservationID INT not NULL,
-
-    PRIMARY KEY(reservationID),
-    FOREIGN KEY(reservationID) REFERENCES Reservation(reservationID) ON DELETE CASCADE,
-
-    volunteerID INT not NULL,
-    FOREIGN KEY(volunteerID) REFERENCES User(userID) ON DELETE CASCADE
-        -- delete reservation if the volunteer is deleted
-);
-
--- (specialization/generalization -> Reservation) --
-CREATE TABLE CheckUp (
-    reservationID INT not NULL,
-
-    PRIMARY KEY(reservationID),
-    FOREIGN KEY(reservationID) REFERENCES Reservation(reservationID) ON DELETE CASCADE,
-
-    veterinarianID INT not NULL,
-    FOREIGN KEY(veterinarianID) REFERENCES User(userID) ON DELETE CASCADE
-    -- delete reservation if the veterinarian is deleted
+    confirmation VARCHAR(9) not NULL -- pending/declined/approved/...
 );
 
 -- ----------------------------------------------------------------------------------------- --
@@ -143,19 +119,6 @@ CREATE TABLE CheckUp (
 -- ----------------------------------------------------------------------------------------- --
 
 -- The database will be filled with sample data for easier development
-
--- ---------------------------------- INSERT INTO USER---------------------------------- --
-
--- Inserting basic users into User table
-INSERT INTO User (last_login, firstName, lastName, username, userPassword, email, phoneNumber, userRole, verified)
-VALUES
-(NULL, 'Jan', 'Novák', 'jnovak', 'Heslo123', 'jan.novak@email.cz', '123456789', 'volunteer', FALSE), -- ID 1
-(NULL, 'Milan', 'Vrbas', 'Milisaurus', 'C!master7', 'milan.vrbas1@gmail.com', '731672979', 'vet', FALSE), -- ID 2
-(NULL, 'Petr', 'Svoboda', 'psvoboda', 'Petr*Heslo', 'petr.svoboda@email.com', '987654321', 'carer', FALSE), -- ID 3
-(NULL, 'Tomáš', 'Daniel', 'xDandys', 'Gym_Monster', 'tomas.daniel@centrum.cz', '731572983', 'admin', FALSE), -- ID 4
-(NULL, 'Janšta', 'Jakub', 'Kubalabambula', 'Godot#Master', 'jakub.jansta@gmail.com', '732315134', 'admin', FALSE), -- ID 5
-(NULL, 'Eva', 'Králová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555', 'volunteer', FALSE), -- ID 6
-(NULL, 'Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413', 'carer', FALSE); -- ID 7
 
 -- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- -
 
@@ -206,42 +169,42 @@ VALUES
 
 -- -------------------------------- INSERT FOR RESERVATIONS -------------------------------- --
 
--- Inserting reservations for animals
-INSERT INTO Reservation (start, end, animalID, caregiverID)
-VALUES
--- Reservation for Max (Jan Novák - ID 1)
-('2023-09-25 10:00:00', '2023-09-25 11:00:00', 1, 1),
-('2023-09-26 14:00:00', '2023-09-26 15:00:00', 1, 1),
+-- -- Inserting reservations for animals
+-- INSERT INTO Reservation (start, end, animalID, caregiverID, confirmation)
+-- VALUES
+-- -- Reservation for Max (Jan Novák - ID 1)
+-- ('2023-09-25 10:00:00', '2023-09-25 11:00:00', 1, 1, 'pending'),
+-- ('2023-09-26 14:00:00', '2023-09-26 15:00:00', 1, 1, 'pending'),
 
--- Reservation for Bella (Milan Vrbas - ID 2)
-('2023-09-25 16:00:00', '2023-09-25 17:00:00', 2, 2),
+-- -- Reservation for Bella (Milan Vrbas - ID 2)
+-- ('2023-09-25 16:00:00', '2023-09-25 17:00:00', 2, 2, 'pending'),
 
--- Reservation for Rex (Jan Novák - ID 1)
-('2023-09-27 09:00:00', '2023-09-27 10:00:00', 3, 1),
+-- -- Reservation for Rex (Jan Novák - ID 1)
+-- ('2023-09-27 09:00:00', '2023-09-27 10:00:00', 3, 1, 'pending'),
 
--- Reservation for Molly (Milan Vrbas - ID 2)
-('2023-09-26 09:00:00', '2023-09-26 10:00:00', 4, 2),
+-- -- Reservation for Molly (Milan Vrbas - ID 2)
+-- ('2023-09-26 09:00:00', '2023-09-26 10:00:00', 4, 2, 'pending'),
 
--- Reservation for Jerry (Jan Novák - ID 1)
-('2023-09-28 11:00:00', '2023-09-28 12:00:00', 5, 1);
+-- -- Reservation for Jerry (Jan Novák - ID 1)
+-- ('2023-09-28 11:00:00', '2023-09-28 12:00:00', 5, 1, 'pending');
 
--- Inserting walks for animals
-INSERT INTO Walking (reservationID, volunteerID)
-VALUES
--- Walk for Max (Tomáš Daniel - ID 4)
-(1, 4),
+-- -- Inserting walks for animals
+-- INSERT INTO Walking (reservationID, volunteerID)
+-- VALUES
+-- -- Walk for Max (Tomáš Daniel - ID 4)
+-- (1, 4),
 
--- Walk for Bella (Eva Králová - ID 6)
-(3, 6),
+-- -- Walk for Bella (Eva Králová - ID 6)
+-- (3, 6),
 
--- Walk for Rex (Jakub Janšta - ID 5)
-(4, 5);
+-- -- Walk for Rex (Jakub Janšta - ID 5)
+-- (4, 5);
 
--- Inserting CheckUps for animals
-INSERT INTO CheckUp (reservationID, veterinarianID)
-VALUES
--- Checkup for Max (Petr Svoboda - ID 3)
-(2, 3),
+-- -- Inserting CheckUps for animals
+-- INSERT INTO CheckUp (reservationID, veterinarianID)
+-- VALUES
+-- -- Checkup for Max (Petr Svoboda - ID 3)
+-- (2, 3),
 
--- Checkup for Molly (Petr Svoboda - ID 3)
-(5, 3);
+-- -- Checkup for Molly (Petr Svoboda - ID 3)
+-- (5, 3);
