@@ -42,6 +42,9 @@
         </div>
         <hr>
             <div class="row">
+                <!-- Timetable -->
+                {% include "timetable.html" %}
+
                 {% if user.userRole == "volunteer" %}
                     <!-- Reservation form -->
                     <div class="col-md-3">
@@ -67,8 +70,6 @@
                         Want to take me for a walk? <button><a href="/register">Register</a></button> as volunteer, get verified and let's meet!
                     </label>
                 {% endif %}
-                <!-- Timetable -->
-                {% include "timetable.html" %}
             </div>
     </div>
 

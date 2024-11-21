@@ -17,18 +17,16 @@ MAX_HOUR = 18
 # Home view
 def home(request):
     form = AnimalSearchForm(request.GET)
-    animals = Animal.objects.all()
+    animals = Animal.objects.filter(is_active=True).order_by("animal_id")
 
     if form.is_valid():
         search_query = form.cleaned_data["search_bar"]
         search_specie = form.cleaned_data["specie_choice"]
 
         if search_query:
-            animals = Animal.objects.filter(name__icontains=search_query, is_active=True)
+            animals = animals.filter(name__icontains=search_query, is_active=True)
         if search_specie:
-            animals = Animal.objects.filter(species__in=search_specie)
-    else:
-        animals = Animal.objects.filter(is_active=True).order_by("animal_id")
+            animals = animals.filter(species__in=search_specie)
 
     return render(request, "home.html", {
         "animals" : animals,
@@ -184,14 +182,35 @@ def client_details(request):
     # Security: only logged user can view this
     role_required(request)
 
-    form = UserInfoForm(user=request.user)
+    userinfo_form = UserInfoForm(instance=request.user)
+
     if request.method == "POST":
-        form = UserInfoForm(request.POST, instance=request.user, user=request.user)
-        if form.is_valid():
-            # Save changes in user profile
-            form.save()
+        userinfo_form = UserInfoForm(request.POST, instance=request.user)
+
+        if userinfo_form.is_valid():
+            userinfo_form.save()
+        else:
+            error_messages = [error for errors in userinfo_form.errors.values() for error in errors]
+            messages.error(request, " ".join(error_messages))
+    # Redirect to page user is currently on
+    return redirect(request.META.get("HTTP_REFERER"))
+
+def client_changepwd(request):
+    # Security: only logged user can view this
+    role_required(request)
+
+    changepwd_form = UserPasswordChangeForm(user=request.user)
+
+    if request.method == "POST":
+        changepwd_form = UserPasswordChangeForm(user=request.user, data=request.POST)
+
+        if changepwd_form.is_valid():
+            changepwd_form.save()
             # Re-authenticate user and update session hash to prevent logout
-            update_session_auth_hash(request, request.user)
+            update_session_auth_hash(request, changepwd_form.user)
+        else:
+            error_messages = [error for errors in changepwd_form.errors.values() for error in errors]
+            messages.error(request, " ".join(error_messages))
     # Redirect to page user is currently on
     return redirect(request.META.get("HTTP_REFERER"))
 
@@ -587,16 +606,16 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
         return redirect("walklist")
 
     # Forbid changing of already ongoing booking
-    if walk.walk_id.start_time < datetime.now().replace(tzinfo=timezone.utc):
+    if walk.start_time < datetime.now().replace(tzinfo=timezone.utc):
         messages.error(request, "Cannot modify an already finished/ongoing walk.")
         return redirect("walklist")
 
     # Forbid confirming two bookings at the same time
-    if desired_confirmation == "approved" and walk.walk_id.has_conflict():
+    if desired_confirmation == "approved" and walk.has_conflict():
         messages.error(request, "Cannot approve walk. Another booking is in conflict.")
         return redirect("walklist")
 
-    walk.walk_id.confirmation = desired_confirmation
+    walk.confirmation = desired_confirmation
     walk.save()
     messages.success(request, f"Booking confirmation changed to '{desired_confirmation}'.")
     return redirect("walklist")
@@ -613,7 +632,7 @@ def walk_delete(request, walk_id):
     #     messages.error(request, "Cannot cancel a walk that does not belong to you.")
     #     return redirect("walklist")
 
-    if walk.walk_id.start_time < datetime.now().replace(tzinfo=timezone.utc):
+    if walk.start_time < datetime.now().replace(tzinfo=timezone.utc):
         messages.error(request, "Cannot cancel an already finished/ongoing walk.")
         return redirect("walklist")
 

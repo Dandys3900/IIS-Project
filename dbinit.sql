@@ -110,7 +110,7 @@ CREATE TABLE Reservation (
     ownerID INT not NULL,
     FOREIGN KEY(ownerID) REFERENCES User(userID),
     -- link to User, reservation remains even if the owner is deleted
-    
+
     confirmation VARCHAR(9) not NULL -- pending/declined/approved/...
 );
 
@@ -119,19 +119,6 @@ CREATE TABLE Reservation (
 -- ----------------------------------------------------------------------------------------- --
 
 -- The database will be filled with sample data for easier development
-
--- ---------------------------------- INSERT INTO USER---------------------------------- --
-
--- Inserting basic users into User table
-INSERT INTO User (last_login, firstName, lastName, username, userPassword, email, phoneNumber, userRole, verified)
-VALUES
-(NULL, 'Jan', 'Novák', 'jnovak', 'Heslo123', 'jan.novak@email.cz', '123456789', 'volunteer', FALSE), -- ID 1
-(NULL, 'Milan', 'Vrbas', 'Milisaurus', 'C!master7', 'milan.vrbas1@gmail.com', '731672979', 'vet', FALSE), -- ID 2
-(NULL, 'Petr', 'Svoboda', 'psvoboda', 'Petr*Heslo', 'petr.svoboda@email.com', '987654321', 'carer', FALSE), -- ID 3
-(NULL, 'Tomáš', 'Daniel', 'xDandys', 'Gym_Monster', 'tomas.daniel@centrum.cz', '731572983', 'admin', FALSE), -- ID 4
-(NULL, 'Janšta', 'Jakub', 'Kubalabambula', 'Godot#Master', 'jakub.jansta@gmail.com', '732315134', 'admin', FALSE), -- ID 5
-(NULL, 'Eva', 'Králová', 'ekralova', 'Kralova@', 'eva.kralova@gmail.com', '555555555', 'volunteer', TRUE), -- ID 6
-(NULL, 'Marie', 'Novotná', 'mnovotna', 'MarieHeslo420', 'marie.novotna@seznam.cz', '624421413', 'carer', FALSE); -- ID 7
 
 -- ---------------------------------- INSERT INTO ANIMALS ---------------------------------- -
 

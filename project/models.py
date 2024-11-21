@@ -129,4 +129,4 @@ class Reservation(models.Model):
             start_time__lt=self.end_time,  # Check overlap: starts before this ends
             end_time__gt=self.start_time,  # Check overlap: ends after this starts
             confirmation="approved"
-        ).exclude(reservationID=self.reservationID).exists()
+        ).exclude(reservation_id=self.reservation_id).exists()

@@ -103,6 +103,14 @@
                                             <button type="button" onclick="togglePwdChangeForm()" class="btn btn-warning btn-block">Change password</button>
                                             <button type="submit" class="btn btn-primary btn-block">Save</button>
                                         </form>
+                                        <br>
+                                        <form id="pwchangeform" method="POST" action="{% url 'userchangepwd' %}">
+                                            <!-- Django requires this token for enhanced security -->
+                                            {% csrf_token %}
+                                            <!-- Render form -->
+                                            {{ userpwd_form.as_p }}
+                                            <button type="submit" class="btn btn-primary btn-block">Change</button>
+                                        </form>
                                     </div>
                                 </div>
                         </div>
@@ -136,27 +144,16 @@
             }
 
             function togglePwdChangeForm() {
-                element1  = document.getElementById("id_password1");
-                element2  = document.getElementById("id_password2");
-                help_text = document.getElementById("id_password1_helptext").parentElement.nextSibling
-
-                if (element1.classList.contains("d-none")) {
-                    help_text.removeAttribute("hidden");
-                    element1.classList.remove("d-none");
-                    element2.classList.remove("d-none");
-                }
-                else {
-                    help_text.setAttribute("hidden", "hidden");
-                    element1.classList.add("d-none");
-                    element2.classList.add("d-none");
-                }
+                element = document.getElementById("pwchangeform");
+                if (element.style.display === "none")
+                    document.getElementById("pwchangeform").style.display = "block";
+                else
+                    document.getElementById("pwchangeform").style.display = "none";
             }
 
             // Initially hide reset password hint text
             document.addEventListener("DOMContentLoaded", function() {
-                element = document.getElementById("id_password1_helptext");
-                if (element)
-                    element.parentElement.nextSibling.setAttribute("hidden", "hidden");
+                document.getElementById("pwchangeform").style.display = "none";
             });
         </script>
     {% endblock extra_js %}

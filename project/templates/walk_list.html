@@ -20,26 +20,26 @@
                         {% for walk in walks %}
                             <tr class="position-relative">
                                 <td>
-                                    {{ walk.walk_id.animal_id.name }}
+                                    {{ walk.animal.name }}
                                     <!-- Make whole card clickable -->
-                                    <a href="{% url 'bookanimal' walk.walk_id.animal_id.animal_id %}" class="stretched-link"></a>
+                                    <a href="{% url 'bookanimal' walk.animal.animal_id %}" class="stretched-link"></a>
                                 </td>
-                                <td>{{ walk.walk_id.animal_id.species }}</td>
-                                <td>{{ walk.walk_id.start_time.date }}</td>
-                                <td>{{ walk.walk_id.start_time.time }}-{{ walk.walk_id.end_time.time }}</td>
-                                <td>{{ walk.walk_idconfirmation }}</td>
+                                <td>{{ walk.animal.species }}</td>
+                                <td>{{ walk.start_time.date }}</td>
+                                <td>{{ walk.start_time.time }}-{{ walk.end_time.time }}</td>
+                                <td>{{ walk.confirmation }}</td>
                                 <td class="position-relative" style="z-index: 2;">
                                 {% if user.userRole == "carer" %}
-                                    {% if walk.walk_id.confirmation == "pending" %}
-                                        <a href="{% url 'walk_change_confirmation' walk.walk_id.reservationID 'approved' %}" class="btn btn-primary">Approve</a>
-                                        <a href="{% url 'walk_change_confirmation' walk.walk_id.reservationID 'declined' %}" class="btn btn-primary">Decline</a>
-                                    {% elif walk.walk_id.confirmation == "approved" %}
-                                        <a href="{% url 'walk_change_confirmation' walk.walk_id.reservationID 'pending' %}" class="btn btn-primary">Unapprove</a>
-                                    {% elif walk.walk_id.confirmation == "declined" %}
-                                        <a href="{% url 'walk_change_confirmation' walk.walk_id.reservationID 'pending' %}" class="btn btn-primary">Undecline</a>
+                                    {% if walk.confirmation == "pending" %}
+                                        <a href="{% url 'walk_change_confirmation' walk.reservation_id 'approved' %}" class="btn btn-primary">Approve</a>
+                                        <a href="{% url 'walk_change_confirmation' walk.reservation_id 'declined' %}" class="btn btn-primary">Decline</a>
+                                    {% elif walk.confirmation == "approved" %}
+                                        <a href="{% url 'walk_change_confirmation' walk.reservation_id 'pending' %}" class="btn btn-primary">Unapprove</a>
+                                    {% elif walk.confirmation == "declined" %}
+                                        <a href="{% url 'walk_change_confirmation' walk.reservation_id 'pending' %}" class="btn btn-primary">Undecline</a>
                                     {% endif %}
                                 {% elif user.userRole == "volunteer" %}
-                                    <a href="{% url 'walk_delete' walk.walk_id.reservationID %}" class="btn btn-primary">Cancel</a>
+                                    <a href="{% url 'walk_delete' walk.reservation_id %}" class="btn btn-primary">Cancel</a>
                                 {% endif %}
                                 </td>
                             </tr>
