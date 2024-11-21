@@ -612,7 +612,7 @@ def animal_book(request, animal_id):
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])
-    walks = Reservation.objects.all().filter(type="walk", start_time__date__gte=date.today()).order_by("start_time__date", "confirmation")
+    walks = Reservation.objects.all().filter(type="walk", start_time__date__gte=date.today()).order_by("start_time__date")
     if request.user.userrole == "volunteer":
         walks = walks.filter(owner=request.user.user_id)
     return render(request, "walk_list.html", {
