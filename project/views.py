@@ -582,7 +582,6 @@ def animal_book(request, animal_id):
     form.save()
     messages.success(request, "Walk booked.")
     return redirect("bookanimal", animal_id)
-    # return redirect('animalmedrecs', animal_id=animal.animal_id)
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])
@@ -628,9 +627,9 @@ def walk_delete(request, walk_id):
         messages.error(request, f"Error while deleting walk booking: {e}.")
         return redirect("walklist")
 
-    # if walk.volunteer_id != request.user.user_id:
-    #     messages.error(request, "Cannot cancel a walk that does not belong to you.")
-    #     return redirect("walklist")
+    if walk.volunteer_id != request.user.user_id:
+        messages.error(request, "Cannot cancel a walk that does not belong to you.")
+        return redirect("walklist")
 
     if walk.start_time < datetime.now().replace(tzinfo=timezone.utc):
         messages.error(request, "Cannot cancel an already finished/ongoing walk.")
