@@ -292,6 +292,14 @@ class CreateMedicalRecordForm(forms.ModelForm):
             "detail"
         )
 
+class EditMedicalRecordForm(CreateMedicalRecordForm):
+    def __init__(self, *args, **kwargs):
+        super(EditMedicalRecordForm, self).__init__(*args, **kwargs)
+
+        # Fill fields with record data
+        self.fields["name"].initial = self.instance.name
+        self.fields["detail"].initial = self.instance.detail
+
 class CreateAnimalTaskForm(forms.ModelForm):
     target_vet = forms.ModelChoiceField(queryset=CustomUser.objects.filter(userrole="vet"), label="Assign task to", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     detail = forms.CharField(widget=forms.Textarea(attrs={

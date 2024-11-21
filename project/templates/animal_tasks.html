@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container">
+    <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col">
+            <div class="col-md-9">
                 <h1 class="mt-4">{{ animal.name }}</h1>
                 <h4>ID:</h4> {{ animal.animal_id }}
                 <h4>Species:</h4> {{ animal.species }}
                 <h4>Breed:</h4> {{ animal.breed }}
                 <h4>Description:</h4> {{ animal.description }}
+
                 {% include "timetable.html" %}
+
                 <h2 class="mt-4">Tasks for animal</h2>
                 <table class="table">
                     <thead>
@@ -36,7 +38,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card">
                     <div class="card-body">
                         <h3 class="card-title text-center">New task</h3>
@@ -53,7 +55,7 @@
             </div>
         </div>
     </div>
-    
+
     {% block extra_js %}
         <script>
             // timeslot has a scale of 1h
@@ -72,5 +74,5 @@
             document.getElementById("end_time").addEventListener("input", reset_minutes);
         </script>
     {% endblock extra_js %}
-    
+
 {% endblock %}

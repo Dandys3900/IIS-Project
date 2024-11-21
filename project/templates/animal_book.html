@@ -31,11 +31,11 @@
                     {% if animal and animal.photos.exists %}
                         {% for photo in animal.photos.all %}
                             {% if photo.image %}
-                                <img src="{{ photo.image.url }}" class="img-fluid" style="width: 50%; height: auto;">
+                                <img src="{{ photo.image.url }}" class="img-fluid" style="width: 50%; height: 50%;">
                             {% endif %}
                         {% endfor %}
                     {% else %}
-                        <img src="/media/generic_animal.png" class="img-fluid" style="width: 50%; height: auto;"/>
+                        <img src="/media/generic_animal.png" class="img-fluid" style="width: 50%; height: 50%;"/>
                     {% endif %}
                 </div>
             </div>
