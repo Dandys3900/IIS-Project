@@ -102,6 +102,8 @@ class HealthRecord(models.Model):
 
 class AnimalTask(models.Model):
     task_id      = models.AutoField(primary_key=True, db_column="taskID")
+    start_time   = models.DateTimeField(db_column="start")
+    end_time     = models.DateTimeField(db_column="end")
     detail       = models.TextField(db_column="detail")
     is_done      = models.BooleanField(default=False, db_column="isDone")
     animal_id    = models.ForeignKey(Animal, related_name="animal_tasks", on_delete=models.CASCADE, db_column="animalID")

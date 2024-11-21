@@ -480,6 +480,8 @@ def animal_vetrecord(request, animal_id):
 
     vet_task = animal_task_form.save(commit=False)
     reservation = book_animal_form.save(commit=False)
+    vet_task.start_time = reservation.start_time
+    vet_task.end_time = reservation.end_time
     vet_task.animal_id = animal
     vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
     reservation.veterinarian = animal_task_form.cleaned_data["target_vet"]

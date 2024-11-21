@@ -51,6 +51,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Detail</th>
+                            <th>Planned time</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -59,6 +60,7 @@
                             <tr class="{% if task.is_done %} table-success {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
+                                <td>{{ task.start_time.date }} ({{ task.start_time.time }}-{{ walk.end_time.time }})</td>
                                 <td><a href="{% url 'updatetaskstatus' task.task_id %}" class="btn btn-primary">
                                     {% if task.is_done == False %}
                                         Mark done

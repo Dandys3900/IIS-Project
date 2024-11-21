@@ -18,6 +18,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Detail</th>
+                            <th>Planned time</th>
                             <th>Assigned veterinarian (ID)</th>
                             <th>Done</th>
                         </tr>
@@ -27,6 +28,7 @@
                             <tr class="{% if task.is_done %} table-success {% else %} table-danger {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
+                                <td>{{ task.start_time.date }} ({{ task.start_time.time }}-{{ walk.end_time.time }})</td>
                                 <td>
                                     {{ task.veterinarian.first_name }}
                                     {{ task.veterinarian.last_name }}

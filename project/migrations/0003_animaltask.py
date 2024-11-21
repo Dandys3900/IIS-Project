@@ -16,6 +16,8 @@ class Migration(migrations.Migration):
             name='AnimalTask',
             fields=[
                 ('task_id', models.AutoField(db_column='taskID', primary_key=True, serialize=False)),
+                ('start_time', models.DateTimeField(db_column='start')),
+                ('end_time', models.DateTimeField(db_column='end')),
                 ('detail', models.TextField(db_column='detail')),
                 ('is_done', models.BooleanField(db_column='isDone', default=False)),
                 ('animal_id', models.ForeignKey(db_column='animalID', on_delete=django.db.models.deletion.CASCADE, related_name='animal_tasks', to='project.animal')),
