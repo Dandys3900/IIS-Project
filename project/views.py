@@ -182,10 +182,10 @@ def client_details(request):
     # Security: only logged user can view this
     role_required(request)
 
-    userinfo_form = UserInfoForm(user=request.user, instance=request.user)
+    userinfo_form = UserInfoForm(instance=request.user)
 
     if request.method == "POST":
-        userinfo_form = UserInfoForm(request.POST, user=request.user, instance=request.user)
+        userinfo_form = UserInfoForm(request.POST, instance=request.user)
 
         if userinfo_form.is_valid():
             userinfo_form.save()

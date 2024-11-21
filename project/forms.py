@@ -173,26 +173,24 @@ class UserInfoForm(forms.ModelForm):
         )
 
     def __init__(self, *args, **kwargs):
-        # Retrieve user being edited
-        self.user = kwargs.pop("user")
         super(UserInfoForm, self).__init__(*args, **kwargs)
 
         # Fill form with user data
         self.fields["first_name"].widget.attrs["class"] = "form-control"
         self.fields["first_name"].label= "First name"
-        self.fields["first_name"].initial = self.user.first_name
+        self.fields["first_name"].initial = self.instance.first_name
 
         self.fields["last_name"].widget.attrs["class"] = "form-control"
         self.fields["last_name"].label= "Last name"
-        self.fields["last_name"].initial = self.user.last_name
+        self.fields["last_name"].initial = self.instance.last_name
 
         self.fields["email"].widget.attrs["class"] = "form-control"
         self.fields["email"].label= "Email"
-        self.fields["email"].initial = self.user.email
+        self.fields["email"].initial = self.instance.email
 
         self.fields["phone_number"].widget.attrs["class"] = "form-control"
         self.fields["phone_number"].label= "Phone number"
-        self.fields["phone_number"].initial = self.user.phone_number
+        self.fields["phone_number"].initial = self.instance.phone_number
 
 class UserPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
@@ -306,8 +304,6 @@ class CreateAnimalTaskForm(forms.ModelForm):
         fields = (
             "detail",
         )
-    
-    
 
 class BookAnimalForm(forms.Form):
     date = forms.DateField(
