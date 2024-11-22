@@ -204,29 +204,24 @@ INSERT INTO HealthRecord (name, detail, animalID, veterinarianID)
 VALUES
 -- Only one veterinarian - Milan Vrbas ID 2
 -- Max (Pes, ID 1)
-('Očkování', 'Max byl očkován proti vzteklině a psince.', 1, 2),
 ('Prohlídka', 'Během kontroly byla zjištěna nadváha, doporučeno více pohybu.', 1, 2),
 
 -- Bella (Pes, ID 2)
 ('Kastrace', 'Bella byla úspěšně kastrována.', 2, 2),
-('Prohlídka', 'Bella má v pořádku srst a váhu.', 2, 2),
 
 -- Rex (Pes, ID 3)
 ('Očkování', 'Rex byl očkován proti vzteklině.', 3, 2),
-('Fyzická terapie', 'Rex zahájil fyzioterapii pro zlepšení pohyblivosti kyčlí.', 3, 2),
 
 -- Molly (Kočka, ID 4)
 ('Prohlídka', 'Molly má čisté uši a oči, je zdravá.', 4, 2),
 
 -- Jerry (Kočka, ID 5)
-('Odčervení', 'Jerry prošel úspěšným odčervením.', 5, 2),
 ('Problémy s nadváhou', 'Jerry má nadváhu, doporučena redukční dieta.', 5, 2),
 
 -- Kotěnka (Kočka, ID 6)
 ('Prohlídka', 'Kotěnka je zdravá, ale doporučena prevence proti blechám.', 6, 2),
 
 -- Simba (Kočka, ID 7)
-('Očkování', 'Simba byl očkován proti vzteklině.', 7, 2),
 ('Zranění tlapky', 'Simba měl drobné poranění tlapky, ošetřeno antiseptikem.', 7, 2),
 
 -- Lola (Králík, ID 8)
@@ -234,7 +229,6 @@ VALUES
 
 -- Charlie (Králík, ID 9)
 ('Očkování', 'Charlie byl očkován proti myxomatóze a moru králíků.', 9, 2),
-('Problémy s tlapkami', 'Charlie měl drobný zánět na tlapkách, aplikován antiseptický krém.', 9, 2),
 
 -- Bublinka (Morče, ID 10)
 ('Prohlídka', 'Bublinka má zdravé zuby a srst, doporučeno pravidelné stříhání drápků.', 10, 2);
@@ -246,135 +240,109 @@ INSERT INTO Reservation (start, end, type, animalID, ownerID, confirmation)
 VALUES
 -- -------------------------------- Old checkup reservations ------------------------------- --
 -- Max (Pes, ID 1)
-('2024-11-01 09:00:00', '2024-11-01 09:30:00', 'checkup', 1, 2, 'approved'), -- Reservation ID 1
-('2024-11-02 10:00:00', '2024-11-02 10:30:00', 'checkup', 1, 2, 'approved'), -- Reservation ID 2
+('2024-11-02 10:00:00', '2024-11-02 11:00:00', 'checkup', 1, 2, 'approved'), -- Reservation ID 1
 
 -- Bella (Pes, ID 2)
-('2024-10-01 11:00:00', '2024-10-01 11:30:00', 'checkup', 2, 2, 'approved'), -- Reservation ID 3
-('2024-10-03 14:00:00', '2024-10-03 14:30:00', 'checkup', 2, 2, 'approved'), -- Reservation ID 4
+('2024-10-01 11:00:00', '2024-10-01 13:00:00', 'checkup', 2, 2, 'approved'), -- Reservation ID 2
 
 -- Rex (Pes, ID 3)
-('2024-09-10 09:00:00', '2024-09-10 09:30:00', 'checkup', 3, 2, 'approved'), -- Reservation ID 5
-('2024-09-15 10:00:00', '2024-09-15 10:30:00', 'checkup', 3, 2, 'approved'), -- Reservation ID 6
+('2024-09-15 10:00:00', '2024-09-15 11:00:00', 'checkup', 3, 2, 'approved'), -- Reservation ID 3
 
 -- Molly (Kočka, ID 4)
-('2024-08-05 10:00:00', '2024-08-05 10:30:00', 'checkup', 4, 2, 'approved'), -- Reservation ID 7
+('2024-08-05 10:00:00', '2024-08-05 12:00:00', 'checkup', 4, 2, 'approved'), -- Reservation ID 4
 
 -- Jerry (Kočka, ID 5)
-('2024-07-01 11:00:00', '2024-07-01 11:30:00', 'checkup', 5, 2, 'approved'), -- Reservation ID 8
-('2024-07-05 15:00:00', '2024-07-05 15:30:00', 'checkup', 5, 2, 'approved'), -- Reservation ID 9
+('2024-07-05 15:00:00', '2024-07-05 17:00:00', 'checkup', 5, 2, 'approved'), -- Reservation ID 5
 
 -- Kotěnka (Kočka, ID 6)
-('2024-06-10 10:00:00', '2024-06-10 10:30:00', 'checkup', 6, 2, 'approved'), -- Reservation ID 10
+('2024-06-10 10:00:00', '2024-06-10 13:00:00', 'checkup', 6, 2, 'approved'), -- Reservation ID 6
 
 -- Simba (Kočka, ID 7)
-('2024-05-15 09:00:00', '2024-05-15 09:30:00', 'checkup', 7, 2, 'approved'), -- Reservation ID 11
-('2024-05-20 14:00:00', '2024-05-20 14:30:00', 'checkup', 7, 2, 'approved'), -- Reservation ID 12
+('2024-05-20 14:00:00', '2024-05-20 15:00:00', 'checkup', 7, 2, 'approved'), -- Reservation ID 7
 
 -- Lola (Králík, ID 8)
-('2024-04-01 11:00:00', '2024-04-01 11:30:00', 'checkup', 8, 2, 'approved'), -- Reservation ID 13
+('2024-04-01 11:00:00', '2024-04-01 12:00:00', 'checkup', 8, 2, 'approved'), -- Reservation ID 8
 
 -- Charlie (Králík, ID 9)
-('2024-03-10 09:00:00', '2024-03-10 09:30:00', 'checkup', 9, 2, 'approved'), -- Reservation ID 14
-('2024-03-15 10:00:00', '2024-03-15 10:30:00', 'checkup', 9, 2, 'approved'), -- Reservation ID 15
+('2024-03-10 09:00:00', '2024-03-10 11:00:00', 'checkup', 9, 2, 'approved'), -- Reservation ID 9
 
 -- Bublinka (Morče, ID 10)
-('2024-08-06 15:00:00', '2024-08-06 16:00:00', 'checkup', 10, 2, 'approved'), -- Reservation ID 16
+('2024-08-06 15:00:00', '2024-08-06 16:00:00', 'checkup', 10, 2, 'approved'), -- Reservation ID 10
 
 -- ----------------------------- Future checkup reservations ------------------------------- --
 -- Max (Pes, ID 1)
-('2024-12-20 09:00:00', '2024-12-20 09:30:00', 'checkup', 1, 2, 'pending'), -- Reservation ID 17
-('2024-12-22 10:00:00', '2024-12-22 10:30:00', 'checkup', 1, 2, 'pending'), -- Reservation ID 18
+('2024-12-20 09:00:00', '2024-12-20 10:00:00', 'checkup', 1, 2, 'pending'), -- Reservation ID 11
 
 -- Bella (Pes, ID 2)
-('2024-12-24 11:00:00', '2024-12-24 11:30:00', 'checkup', 2, 2, 'approved'), -- Reservation ID 19
+('2024-12-24 11:00:00', '2024-12-24 13:00:00', 'checkup', 2, 2, 'approved'), -- Reservation ID 12
 
 -- Simba (Kočka, ID 7)
-('2024-12-27 14:00:00', '2024-12-27 14:30:00', 'checkup', 7, 2, 'approved'), -- Reservation ID 20
+('2024-12-27 14:00:00', '2024-12-27 15:00:00', 'checkup', 7, 2, 'approved'), -- Reservation ID 13
 
 -- Bublinka (Morče, ID 10)
-('2024-12-30 15:00:00', '2024-12-30 15:30:00', 'checkup', 10, 2, 'approved'), -- Reservation ID 21
+('2024-12-30 15:00:00', '2024-12-30 16:00:00', 'checkup', 10, 2, 'approved'), -- Reservation ID 14
 
 -- -------------------------------- Old walk reservations ---------------------------------- --
 -- Max (Pes, ID 1)
-('2024-06-01 09:00:00', '2024-06-04 19:00:00', 'walk', 1, 1, 'approved'), -- Reservation ID 22
-('2024-07-10 10:00:00', '2024-07-13 18:00:00', 'walk', 1, 1, 'approved'), -- Reservation ID 23
+('2024-06-01 09:00:00', '2024-06-01 15:00:00', 'walk', 1, 1, 'approved'), -- Reservation ID 15
 
 -- Bella (Pes, ID 2)
-('2024-05-01 10:00:00', '2024-05-04 18:00:00', 'walk', 2, 6, 'approved'), -- Reservation ID 24
-('2024-06-20 09:00:00', '2024-06-23 19:00:00', 'walk', 2, 6, 'approved'), -- Reservation ID 25
-('2024-07-15 10:00:00', '2024-07-18 20:00:00', 'walk', 2, 6, 'declined'), -- Reservation ID 26
+('2024-05-01 10:00:00', '2024-05-01 18:00:00', 'walk', 2, 6, 'approved'), -- Reservation ID 16
+('2024-07-15 10:00:00', '2024-07-15 18:00:00', 'walk', 2, 6, 'declined'), -- Reservation ID 17
 
 -- Rex (Pes, ID 3)
-('2024-04-01 10:00:00', '2024-04-04 18:00:00', 'walk', 3, 1, 'approved'), -- Reservation ID 27
-('2024-05-15 09:00:00', '2024-05-18 20:00:00', 'walk', 3, 1, 'approved'), -- Reservation ID 28
+('2024-04-01 10:00:00', '2024-04-01 18:00:00', 'walk', 3, 1, 'approved'), -- Reservation ID 18
 
 -- Jerry (Kočka, ID 5)
-('2024-04-05 10:00:00', '2024-04-08 18:00:00', 'walk', 5, 6, 'approved'), -- Reservation ID 29
-('2024-05-25 09:00:00', '2024-05-28 20:00:00', 'walk', 5, 6, 'approved'), -- Reservation ID 30
+('2024-04-05 10:00:00', '2024-04-05 11:00:00', 'walk', 5, 6, 'approved'), -- Reservation ID 19
+('2024-05-25 09:00:00', '2024-05-25 18:00:00', 'walk', 5, 6, 'approved'), -- Reservation ID 20
 
 -- Simba (Kočka, ID 7)
-('2024-03-20 09:00:00', '2024-03-23 19:00:00', 'walk', 7, 6, 'approved'), -- Reservation ID 31
-('2024-04-15 10:00:00', '2024-04-18 18:00:00', 'walk', 7, 6, 'declined'), -- Reservation ID 32
-('2024-05-05 09:00:00', '2024-05-08 20:00:00', 'walk', 7, 6, 'approved'), -- Reservation ID 33
+('2024-03-20 09:00:00', '2024-03-20 13:00:00', 'walk', 7, 6, 'approved'), -- Reservation ID 21
 
 -- Lola (Králík, ID 8)
-('2024-02-01 10:00:00', '2024-02-04 19:00:00', 'walk', 8, 1, 'approved'), -- Reservation ID 34
-('2024-03-10 09:00:00', '2024-03-13 18:00:00', 'walk', 8, 1, 'approved'), -- Reservation ID 35
+('2024-03-10 09:00:00', '2024-03-10 18:00:00', 'walk', 8, 1, 'approved'), -- Reservation ID 22
 
 -- Charlie (Králík, ID 9)
-('2024-01-15 10:00:00', '2024-01-18 18:00:00', 'walk', 9, 6, 'declined'), -- Reservation ID 36
-('2024-02-10 09:00:00', '2024-02-13 19:00:00', 'walk', 9, 6, 'approved'), -- Reservation ID 37
-('2024-03-05 10:00:00', '2024-03-08 20:00:00', 'walk', 9, 6, 'approved'), -- Reservation ID 38
+('2024-01-15 10:00:00', '2024-01-15 14:00:00', 'walk', 9, 6, 'declined'), -- Reservation ID 23
 
 -- Bublinka (Morče, ID 10)
-('2024-01-10 09:00:00', '2024-01-13 18:00:00', 'walk', 10, 6, 'approved'), -- Reservation ID 39
-('2024-02-05 10:00:00', '2024-02-08 19:00:00', 'walk', 10, 1, 'approved'), -- Reservation ID 40
-('2024-03-15 09:00:00', '2024-03-18 20:00:00', 'walk', 10, 6, 'declined'), -- Reservation ID 41
+('2024-01-10 09:00:00', '2024-01-10 13:00:00', 'walk', 10, 6, 'approved'), -- Reservation ID 24
+('2024-02-05 10:00:00', '2024-02-05 10:00:00', 'walk', 10, 1, 'approved'), -- Reservation ID 25
 
 -- ------------------------------- Future walk reservations -------------------------------- --
 -- Max (Pes, ID 1)
-('2024-12-20 09:00:00', '2024-12-23 18:00:00', 'walk', 1, 6, 'pending'), -- Reservation ID 42
-('2025-01-10 10:00:00', '2025-01-13 17:00:00', 'walk', 1, 1, 'approved'), -- Reservation ID 43
+('2024-12-20 15:00:00', '2024-12-20 18:00:00', 'walk', 1, 6, 'pending'), -- Reservation ID 26
 
 -- Bella (Pes, ID 2)
-('2024-11-25 10:00:00', '2024-11-28 19:00:00', 'walk', 2, 1, 'approved'), -- Reservation ID 44
-('2025-02-01 11:00:00', '2025-02-04 20:00:00', 'walk', 2, 6, 'pending'), -- Reservation ID 45
+('2025-02-01 11:00:00', '2025-02-01 13:00:00', 'walk', 2, 6, 'pending'), -- Reservation ID 27
 
 -- Rex (Pes, ID 3)
-('2024-12-05 09:00:00', '2024-12-08 18:00:00', 'walk', 3, 6, 'approved'), -- Reservation ID 46
-('2025-03-15 12:00:00', '2025-03-18 18:30:00', 'walk', 3, 1, 'declined'), -- Reservation ID 47
+('2025-03-15 12:00:00', '2025-03-15 15:00:00', 'walk', 3, 1, 'declined'), -- Reservation ID 28
 
 -- Molly (Kočka, ID 4)
-('2024-11-30 08:00:00', '2024-12-03 16:30:00', 'walk', 4, 1, 'approved'), -- Reservation ID 48
-('2025-01-15 09:30:00', '2025-01-18 19:00:00', 'walk', 4, 6, 'pending'), -- Reservation ID 49
+('2024-11-30 13:00:00', '2024-11-30 16:00:00', 'walk', 4, 1, 'approved'), -- Reservation ID 29
 
 -- Jerry (Kočka, ID 5)
-('2024-12-25 10:00:00', '2024-12-28 19:00:00', 'walk', 5, 6, 'approved'), -- Reservation ID 50
-('2025-02-20 09:00:00', '2025-02-23 17:30:00', 'walk', 5, 1, 'pending'), -- Reservation ID 51
+('2025-02-20 09:00:00', '2025-02-20 14:00:00', 'walk', 5, 1, 'pending'), -- Reservation ID 30
 
 -- Kotěnka (Kočka, ID 6)
-('2024-11-20 10:30:00', '2024-11-23 18:00:00', 'walk', 6, 6, 'approved'), -- Reservation ID 52
-('2025-03-01 11:00:00', '2025-03-04 20:00:00', 'walk', 6, 1, 'pending'), -- Reservation ID 53
+('2025-03-01 11:00:00', '2025-03-01 13:00:00', 'walk', 6, 1, 'pending'), -- Reservation ID 31
 
 -- Simba (Kočka, ID 7)
-('2024-12-10 09:00:00', '2024-12-13 18:30:00', 'walk', 7, 1, 'approved'), -- Reservation ID 54
-('2025-01-20 10:00:00', '2025-01-23 19:00:00', 'walk', 7, 6, 'approved'), -- Reservation ID 55
+('2024-12-10 09:00:00', '2024-12-10 12:00:00', 'walk', 7, 1, 'approved'), -- Reservation ID 32
 
 -- Lola (Králík, ID 8)
-('2024-11-15 09:00:00', '2024-11-18 18:00:00', 'walk', 8, 1, 'pending'), -- Reservation ID 56
-('2025-02-10 10:00:00', '2025-02-13 17:30:00', 'walk', 8, 6, 'approved'), -- Reservation ID 57
+('2024-11-15 09:00:00', '2024-11-15 18:00:00', 'walk', 8, 1, 'pending'), -- Reservation ID 33
 
 -- Charlie (Králík, ID 9)
-('2024-11-18 09:00:00', '2024-11-21 18:00:00', 'walk', 9, 1, 'approved'), -- Reservation ID 58
-('2025-03-05 10:30:00', '2025-03-08 18:30:00', 'walk', 9, 6, 'pending'), -- Reservation ID 59
+('2024-11-18 09:00:00', '2024-11-18 18:00:00', 'walk', 9, 1, 'approved'), -- Reservation ID 34
 
 -- Bublinka (Morče, ID 10)
-('2024-12-01 10:00:00', '2024-12-04 19:00:00', 'walk', 10, 1, 'approved'), -- Reservation ID 60
-('2025-01-25 09:30:00', '2025-01-28 17:30:00', 'walk', 10, 6, 'approved'); -- Reservation ID 61
+('2025-01-25 09:00:00', '2025-01-25 10:00:00', 'walk', 10, 6, 'approved'); -- Reservation ID 35
 
 
--- Future Reservation for Lola (Králík, ID 8) - ('Prohlídka blech', FALSE, 8, 2, 62) not yet created
+-- Future Reservation for Lola (Králík, ID 8) - ('Prohlídka blech', FALSE, 8, 2, 36) not yet created
 
 -- ----------------------------------- INSERT INTO TASK ------------------------------------ --
 
@@ -382,54 +350,47 @@ INSERT INTO Task (detail, isDone, animalID, veterinarianID, reservationID)
 VALUES
 -- ---------------------------------- Accomplished tasks ----------------------------------- --
 -- Max (Pes, ID 1)
-('Očkování proti vzteklině a psince', TRUE, 1, 2, 1),
-('Kontrola kvůli nadváze', TRUE, 1, 2, 2),
+('Kontrola kvůli nadváze', TRUE, 1, 2, 1),
 
 -- Bella (Pes, ID 2)
-('Kastrace', TRUE, 2, 2, 3),
-('Běžná prohlídka srsti a váhy', TRUE, 2, 2, 4),
+('Kastrace', TRUE, 2, 2, 2),
 
 -- Rex (Pes, ID 3)
-('Očkování proti vzteklině', TRUE, 3, 2, 5),
-('Fyzioterapie pro zlepšení pohyblivosti kyčlí', TRUE, 3, 2, 6),
+('Fyzioterapie pro zlepšení pohyblivosti kyčlí', TRUE, 3, 2, 3),
 
 -- Molly (Kočka, ID 4)
-('Běžná kontrola zdravotního stavu', TRUE, 4, 2, 7),
+('Běžná kontrola zdravotního stavu', TRUE, 4, 2, 4),
 
 -- Jerry (Kočka, ID 5)
-('Odčervení', TRUE, 5, 2, 8),
-('Kontrola kvůli nadváze', TRUE, 5, 2, 9),
+('Kontrola kvůli nadváze', TRUE, 5, 2, 5),
 
 -- Kotěnka (Kočka, ID 6)
-('Prevence proti blechám', TRUE, 6, 2, 10),
+('Prevence proti blechám', TRUE, 6, 2, 6),
 
 -- Simba (Kočka, ID 7)
-('Očkování proti vzteklině', TRUE, 7, 2, 11),
-('Ošetření drobného poranění tlapky', TRUE, 7, 2, 12),
+('Ošetření drobného poranění tlapky', TRUE, 7, 2, 7),
 
 -- Lola (Králík, ID 8)
-('Běžná kontrola chrupu a srsti', TRUE, 8, 2, 13),
+('Běžná kontrola chrupu a srsti', TRUE, 8, 2, 8),
 
 -- Charlie (Králík, ID 9)
-('Očkování proti myxomatóze a moru králíků', TRUE, 9, 2, 14),
-('Ošetření drobného zánětu tlapek', TRUE, 9, 2, 15),
+('Očkování proti myxomatóze a moru králíků', TRUE, 9, 2, 9),
 
 -- Bublinka (Morče, ID 10)
-('Běžná kontrola zdravotního stavu', TRUE, 10, 2, 16),
+('Běžná kontrola zdravotního stavu', TRUE, 10, 2, 10),
 
 -- ------------------------------------- Future tasks -------------------------------------- --
 -- Max (Pes, ID 1)
-('Prohlídka zubů a uší', FALSE, 1, 2, 17),
-('Očkování proti klíšťatům', FALSE, 1, 2, 18),
+('Prohlídka zubů a uší', FALSE, 1, 2, 11),
 
 -- Bella (Pes, ID 2)
-('Vyšetření pohyblivosti', FALSE, 2, 2, 19),
+('Vyšetření pohyblivosti', FALSE, 2, 2, 12),
 
 -- Simba (Kočka, ID 7)
-('Kontrola stavu srsti', FALSE, 7, 2, 20),
+('Kontrola stavu srsti', FALSE, 7, 2, 13),
 
 -- Bublinka (Morče, ID 10)
-('Kontrola váhy a doporučení stravy', FALSE, 10, 2, 21),
+('Kontrola váhy a doporučení stravy', FALSE, 10, 2, 14),
 
 -- Lola (Králík, ID 8)
 ('Prohlídka blech', FALSE, 8, 2, NULL); -- reservation does not exist 

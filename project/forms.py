@@ -292,6 +292,14 @@ class CreateMedicalRecordForm(forms.ModelForm):
             "detail"
         )
 
+class EditMedicalRecordForm(CreateMedicalRecordForm):
+    def __init__(self, *args, **kwargs):
+        super(EditMedicalRecordForm, self).__init__(*args, **kwargs)
+
+        # Fill fields with record data
+        self.fields["name"].initial = self.instance.name
+        self.fields["detail"].initial = self.instance.detail
+
 class CreateAnimalTaskForm(forms.ModelForm):
     target_vet = forms.ModelChoiceField(queryset=CustomUser.objects.filter(userrole="vet"), label="Assign task to", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     detail = forms.CharField(widget=forms.Textarea(attrs={
@@ -355,6 +363,11 @@ class BookAnimalForm(forms.Form):
             reservation.confirmation = "available"
         elif self.type == "checkup":
             reservation.confirmation = "approved"
+            
+        if reservation.has_conflict():
+            return None
+        if commit:
+            reservation.save()
         return reservation
 
     # Call this before caling save() in case it is a walk or availability

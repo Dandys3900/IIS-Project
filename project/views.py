@@ -410,6 +410,8 @@ def animal_medrecord(request, animal_id):
         return redirect("home")
 
     form = CreateMedicalRecordForm()
+    # Create dictionary of forms for each record to edit
+    edit_forms = {record.record_id: EditMedicalRecordForm(instance=record) for record in health_records}
 
     if request.method == "GET":
         # Render page
@@ -417,8 +419,17 @@ def animal_medrecord(request, animal_id):
             "animal"         : animal,
             "health_records" : health_records,
             "animal_tasks"   : animal_tasks,
-            "form"           : form
+            "form"           : form,
+            "edit_forms"     : edit_forms
         })
+
+    record_id = request.POST.get("record_id")
+    if record_id:
+        form = edit_forms[int(record_id)]
+        form = EditMedicalRecordForm(request.POST, instance=form.instance)
+        if form.is_valid():
+            form.save()
+            return redirect("animalmedrecs", animal_id=animal.animal_id)
 
     form = CreateMedicalRecordForm(request.POST)
 
@@ -464,9 +475,21 @@ def animal_vetrecord(request, animal_id):
         messages.error(request, "Invalid form.")
         return redirect("animalvettasks", animal_id=animal.animal_id)
 
+    if not verify_booking(book_animal_form, request):
+        return render(request, "animal_tasks.html", {
+            "animal" : animal,
+            "tasks"  : animal_tasks,
+            "animal_task_form" : animal_task_form,
+            "book_animal_form" : book_animal_form,
+            "timetable": timetable,
+        })
+
     vet_task = animal_task_form.save(commit=False)
     vet_task.animal_id = animal
     vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
+    vet_task.animal_id = animal
+    vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
+    vet_task.reservation = None
     vet_task.save()
     # Notify user
     messages.success(request, "Task created succesfully")
@@ -486,6 +509,20 @@ def animal_update_task(request, task_id):
     task.save()
     # Redirect back
     return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
+
+def animal_delete_record(request, record_id):
+    # Security: only veterinarian can view this
+    role_required(request, ["vet"])
+
+    try: # Get record to be deleted
+        record = HealthRecord.objects.get(record_id=record_id)
+    except Exception as e:
+        messages.error(request, f"Error while deleting health record: {e}")
+        return redirect("animalmedrecs", animal_id=record.animal_id.animal_id)
+
+    record.delete()
+    # Redirect back
+    return redirect('animalmedrecs', animal_id=record.animal_id.animal_id)
 
 def volunteers_list(request):
     # Security: only carer can view this
@@ -541,33 +578,7 @@ def animal_book(request, animal_id):
         messages.error(request, "Could not book a walk.")
         return redirect("bookanimal", animal_id)
 
-    if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) < datetime.now().time().replace(tzinfo=timezone.utc):
-        messages.error(request, "Error while booking animal: Cannot book animal in the past time.")
-        # Reset given times and re-render
-        form.data = form.data.copy()
-        form.data["start_time"] = ""
-        return render(request, "animal_book.html", {
-            "form"     : form,
-            "animal"   : animal,
-            "timetable": timetable,
-        })
-    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) >= form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
-        messages.error(request, "Error while booking animal: Cannot book animal for a negative or zero time.")
-        # Reset given times and re-render
-        form.data = form.data.copy()
-        form.data["start_time"] = ""
-        form.data["end_time"] = ""
-        return render(request, "animal_book.html", {
-            "form"     : form,
-            "animal"   : animal,
-            "timetable": timetable,
-        })
-    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < MIN_HOUR or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > MAX_HOUR:
-        messages.error(request, f"Error while booking animal: Shelter is open from {MIN_HOUR}:00 - {MAX_HOUR}:00.")
-        # Reset given times and re-render
-        form.data = form.data.copy()
-        form.data["start_time"] = ""
-        form.data["end_time"] = ""
+    if not verify_booking(form, request):
         return render(request, "animal_book.html", {
             "form"     : form,
             "animal"   : animal,
@@ -580,14 +591,14 @@ def animal_book(request, animal_id):
         return redirect("bookanimal", animal_id)
     
     form.save()
-    messages.success(request, "Walk booked.")
+    messages.success(request, "Walk booked. Please wait for confirmation.")
     return redirect("bookanimal", animal_id)
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])
-    walks = Reservation.objects.all().filter(type="walk")
+    walks = Reservation.objects.all().filter(type="walk", start_time__date__gte=date.today()).order_by("start_time__date")
     if request.user.userrole == "volunteer":
-        walks = walks.filter(volunteer_id=request.user.user_id)
+        walks = walks.filter(owner=request.user.user_id)
     return render(request, "walk_list.html", {
         "walks" : walks
     })
@@ -611,7 +622,7 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
 
     # Forbid confirming two bookings at the same time
     if desired_confirmation == "approved" and walk.has_conflict():
-        messages.error(request, "Cannot approve walk. Another booking is in conflict.")
+        messages.error(request, "Cannot process walk. Another booking is in conflict.")
         return redirect("walklist")
 
     walk.confirmation = desired_confirmation
@@ -627,7 +638,7 @@ def walk_delete(request, walk_id):
         messages.error(request, f"Error while deleting walk booking: {e}.")
         return redirect("walklist")
 
-    if walk.volunteer_id != request.user.user_id:
+    if walk.owner.user_id != request.user.user_id:
         messages.error(request, "Cannot cancel a walk that does not belong to you.")
         return redirect("walklist")
 
@@ -701,8 +712,13 @@ def create_timetable(animal, min_hour, max_hour):
         "hours": range(min_hour, max_hour),
         "days": {},
     }
-    # Get all booking for selected animal (don't take past bookings)
-    reservations = Reservation.objects.filter(animal_id=animal, start_time__date__gte=date.today()).order_by("start_time")
+
+    # Get all booking for selected animal (don't take past and declined bookings)
+    reservations = Reservation.objects.filter(
+        animal_id=animal,
+        start_time__date__gte=date.today()
+    ).exclude(confirmation="declined").order_by("start_time")
+
     for reservation in reservations:
         day_key = f"{str(reservation.start_time.date())} ({reservation.start_time.strftime('%A')})"
         # Make day empty if not exists
@@ -713,3 +729,29 @@ def create_timetable(animal, min_hour, max_hour):
             if hour >= reservation.start_time.hour and hour < reservation.end_time.hour:
                 timetable["days"][day_key][hour-min_hour] = reservation.confirmation if reservation.confirmation else "none"
     return timetable
+
+def verify_booking(form, request):
+    if form.cleaned_data["date"] == datetime.today().date() and form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) < datetime.now().time().replace(tzinfo=timezone.utc):
+        messages.error(request, "Error while booking animal: Cannot book animal in the past time.")
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        return False
+
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc) >= form.cleaned_data["end_time"].replace(tzinfo=timezone.utc):
+        messages.error(request, "Error while booking animal: Cannot book animal for a negative or zero time.")
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        form.data["end_time"] = ""
+        return False
+
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < MIN_HOUR or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > MAX_HOUR:
+        messages.error(request, f"Error while booking animal: Shelter is open from {MIN_HOUR}:00 - {MAX_HOUR}:00.")
+        # Reset given times and re-render
+        form.data = form.data.copy()
+        form.data["start_time"] = ""
+        form.data["end_time"] = ""
+        return False
+
+    return True

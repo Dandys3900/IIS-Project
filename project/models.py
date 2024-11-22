@@ -100,17 +100,6 @@ class HealthRecord(models.Model):
         # Specify table for storing animal medical records
         db_table = "HealthRecord"
 
-class AnimalTask(models.Model):
-    task_id      = models.AutoField(primary_key=True, db_column="taskID")
-    detail       = models.TextField(db_column="detail")
-    is_done      = models.BooleanField(default=False, db_column="isDone")
-    animal_id    = models.ForeignKey(Animal, related_name="animal_tasks", on_delete=models.CASCADE, db_column="animalID")
-    veterinarian = models.ForeignKey(CustomUser, related_name="assigned_tasks", on_delete=models.DO_NOTHING, db_column="veterinarianID")
-
-    class Meta:
-        # Specify table for storing animal task for veterinarians
-        db_table = "Task"
-
 class Reservation(models.Model):
     reservation_id = models.AutoField(primary_key=True, db_column="reservationID")
     start_time = models.DateTimeField(db_column="start")
@@ -146,3 +135,15 @@ class Reservation(models.Model):
             end_time__gte = self.end_time, # Existing ends after or at the same time as this
             confirmation__in = reservations_with_confirmation  # Include both approved and declined
         ).exclude(reservation_id=self.reservation_id).first()  # Return the first matching reservation
+
+class AnimalTask(models.Model):
+    task_id      = models.AutoField(primary_key=True, db_column="taskID")
+    detail       = models.TextField(db_column="detail")
+    is_done      = models.BooleanField(default=False, db_column="isDone")
+    animal_id    = models.ForeignKey(Animal, related_name="animal_tasks", on_delete=models.CASCADE, db_column="animalID")
+    veterinarian = models.ForeignKey(CustomUser, related_name="assigned_tasks", on_delete=models.DO_NOTHING, db_column="veterinarianID")
+    reservation  = models.ForeignKey(Reservation, null=True, blank=True, on_delete=models.SET_NULL, db_column="reservationID")
+
+    class Meta:
+        # Specify table for storing animal task for veterinarians
+        db_table = "Task"
