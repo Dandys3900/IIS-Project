@@ -489,18 +489,21 @@ def animal_vetrecord(request, animal_id):
 
     vet_task = animal_task_form.save(commit=False)
     reservation = book_animal_form.save(commit=False)
+
+    if not reservation:
+        messages.error(request, "Conflicting booking found, can't proceed")
+        return redirect("animalvettasks", animal_id=animal.animal_id)
+
     vet_task.start_time = reservation.start_time
     vet_task.end_time = reservation.end_time
     vet_task.animal_id = animal
     vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
     reservation.veterinarian = animal_task_form.cleaned_data["target_vet"]
 
-    if reservation.save():
-        vet_task.save()
-        # Notify user
-        messages.success(request, "Task created succesfully")
-    else:
-        messages.error(request, "Conflicting booking found, can't proceed")
+    reservation.save()
+    vet_task.save()
+    # Notify user
+    messages.success(request, "Task created succesfully")
     return redirect("animalvettasks", animal_id=animal.animal_id)
 
 def animal_update_task(request, task_id):
@@ -593,7 +596,7 @@ def animal_book(request, animal_id):
         })
 
     if form.save():
-        messages.success(request, "Walk booked.")
+        messages.success(request, "Walk booked. Please wait for confirmation.")
     else:
         messages.error(request, "Conflicting booking found, can't proceed")
     return redirect("bookanimal", animal_id)
@@ -625,10 +628,9 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
         return redirect("walklist")
 
     # Forbid confirming two bookings at the same time
-    if desired_confirmation in ["approved", "pending"]:
-        if conflict := walk.has_conflict() and conflict.confirmation == "approved":
-            messages.error(request, "Cannot process walk. Another booking is in conflict.")
-            return redirect("walklist")
+    if desired_confirmation in ["approved", "pending"] and walk.has_conflict():
+        messages.error(request, "Cannot process walk. Another booking is in conflict.")
+        return redirect("walklist")
 
     walk.confirmation = desired_confirmation
     walk.save()

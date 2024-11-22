@@ -129,5 +129,6 @@ class Reservation(models.Model):
         return Reservation.objects.filter(
             animal_id=self.animal_id,      # Only consider reservations for the same animal
             start_time__lt=self.end_time,  # Check overlap: starts before this ends
-            end_time__gt=self.start_time  # Check overlap: ends after this starts
-        ).exclude(reservation_id=self.reservation_id, confirmation="declined")
+            end_time__gt=self.start_time,  # Check overlap: ends after this starts
+            confirmation="approved"
+        ).exclude(reservation_id=self.reservation_id).exists()
