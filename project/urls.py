@@ -39,6 +39,8 @@ urlpatterns = [
     path('animalvettasks/<int:animal_id>', views.animal_vetrecord, name='animalvettasks'),
     # Setting task to done
     path('updatetaskstatus/<int:task_id>', views.animal_update_task, name='updatetaskstatus'),
+    # Deleting animal health record
+    path('deletehealthrecord/<int:record_id>', views.animal_delete_record, name='deletehealthrecord'),
     # Getting list of yet not verified volunteers
     path('volunteerslist/', views.volunteers_list, name='volunteerslist'),
     # Verifying selected volunteer

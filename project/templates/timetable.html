@@ -1,5 +1,5 @@
 {% if timetable %}
-<div class="col-md-9">
+	<div class="col-md-9">
 		<h1 class="mt-4">
 			Current bookings for {{ timetable.animal.name }}:
 			{% if timetable.days|length == 0 %}
@@ -27,5 +27,14 @@
 				{% endfor %}
 			</tbody>
 		</table>
+
+		<!-- Legend -->
+		<div class="mt-4">
+			<ul class="list-unstyled">
+				<li><span class="badge bg-success">&nbsp;&nbsp;</span> Free</li>
+				<li><span class="badge bg-warning">&nbsp;&nbsp;</span> Requested, not confirmed</li>
+				<li><span class="badge bg-danger">&nbsp;&nbsp;</span> Confirmed, booked</li>
+			</ul>
+		</div>
 	</div>
 {% endif %}
