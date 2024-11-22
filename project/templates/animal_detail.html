@@ -60,12 +60,18 @@
                             <tr class="{% if task.is_done %} table-success {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
-                                <td>{{ task.start_time.date }} ({{ task.start_time.time }}-{{ task.end_time.time }})</td>
+                                <td>
+                                    {% if task.reservation %}
+                                        {{ task.reservation.start_time.date }} ({{ task.reservation.start_time.time }}-{{ task.reservation.end_time.time }})
+                                    {% else %}
+                                        Not booked yet
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <a href="{% url 'updatetaskstatus' task.task_id %}" class="btn btn-primary">
                                         {% if task.is_done == False %}
                                             Mark done
-                                        {% elif task.start_time.date >= current_date %}
+                                        {% else %}
                                             Reopen
                                         {% endif %}
                                     </a>

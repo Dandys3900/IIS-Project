@@ -412,7 +412,6 @@ def animal_medrecord(request, animal_id):
     form = CreateMedicalRecordForm()
     # Create dictionary of forms for each record to edit
     edit_forms = {record.record_id: EditMedicalRecordForm(instance=record) for record in health_records}
-    current_date = datetime.today().date()
 
     if request.method == "GET":
         # Render page
@@ -421,8 +420,7 @@ def animal_medrecord(request, animal_id):
             "health_records" : health_records,
             "animal_tasks"   : animal_tasks,
             "form"           : form,
-            "edit_forms"     : edit_forms,
-            "current_date"   : current_date
+            "edit_forms"     : edit_forms
         })
 
     record_id = request.POST.get("record_id")
@@ -496,11 +494,10 @@ def animal_vetrecord(request, animal_id):
         messages.error(request, "Conflicting booking found, can't proceed")
         return redirect("animalvettasks", animal_id=animal.animal_id)
 
-    vet_task.start_time = reservation.start_time
-    vet_task.end_time = reservation.end_time
+    reservation.veterinarian = animal_task_form.cleaned_data["target_vet"]
     vet_task.animal_id = animal
     vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
-    reservation.veterinarian = animal_task_form.cleaned_data["target_vet"]
+    vet_task.reservation = reservation
 
     reservation.save()
     vet_task.save()

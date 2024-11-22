@@ -28,7 +28,13 @@
                             <tr class="{% if task.is_done %} table-success {% else %} table-danger {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
-                                <td>{{ task.start_time.date }} ({{ task.start_time.time }}-{{ task.end_time.time }})</td>
+                                <td>
+                                    {% if task.reservation %}
+                                        {{ task.reservation.start_time.date }} ({{ task.reservation.start_time.time }}-{{ task.reservation.end_time.time }})
+                                    {% else %}
+                                        Not booked yet
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {{ task.veterinarian.first_name }}
                                     {{ task.veterinarian.last_name }}

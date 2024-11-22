@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('project', '0002_healthrecord'),
+        ('project', '0003_reservation_checkup_walking'),
     ]
 
     operations = [
@@ -16,12 +16,11 @@ class Migration(migrations.Migration):
             name='AnimalTask',
             fields=[
                 ('task_id', models.AutoField(db_column='taskID', primary_key=True, serialize=False)),
-                ('start_time', models.DateTimeField(db_column='start')),
-                ('end_time', models.DateTimeField(db_column='end')),
                 ('detail', models.TextField(db_column='detail')),
                 ('is_done', models.BooleanField(db_column='isDone', default=False)),
                 ('animal_id', models.ForeignKey(db_column='animalID', on_delete=django.db.models.deletion.CASCADE, related_name='animal_tasks', to='project.animal')),
                 ('veterinarian', models.ForeignKey(db_column='veterinarianID', on_delete=django.db.models.deletion.DO_NOTHING, related_name='assigned_tasks', to=settings.AUTH_USER_MODEL)),
+                ('reservation', models.ForeignKey(blank=True, db_column='reservationID', null=True, on_delete=django.db.models.deletion.SET_NULL, to='project.reservation')),
             ],
             options={
                 'db_table': 'Task',

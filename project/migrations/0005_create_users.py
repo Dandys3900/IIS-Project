@@ -22,7 +22,7 @@ def create_initial_users(apps, _):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("project", "0004_reservation_checkup_walking"),
+        ("project", "0004_animaltask"),
     ]
 
     operations = [

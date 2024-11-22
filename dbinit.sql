@@ -104,8 +104,6 @@ CREATE TABLE Reservation (
 
 CREATE TABLE Task (
     taskID INT AUTO_INCREMENT not NULL,
-    start DATETIME not NULL, -- date + time
-    end DATETIME not NULL, -- date + time
     detail TEXT not NULL,
     isDone BOOLEAN not NULL,
 
@@ -379,3 +377,59 @@ VALUES
 -- Future Reservation for Lola (Králík, ID 8) - ('Prohlídka blech', FALSE, 8, 2, 62) not yet created
 
 -- ----------------------------------- INSERT INTO TASK ------------------------------------ --
+
+INSERT INTO Task (detail, isDone, animalID, veterinarianID, reservationID)
+VALUES
+-- ---------------------------------- Accomplished tasks ----------------------------------- --
+-- Max (Pes, ID 1)
+('Očkování proti vzteklině a psince', TRUE, 1, 2, 1),
+('Kontrola kvůli nadváze', TRUE, 1, 2, 2),
+
+-- Bella (Pes, ID 2)
+('Kastrace', TRUE, 2, 2, 3),
+('Běžná prohlídka srsti a váhy', TRUE, 2, 2, 4),
+
+-- Rex (Pes, ID 3)
+('Očkování proti vzteklině', TRUE, 3, 2, 5),
+('Fyzioterapie pro zlepšení pohyblivosti kyčlí', TRUE, 3, 2, 6),
+
+-- Molly (Kočka, ID 4)
+('Běžná kontrola zdravotního stavu', TRUE, 4, 2, 7),
+
+-- Jerry (Kočka, ID 5)
+('Odčervení', TRUE, 5, 2, 8),
+('Kontrola kvůli nadváze', TRUE, 5, 2, 9),
+
+-- Kotěnka (Kočka, ID 6)
+('Prevence proti blechám', TRUE, 6, 2, 10),
+
+-- Simba (Kočka, ID 7)
+('Očkování proti vzteklině', TRUE, 7, 2, 11),
+('Ošetření drobného poranění tlapky', TRUE, 7, 2, 12),
+
+-- Lola (Králík, ID 8)
+('Běžná kontrola chrupu a srsti', TRUE, 8, 2, 13),
+
+-- Charlie (Králík, ID 9)
+('Očkování proti myxomatóze a moru králíků', TRUE, 9, 2, 14),
+('Ošetření drobného zánětu tlapek', TRUE, 9, 2, 15),
+
+-- Bublinka (Morče, ID 10)
+('Běžná kontrola zdravotního stavu', TRUE, 10, 2, 16),
+
+-- ------------------------------------- Future tasks -------------------------------------- --
+-- Max (Pes, ID 1)
+('Prohlídka zubů a uší', FALSE, 1, 2, 17),
+('Očkování proti klíšťatům', FALSE, 1, 2, 18),
+
+-- Bella (Pes, ID 2)
+('Vyšetření pohyblivosti', FALSE, 2, 2, 19),
+
+-- Simba (Kočka, ID 7)
+('Kontrola stavu srsti', FALSE, 7, 2, 20),
+
+-- Bublinka (Morče, ID 10)
+('Kontrola váhy a doporučení stravy', FALSE, 10, 2, 21),
+
+-- Lola (Králík, ID 8)
+('Prohlídka blech', FALSE, 8, 2, NULL); -- reservation does not exist
