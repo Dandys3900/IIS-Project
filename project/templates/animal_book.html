@@ -45,19 +45,19 @@
                 <!-- Timetable -->
                 {% include "timetable.html" %}
 
-                {% if user.userRole == "volunteer" %}
+                {% if user.userRole == "volunteer" or user.userRole == "carer" %}
                     <!-- Reservation form -->
                     <div class="col-md-3">
                         <div class="sticky-top">
                             <div class="card">
                                 <div class="card-body">
-                                    <h3 class="card-title text-center">Book Animal</h3>
+                                    <h3 class="card-title text-center">{% if user.userRole == "volunteer" %} Book Animal {% else %} Book time for volunteer walks {% endif %}</h3>
                                     <form method="POST">
                                         <!-- Django requires this token for enhanced security -->
                                         {% csrf_token %}
                                         <!-- Render form -->
                                         {{ form.as_p }}
-                                        <button type="submit" name="submit" class="btn btn-primary btn-block">Request walk</button>
+                                        <button type="submit" name="submit" class="btn btn-primary btn-block">{% if user.userRole == "volunteer" %} Request Walk {% else %} Book time for walks {% endif %}</button>
                                     </form>
                                 </div>
                             </div>

@@ -448,7 +448,6 @@ def animal_vetrecord(request, animal_id):
     timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
 
     animal_task_form = CreateAnimalTaskForm()
-    book_animal_form = BookAnimalForm(animal=animal, user=request.user, type="checkup")
 
     if request.method == "GET":
         # Render page
@@ -456,23 +455,18 @@ def animal_vetrecord(request, animal_id):
             "animal" : animal,
             "tasks"  : animal_tasks,
             "animal_task_form"   : animal_task_form,
-            "book_animal_form"  : book_animal_form,
             "timetable": timetable,
         })
 
     animal_task_form = CreateAnimalTaskForm(request.POST)
-    book_animal_form = BookAnimalForm(request.POST, animal=animal, user=request.user, type="checkup")
 
-    if not (animal_task_form.is_valid() and book_animal_form.is_valid()):
+    if not animal_task_form.is_valid():
         messages.error(request, "Invalid form.")
         return redirect("animalvettasks", animal_id=animal.animal_id)
 
     vet_task = animal_task_form.save(commit=False)
-    reservation = book_animal_form.save(commit=False)
     vet_task.animal_id = animal
     vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
-    reservation.veterinarian = animal_task_form.cleaned_data["target_vet"]
-    reservation.save()
     vet_task.save()
     # Notify user
     messages.success(request, "Task created succesfully")
@@ -537,10 +531,11 @@ def animal_book(request, animal_id):
             "timetable": timetable,
         })
 
-    if request.user and not request.user.verified: # Unverified volunteer
+    if request.user and request.user.userrole == "volunteer" and not request.user.verified: # Unverified volunteer
         messages.warning(request, "To take an animal for a walk, you need to be verified. Contact a carer to be verified.")
         return redirect("bookanimal", animal_id)
 
+    # Create a walk booking or walk availability based on userrole
     form = BookAnimalForm(data=request.POST, animal=animal, user=request.user)
     if not form.is_valid():
         messages.error(request, "Could not book a walk.")
@@ -579,6 +574,11 @@ def animal_book(request, animal_id):
             "timetable": timetable,
         })
 
+    can_be_saved, error_message = form.can_be_saved()
+    if not can_be_saved:
+        messages.error(request, error_message)
+        return redirect("bookanimal", animal_id)
+    
     form.save()
     messages.success(request, "Walk booked.")
     return redirect("bookanimal", animal_id)

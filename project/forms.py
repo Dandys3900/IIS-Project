@@ -322,30 +322,84 @@ class BookAnimalForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.animal = kwargs.pop("animal") # Retrieve animal being booked
         self.user = kwargs.pop("user") # Retrieve volunteer
-        self.type = kwargs.pop("type") if "type" in kwargs else "walk" # Retrieve confirmation
+        if self.user.userrole == "volunteer":
+            self.type = "walk"
+        elif self.user.userrole == "carer":
+            self.type = "availability"
+        elif self.user.userrole == "vet":
+            self.type = "checkup"
         super().__init__(*args, **kwargs)
+        self.reservation = None
 
     class Meta:
         model = Reservation
         fields = ()
 
-    def save(self, commit=True):
+    def _create_reservation(self, from_reservation=None):
         reservation = Reservation()
         # Combine date and time into datetime
         date = self.cleaned_data["date"]
         start_time = self.cleaned_data["start_time"]
         end_time = self.cleaned_data["end_time"]
         # Set fields
-        reservation.owner = self.user
-        reservation.animal = self.animal
-        reservation.type = self.type
+        reservation.owner = from_reservation.owner if from_reservation else self.user
+        reservation.animal = from_reservation.animal if from_reservation else self.animal
+        reservation.type = from_reservation.type if from_reservation else self.type
         reservation.start_time = datetime.combine(date, start_time).replace(tzinfo=timezone.utc)
         reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
-        reservation.confirmation = "pending" if self.type == "walk" else "approved"
-
-        if commit:
-            reservation.save()
+        if from_reservation:
+            reservation.confirmation = from_reservation.confirmation
+        elif self.type == "walk":
+            reservation.confirmation = "pending"
+        elif self.type == "availability":
+            reservation.confirmation = "available"
+        elif self.type == "checkup":
+            reservation.confirmation = "approved"
         return reservation
+
+    # Call this before caling save() in case it is a walk or availability
+    # This is not inside save() because it also returns an error message that is to be shown to the user.
+    def can_be_saved(self):
+        self.reservation = self.reservation if self.reservation else self._create_reservation()
+        if self.type == "walk":
+            # Allow walks to be created only inside availability reservations
+            if not self.reservation.is_fully_contained(("available")):
+                return (False, "Could not create walk reservation because it is not inside a available walk timeframe.")
+        elif self.type == "availability":
+            # Disallow creation of availability reservations that conflict with approved (checkup/walk) or available (other availibilities) 
+            if self.reservation.has_conflict(("approved", "available")):
+                return (False, "Could not create walk availability reservation due to conflicting schedules.")
+        elif self.type == "checkup":
+            if self.reservation.has_conflict(("approved", "available", "pending")):
+                return (False, "Could not create checkup reservation due to conflicting schedules.")
+        return (True, "") # ok, no error
+
+    def split_availability_by_reservation(self):
+        availability_reservation = self.reservation.get_containing_reservation(("availability"))
+        # Before walk
+        if availability_reservation.start < self.reservation.start:
+            new_availability = self._create_reservation(availability_reservation)
+            new_availability.start_time = availability_reservation.start
+            new_availability.end_time = self.reservation.start_time
+            new_availability.save()
+        # After walk
+        if availability_reservation.end > self.reservation.end:
+            new_availability = self._create_reservation(availability_reservation)
+            new_availability.start_time = self.reservation.end_time
+            new_availability.end_time = availability_reservation.end
+            new_availability.save()
+        # Delete the original availability
+        availability_reservation.delete()
+
+    def save(self, commit=True):
+        self.reservation = self.reservation if self.reservation else self._create_reservation()
+        if commit:
+            self.reservation.save()
+            # If the created reservation is walk, we need to destroy the availability at the same time, replace it with the walk
+            # and then (if needed) split the availability
+            if self.reservation.type == "walk":
+                self.split_availability_by_reservation()
+        return self.reservation
 
 class AnimalSearchForm(forms.Form):
     # Search bar for animal

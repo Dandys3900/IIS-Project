@@ -123,10 +123,26 @@ class Reservation(models.Model):
     class Meta:
         db_table = "Reservation"
 
-    def has_conflict(self):
+    def has_conflict(self, reservations_with_confirmation=("approved")):
         return Reservation.objects.filter(
-            animal_id=self.animal_id,      # Only consider reservations for the same animal
-            start_time__lt=self.end_time,  # Check overlap: starts before this ends
-            end_time__gt=self.start_time,  # Check overlap: ends after this starts
-            confirmation="approved"
-        ).exclude(reservation_id=self.reservation_id).exists()
+            animal_id = self.animal_id,      # Only consider reservations for the same animal
+            start_time__lt = self.end_time,  # Check overlap: starts before this ends
+            end_time__gt = self.start_time,  # Check overlap: ends after this starts
+            confirmation__in = reservations_with_confirmation,
+        ).exclude(reservation_id = self.reservation_id).exists()
+
+    def is_fully_contained(self, reservations_with_confirmation=("available")):
+        return Reservation.objects.filter(
+            animal_id = self.animal_id, # Only consider reservations for the same animal
+            start_time__lte = self.start_time, # Existing starts before or at the same time as this
+            end_time__gte = self.end_time, # Existing ends after or at the same time as this
+            confirmation__in = reservations_with_confirmation
+        ).exclude(reservation_id = self.reservation_id).exists()
+
+    def get_containing_reservation(self, reservations_with_confirmation=("available")):
+        return Reservation.objects.filter(
+            animal_id = self.animal_id,  # Only consider reservations for the same animal
+            start_time__lte = self.start_time, # Existing starts before or at the same time as this
+            end_time__gte = self.end_time, # Existing ends after or at the same time as this
+            confirmation__in = reservations_with_confirmation  # Include both approved and declined
+        ).exclude(reservation_id=self.reservation_id).first()  # Return the first matching reservation
