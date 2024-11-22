@@ -625,9 +625,10 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
         return redirect("walklist")
 
     # Forbid confirming two bookings at the same time
-    if desired_confirmation in ["approved", "pending"] and walk.has_conflict():
-        messages.error(request, "Cannot process walk. Another booking is in conflict.")
-        return redirect("walklist")
+    if desired_confirmation in ["approved", "pending"]:
+        if conflict := walk.has_conflict() and conflict.confirmation == "approved":
+            messages.error(request, "Cannot process walk. Another booking is in conflict.")
+            return redirect("walklist")
 
     walk.confirmation = desired_confirmation
     walk.save()
