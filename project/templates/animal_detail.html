@@ -60,15 +60,16 @@
                             <tr class="{% if task.is_done %} table-success {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
-                                <td>{{ task.start_time.date }} ({{ task.start_time.time }}-{{ walk.end_time.time }})</td>
-                                <td><a href="{% url 'updatetaskstatus' task.task_id %}" class="btn btn-primary">
-                                    {% if task.is_done == False %}
-                                        Mark done
-                                    {% else %}
-                                        Reopen
-                                    {% endif %}
-                                </a></td>
-                                <!-- TODO: Here can be another button "schedule" which be linked to schedule page -->
+                                <td>{{ task.start_time.date }} ({{ task.start_time.time }}-{{ task.end_time.time }})</td>
+                                <td>
+                                    <a href="{% url 'updatetaskstatus' task.task_id %}" class="btn btn-primary">
+                                        {% if task.is_done == False %}
+                                            Mark done
+                                        {% elif task.start_time.date >= current_date %}
+                                            Reopen
+                                        {% endif %}
+                                    </a>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>

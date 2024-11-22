@@ -96,7 +96,7 @@ CREATE TABLE Reservation (
     ownerID INT not NULL,
     FOREIGN KEY(ownerID) REFERENCES User(userID),
     -- link to User, reservation remains even if the owner is deleted
-    
+
     confirmation VARCHAR(9) not NULL -- pending/declined/approved/...
 );
 
@@ -104,6 +104,8 @@ CREATE TABLE Reservation (
 
 CREATE TABLE Task (
     taskID INT AUTO_INCREMENT not NULL,
+    start DATETIME not NULL, -- date + time
+    end DATETIME not NULL, -- date + time
     detail TEXT not NULL,
     isDone BOOLEAN not NULL,
 
@@ -134,7 +136,7 @@ CREATE TABLE Task (
 -- Jan Novák, dobrovolník, ID 1
 -- Milan Vrbas, veterinář, ID 2
 -- Petr Svoboda, pečovatel, ID 3
--- Tomáš Daniel, administrátor, ID 4 
+-- Tomáš Daniel, administrátor, ID 4
 -- Jakub Janšta, administrátor, ID 5
 -- Eva Králová, dobrovolník, ID 6
 -- Marie Novotná, pečovatel, ID 7
@@ -146,56 +148,56 @@ INSERT INTO Animal (species, name, gender, birthDate, arrivalDate, isActive, bre
 VALUES
 -- Pes Max, ID 1
 ('Pes', 'Max', 0, '2018-05-10', '2024-03-15', TRUE, 'Labrador',
-    'Max je přátelský a energický labrador, který miluje děti a dlouhé procházky přírodou. 
-    Je velmi chytrý, rád se učí nové triky a přizpůsobí se každému prostředí. 
+    'Max je přátelský a energický labrador, který miluje děti a dlouhé procházky přírodou.
+    Je velmi chytrý, rád se učí nové triky a přizpůsobí se každému prostředí.
     Váží přibližně 32 kg.'),
 
 -- Pes Bella, ID 2
 ('Pes', 'Bella', 1, '2020-08-20', '2024-01-10', TRUE, 'Labrador',
-    'Bella je hravá a oddaná fenka, která má ráda společnost lidí i jiných psů. 
-    Ideální volba pro aktivní rodinu, která tráví hodně času venku. 
+    'Bella je hravá a oddaná fenka, která má ráda společnost lidí i jiných psů.
+    Ideální volba pro aktivní rodinu, která tráví hodně času venku.
     Váží přibližně 26 kg.'),
 
 -- Pes Rex, ID 3
 ('Pes', 'Rex', 0, '2019-03-25', '2023-12-01', TRUE, 'Německý ovčák',
-    'Rex je velký a přátelský německý ovčák. Je velmi věrný a ochotný chránit svou rodinu. 
+    'Rex je velký a přátelský německý ovčák. Je velmi věrný a ochotný chránit svou rodinu.
     Hodí se pro majitele, kteří mu zajistí dostatek pohybu a stimulace. Váží přibližně 35 kg.'),
 
 -- Kočka Molly, ID 4
 ('Kočka', 'Molly', 1, '2022-01-15', '2024-06-20', TRUE, 'Britská krátkosrstá kočka',
-    'Molly je klidná a mazlivá britská krátkosrstá kočka, která ráda pozoruje okolí a užívá 
+    'Molly je klidná a mazlivá britská krátkosrstá kočka, která ráda pozoruje okolí a užívá
     si klidné chvíle. Váží přibližně 4 kg.'),
 
 -- Kočka Jerry, ID 5
 ('Kočka', 'Jerry', 0, '2021-05-10', '2024-04-15', TRUE, 'Britská krátkosrstá kočka',
-    'Jerry je velký a pohodový kocour, který si užívá klid a spánek. Je to nenáročný 
+    'Jerry je velký a pohodový kocour, který si užívá klid a spánek. Je to nenáročný
     společník, který ocení klidné prostředí. Váží přibližně 5 kg.'),
 
 -- Kočka Kotěnka, ID 6
 ('Kočka', 'Kotěnka', 1, '2023-02-10', '2024-03-20', TRUE, 'Kočka domácí',
-    'Kotěnka je mladá a přítulná kočka, která si rychle oblíbí každého, kdo ji dá lásku. 
+    'Kotěnka je mladá a přítulná kočka, která si rychle oblíbí každého, kdo ji dá lásku.
     Miluje teplo a ráda tráví čas v blízkosti svého majitele. Váží přibližně 3 kg.'),
 
 -- Kočka Simba, ID 7
 ('Kočka', 'Simba', 0, '2022-08-15', '2024-05-10', TRUE, 'Siamská kočka',
-    'Simba je hravý a zvědavý siamský kocour, který miluje hračky a pozornost. 
+    'Simba je hravý a zvědavý siamský kocour, který miluje hračky a pozornost.
     Je velmi aktivní a potřebuje podnětné prostředí, aby byl šťastný. Váží přibližně 4,5 kg.'),
 
 -- Králík Lola, ID 8
 ('Králík', 'Lola', 1, '2023-04-15', '2024-05-20', TRUE, 'Zakrslý beran',
-    'Lola je jemná a klidná samička, která si rychle získá vaše srdce. Miluje mazlení a ráda 
+    'Lola je jemná a klidná samička, která si rychle získá vaše srdce. Miluje mazlení a ráda
     tráví dlouhé chvíle okusováním čerstvé zeleniny. Váží přibližně 1,2 kg.'),
 
 -- Králík Charlie, ID 9
 ('Králík', 'Charlie', 0, '2022-08-10', '2024-06-25', TRUE, 'Zakrslý rex',
-    'Charlie je energický a zvědavý králíček, který si užívá skákání a objevování nových 
-    prostředí. Je velmi hravý, ale potřebuje hodně prostoru na pohyb. 
+    'Charlie je energický a zvědavý králíček, který si užívá skákání a objevování nových
+    prostředí. Je velmi hravý, ale potřebuje hodně prostoru na pohyb.
     Skvělý parťák pro aktivní majitele. Váží přibližně 0,9 kg.'),
 
 -- Morče Bublinka, ID 10
 ('Morče', 'Bublinka', 1, '2023-05-10', '2024-09-01', TRUE, 'Anglické hladkosrsté morče',
-    'Bublina je přítulné a zvědavé morče, které si užívá pozornost a ráda si pochutnává na 
-    čerstvé zelenině, zejména okurce a mrkvi. Je vhodná do domácnosti s dětmi, které ji budou 
+    'Bublina je přítulné a zvědavé morče, které si užívá pozornost a ráda si pochutnává na
+    čerstvé zelenině, zejména okurce a mrkvi. Je vhodná do domácnosti s dětmi, které ji budou
     věnovat lásku. Váží přibližně 0,8 kg.');
 
 
@@ -377,59 +379,3 @@ VALUES
 -- Future Reservation for Lola (Králík, ID 8) - ('Prohlídka blech', FALSE, 8, 2, 62) not yet created
 
 -- ----------------------------------- INSERT INTO TASK ------------------------------------ --
-
-INSERT INTO Task (detail, isDone, animalID, veterinarianID, reservationID)
-VALUES
--- ---------------------------------- Accomplished tasks ----------------------------------- --
--- Max (Pes, ID 1)
-('Očkování proti vzteklině a psince', TRUE, 1, 2, 1),
-('Kontrola kvůli nadváze', TRUE, 1, 2, 2),
-
--- Bella (Pes, ID 2)
-('Kastrace', TRUE, 2, 2, 3),
-('Běžná prohlídka srsti a váhy', TRUE, 2, 2, 4),
-
--- Rex (Pes, ID 3)
-('Očkování proti vzteklině', TRUE, 3, 2, 5),
-('Fyzioterapie pro zlepšení pohyblivosti kyčlí', TRUE, 3, 2, 6),
-
--- Molly (Kočka, ID 4)
-('Běžná kontrola zdravotního stavu', TRUE, 4, 2, 7),
-
--- Jerry (Kočka, ID 5)
-('Odčervení', TRUE, 5, 2, 8),
-('Kontrola kvůli nadváze', TRUE, 5, 2, 9),
-
--- Kotěnka (Kočka, ID 6)
-('Prevence proti blechám', TRUE, 6, 2, 10),
-
--- Simba (Kočka, ID 7)
-('Očkování proti vzteklině', TRUE, 7, 2, 11),
-('Ošetření drobného poranění tlapky', TRUE, 7, 2, 12),
-
--- Lola (Králík, ID 8)
-('Běžná kontrola chrupu a srsti', TRUE, 8, 2, 13),
-
--- Charlie (Králík, ID 9)
-('Očkování proti myxomatóze a moru králíků', TRUE, 9, 2, 14),
-('Ošetření drobného zánětu tlapek', TRUE, 9, 2, 15),
-
--- Bublinka (Morče, ID 10)
-('Běžná kontrola zdravotního stavu', TRUE, 10, 2, 16),
-
--- ------------------------------------- Future tasks -------------------------------------- --
--- Max (Pes, ID 1)
-('Prohlídka zubů a uší', FALSE, 1, 2, 17),
-('Očkování proti klíšťatům', FALSE, 1, 2, 18),
-
--- Bella (Pes, ID 2)
-('Vyšetření pohyblivosti', FALSE, 2, 2, 19),
-
--- Simba (Kočka, ID 7)
-('Kontrola stavu srsti', FALSE, 7, 2, 20),
-
--- Bublinka (Morče, ID 10)
-('Kontrola váhy a doporučení stravy', FALSE, 10, 2, 21),
-
--- Lola (Králík, ID 8)
-('Prohlídka blech', FALSE, 8, 2, NULL); -- reservation does not exist 

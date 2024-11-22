@@ -412,6 +412,7 @@ def animal_medrecord(request, animal_id):
     form = CreateMedicalRecordForm()
     # Create dictionary of forms for each record to edit
     edit_forms = {record.record_id: EditMedicalRecordForm(instance=record) for record in health_records}
+    current_date = datetime.today().date()
 
     if request.method == "GET":
         # Render page
@@ -420,7 +421,8 @@ def animal_medrecord(request, animal_id):
             "health_records" : health_records,
             "animal_tasks"   : animal_tasks,
             "form"           : form,
-            "edit_forms"     : edit_forms
+            "edit_forms"     : edit_forms,
+            "current_date"   : current_date
         })
 
     record_id = request.POST.get("record_id")

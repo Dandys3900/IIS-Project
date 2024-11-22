@@ -13,7 +13,7 @@
                 {% include "timetable.html" %}
 
                 <h2 class="mt-4">Tasks for animal</h2>
-                <table class="table">
+                <table class="table" style="width: auto;">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -28,7 +28,7 @@
                             <tr class="{% if task.is_done %} table-success {% else %} table-danger {% endif %}">
                                 <td>{{ task.task_id }}</td>
                                 <td>{{ task.detail }}</td>
-                                <td>{{ task.start_time.date }} ({{ task.start_time.time }}-{{ walk.end_time.time }})</td>
+                                <td>{{ task.start_time.date }} ({{ task.start_time.time }}-{{ task.end_time.time }})</td>
                                 <td>
                                     {{ task.veterinarian.first_name }}
                                     {{ task.veterinarian.last_name }}
