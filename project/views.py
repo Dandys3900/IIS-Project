@@ -527,13 +527,16 @@ def create_task_reservation(request, task_id):
     except Exception as e:
         messages.error(request, f"Error while getting task: {e}")
         return redirect("animalslist")
-    
+
     if request.method == "GET":
         return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
-    
+
     form = BookAnimalForm(request.POST, animal=task.animal_id, user=request.user, task_id=task.task_id)
     if not form.is_valid():
         messages.error(request, "Invalid form.")
+
+    if not verify_booking(form, request):
+        return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
 
     if form.save():
         messages.success(request, "Checkup booking created.")

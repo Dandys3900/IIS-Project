@@ -83,14 +83,17 @@
                 e.target.value = `${hour}:00`;
             }
 
-            // Avoid user to select past date for walk(s)
-            document.addEventListener("DOMContentLoaded", function() {
-                var today = new Date().toISOString().split("T")[0];
-                document.getElementById("date_input").setAttribute("min", today);
-            });
+            // If this element is missing, whole form is
+            if (document.getElementById("date_input")) {
+                // Avoid user to select past date for walk(s)
+                document.addEventListener("DOMContentLoaded", function() {
+                    var today = new Date().toISOString().split("T")[0];
+                    document.getElementById("date_input").setAttribute("min", today);
+                });
 
-            document.getElementById("start_time").addEventListener("input", reset_minutes);
-            document.getElementById("end_time").addEventListener("input", reset_minutes);
+                document.getElementById("start_time").addEventListener("input", reset_minutes);
+                document.getElementById("end_time").addEventListener("input", reset_minutes);
+            }
         </script>
     {% endblock extra_js %}
 

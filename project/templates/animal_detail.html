@@ -3,7 +3,7 @@
 {% block content %}
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-md-7">
+            <div class="col-md-6">
                 <h1 class="mt-4">{{ animal.name }}</h1>
                 <h4>ID:</h4> {{ animal.animal_id }}
                 <h4>Species:</h4> {{ animal.species }}
@@ -122,7 +122,7 @@
                 </div>
             {% endfor %}
             {% for task_id, form in book_forms.items %}
-                <div class="col-md-3" id="bookform-{{ task_id }}" style="display: none;">
+                <div class="col-md-5" id="bookform-{{ task_id }}" style="display: none;">
                     <div class="card">
                         <div class="card-body">
                             <h3 class="card-title text-center">Make a reservation for checkup</h3>
@@ -185,23 +185,19 @@
                     if (formShownID)
                         document.getElementById(formShownID).style.display = "none";
                     formShownID = "bookform-" + formID;
+
+                    parent = document.getElementById(formShownID);
+                    var today = new Date().toISOString().split("T")[0];
+                    parent.querySelector("#date_input").setAttribute("min", today);
+                    parent.querySelector("#start_time").addEventListener("input", reset_minutes);
+                    parent.querySelector("#end_time").addEventListener("input", reset_minutes);
                 }
-            
             }
             // timeslot has a scale of 1h
             function reset_minutes(e) {
                 let hour = e.target.value.split(":")[0];
                 e.target.value = `${hour}:00`;
             }
-
-            // Avoid user to select past date for walk(s)
-            document.addEventListener("DOMContentLoaded", function() {
-                var today = new Date().toISOString().split("T")[0];
-                document.getElementById("date_input").setAttribute("min", today);
-            });
-
-            document.getElementById("start_time").addEventListener("input", reset_minutes);
-            document.getElementById("end_time").addEventListener("input", reset_minutes);
         </script>
     {% endblock extra_js %}
 {% endblock %}
