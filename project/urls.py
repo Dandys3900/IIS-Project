@@ -37,6 +37,8 @@ urlpatterns = [
     path('animalmedrecs/<int:animal_id>', views.animal_medrecord, name='animalmedrecs'),
     # Getting details of tasks for animal
     path('animalvettasks/<int:animal_id>', views.animal_vetrecord, name='animalvettasks'),
+    # Deleting animal vet task
+    path('deletevettask/<int:task_id>', views.animal_delete_task, name='deletevettask'),
     # Setting task to done
     path('updatetaskstatus/<int:task_id>', views.animal_update_task, name='updatetaskstatus'),
     # Deleting animal health record
