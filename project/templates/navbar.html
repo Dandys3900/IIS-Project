@@ -29,6 +29,11 @@
                         </li>
                     {% elif user.userRole == "carer" %}
                         <li class="nav-item me-2">
+                            <a class="nav-link active" aria-current="page" href="{% url 'walk_availability_list' %}">
+                                Walk availabilities
+                            </a>
+                        </li>
+                        <li class="nav-item me-2">
                             <a class="nav-link active" aria-current="page" href="{% url 'walklist' %}">
                                 Booked walks (Pending: {{ pending_walks }})
                             </a>

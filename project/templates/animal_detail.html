@@ -68,6 +68,13 @@
                                     {% endif %}
                                 </td>
                                 <td>
+                                    {% if task.reservation %}
+                                        <a href="{% url 'delete_task_reservation' task.task_id %}" class="btn btn-primary">
+                                            Delete reservation
+                                        </a>
+                                    {% else %}
+                                        <button class="btn btn-primary btn-block" onclick="triggerBookForm({{ task.task_id }})">Make a reservation</button>
+                                    {% endif %}
                                     <a href="{% url 'updatetaskstatus' task.task_id %}" class="btn btn-primary">
                                         {% if task.is_done == False %}
                                             Mark done
@@ -114,6 +121,25 @@
                     </div>
                 </div>
             {% endfor %}
+            {% for task_id, form in book_forms.items %}
+                <div class="col-md-3" id="bookform-{{ task_id }}" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title text-center">Make a reservation for checkup</h3>
+                            <button type="button" class="btn-close" aria-label="Close" style="position: absolute; right: 5px; top: 5px;" onclick="triggerBookForm({{ task_id }})"></button>
+                            <form method="POST" action="{% url 'create_task_reservation' task_id %}">
+                                <!-- Django requires this token for enhanced security -->
+                                {% csrf_token %}
+                                <!-- Render form -->
+                                {{ form.as_p }}
+                                <input type="hidden" name="task_id" value="{{ task_id }}">
+                                <button type="submit" class="btn btn-primary btn-block">Save</button>
+                            </form>
+                            {% include "timetable.html" %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
 
@@ -148,6 +174,34 @@
                     formShownID = "editform-" + formID;
                 }
             }
+
+            function triggerBookForm(formID) {
+                var book_form = document.getElementById("bookform-" + formID);
+                if (book_form.style.display === "block") {
+                    book_form.style.display = "none";
+                    formShownID = null;
+                } else {
+                    book_form.style.display = "block";
+                    if (formShownID)
+                        document.getElementById(formShownID).style.display = "none";
+                    formShownID = "bookform-" + formID;
+                }
+            
+            }
+            // timeslot has a scale of 1h
+            function reset_minutes(e) {
+                let hour = e.target.value.split(":")[0];
+                e.target.value = `${hour}:00`;
+            }
+
+            // Avoid user to select past date for walk(s)
+            document.addEventListener("DOMContentLoaded", function() {
+                var today = new Date().toISOString().split("T")[0];
+                document.getElementById("date_input").setAttribute("min", today);
+            });
+
+            document.getElementById("start_time").addEventListener("input", reset_minutes);
+            document.getElementById("end_time").addEventListener("input", reset_minutes);
         </script>
     {% endblock extra_js %}
 {% endblock %}

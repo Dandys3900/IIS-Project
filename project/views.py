@@ -412,6 +412,7 @@ def animal_medrecord(request, animal_id):
     form = CreateMedicalRecordForm()
     # Create dictionary of forms for each record to edit
     edit_forms = {record.record_id: EditMedicalRecordForm(instance=record) for record in health_records}
+    book_forms = {task.task_id: BookAnimalForm(animal=animal_id, user=request.user, task_id=task.task_id) for task in animal_tasks}
 
     if request.method == "GET":
         # Render page
@@ -420,7 +421,9 @@ def animal_medrecord(request, animal_id):
             "health_records" : health_records,
             "animal_tasks"   : animal_tasks,
             "form"           : form,
-            "edit_forms"     : edit_forms
+            "edit_forms"     : edit_forms,
+            "book_forms"     : book_forms,
+            "timetable"      : create_timetable(animal, MIN_HOUR, MAX_HOUR),
         })
 
     record_id = request.POST.get("record_id")
@@ -475,15 +478,6 @@ def animal_vetrecord(request, animal_id):
         messages.error(request, "Invalid form.")
         return redirect("animalvettasks", animal_id=animal.animal_id)
 
-    if not verify_booking(book_animal_form, request):
-        return render(request, "animal_tasks.html", {
-            "animal" : animal,
-            "tasks"  : animal_tasks,
-            "animal_task_form" : animal_task_form,
-            "book_animal_form" : book_animal_form,
-            "timetable": timetable,
-        })
-
     vet_task = animal_task_form.save(commit=False)
     vet_task.animal_id = animal
     vet_task.veterinarian = animal_task_form.cleaned_data["target_vet"]
@@ -503,10 +497,43 @@ def animal_update_task(request, task_id):
         task = AnimalTask.objects.get(task_id=task_id)
     except Exception as e:
         messages.error(request, f"Error while getting task: {e}")
-        return redirect("animalmedrecs", animal_id=task.animal_id.animal_id)
+        return redirect("animalslist")
 
     task.is_done = not task.is_done
     task.save()
+    # Redirect back
+    return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
+
+def create_task_reservation(request, task_id):
+    role_required(request, ["vet"])
+    try: # Get task
+        task = AnimalTask.objects.get(task_id=task_id)
+    except Exception as e:
+        messages.error(request, f"Error while getting task: {e}")
+        return redirect("animalslist")
+    
+    if request.method == "GET":
+        return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
+    
+    form = BookAnimalForm(request.POST, animal=task.animal_id, user=request.user, task_id=task.task_id)
+    if not form.is_valid():
+        messages.error(request, "Invalid form.")
+
+    if form.save():
+        messages.success(request, "Checkup booking created.")
+    else:
+        messages.error(request, form.error)
+    return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
+
+def delete_task_reservation(request, task_id):
+    role_required(request, ["vet"])
+
+    try: # Get task
+        task = AnimalTask.objects.get(task_id=task_id)
+        task.reservation.delete()
+    except Exception as e:
+        messages.error(request, f"Error while getting task: {e}")
+        return redirect("animalslist")
     # Redirect back
     return redirect('animalmedrecs', animal_id=task.animal_id.animal_id)
 
@@ -518,7 +545,7 @@ def animal_delete_record(request, record_id):
         record = HealthRecord.objects.get(record_id=record_id)
     except Exception as e:
         messages.error(request, f"Error while deleting health record: {e}")
-        return redirect("animalmedrecs", animal_id=record.animal_id.animal_id)
+        return redirect("animalslist")
 
     record.delete()
     # Redirect back
@@ -556,9 +583,9 @@ def animal_book(request, animal_id):
         animal = Animal.objects.get(animal_id=animal_id)
     except Exception as e:
         messages.error(request, f"Error while booking animal: {e}")
-        return redirect("bookanimal", animal_id)
+        return redirect("home")
 
-    form = BookAnimalForm(animal=animal, user=request.user)
+    form = BookAnimalForm(animal=animal, user=request.user) if request.user.is_authenticated else None
     timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
     if request.method == "GET":
         # Render page
@@ -585,13 +612,10 @@ def animal_book(request, animal_id):
             "timetable": timetable,
         })
 
-    can_be_saved, error_message = form.can_be_saved()
-    if not can_be_saved:
-        messages.error(request, error_message)
-        return redirect("bookanimal", animal_id)
-    
-    form.save()
-    messages.success(request, "Walk booked. Please wait for confirmation.")
+    if form.save():
+        messages.success(request, "Walk time for volunteers booked." if request.user.userrole == "carer" else "Walk booked. Please wait for confirmation.")
+    else:
+        messages.error(request, form.error)
     return redirect("bookanimal", animal_id)
 
 def walk_list(request):
@@ -600,8 +624,30 @@ def walk_list(request):
     if request.user.userrole == "volunteer":
         walks = walks.filter(owner=request.user.user_id)
     return render(request, "walk_list.html", {
-        "walks" : walks
+        "walks" : walks,
+        "mode": "walklist",
     })
+
+def walk_availability_list(request):
+    role_required(request, ["carer"])
+    walk_availabilities = Reservation.objects.all().filter(type="availability", start_time__date__gte=date.today()).order_by("start_time__date")
+    return render(request, "walk_list.html", {
+        "walks" : walk_availabilities,
+        "mode": "walk_availability_list",
+    })
+
+def delete_walk_availability(request, availability_id):
+    role_required(request, ["carer"])
+    try: # Get availability and delete it
+        availability = Reservation.objects.get(reservation_id=availability_id)
+        # Forbid changing of already ongoing booking
+        if availability.start_time < datetime.now().replace(tzinfo=timezone.utc):
+            messages.error(request, "Cannot delete an already finished/ongoing availability.")
+            return redirect("walklist")
+        availability.delete()
+    except Exception as e:
+        messages.error(request, f"Error while deleting walk availability: {e}.")
+    return redirect("walk_availability_list")
 
 def walk_change_confirmation(request, walk_id, desired_confirmation):
     role_required(request, ["carer"])
@@ -626,7 +672,7 @@ def walk_change_confirmation(request, walk_id, desired_confirmation):
         return redirect("walklist")
 
     walk.confirmation = desired_confirmation
-    walk.save()
+    walk.save(decliner=request.user) if desired_confirmation == "declined" else walk.save()
     messages.success(request, f"Booking confirmation changed to '{desired_confirmation}'.")
     return redirect("walklist")
 

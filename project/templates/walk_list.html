@@ -4,7 +4,7 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <h1 class="card-title text-center mt-3 mb-3">Requested walks</h1>
+                <h1 class="card-title text-center mt-3 mb-3">{% if mode == 'walk_availability_list' %} Walk availabilities {% else %} Requested walks {% endif %}</h1>
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -30,14 +30,19 @@
                                 <td>{{ walk.confirmation }}</td>
                                 <td class="position-relative" style="z-index: 2;">
                                 {% if user.userRole == "carer" %}
-                                    {% if walk.confirmation == "pending" %}
-                                        <a href="{% url 'walk_change_confirmation' walk.reservation_id 'approved' %}" class="btn btn-primary">Approve</a>
-                                        <a href="{% url 'walk_change_confirmation' walk.reservation_id 'declined' %}" class="btn btn-primary">Decline</a>
-                                    {% elif walk.confirmation == "approved" %}
-                                        <a href="{% url 'walk_change_confirmation' walk.reservation_id 'pending' %}" class="btn btn-primary">Unapprove</a>
-                                    {% elif walk.confirmation == "declined" %}
-                                        <a href="{% url 'walk_change_confirmation' walk.reservation_id 'pending' %}" class="btn btn-primary">Undecline</a>
+                                    {% if mode == 'walk_availability_list' %}
+                                        <a href="{% url 'delete_walk_availability' walk.reservation_id %}" class="btn btn-primary">Delete</a>
+                                    {% else %}
+                                        {% if walk.confirmation == "pending" %}
+                                            <a href="{% url 'walk_change_confirmation' walk.reservation_id 'approved' %}" class="btn btn-primary">Approve</a>
+                                            <a href="{% url 'walk_change_confirmation' walk.reservation_id 'declined' %}" class="btn btn-primary">Decline</a>
+                                        {% elif walk.confirmation == "approved" %}
+                                            <a href="{% url 'walk_change_confirmation' walk.reservation_id 'pending' %}" class="btn btn-primary">Unapprove</a>
+                                        {% elif walk.confirmation == "declined" %}
+                                            <a href="{% url 'walk_change_confirmation' walk.reservation_id 'pending' %}" class="btn btn-primary">Undecline</a>
+                                        {% endif %}
                                     {% endif %}
+
                                 {% elif user.userRole == "volunteer" %}
                                     <a href="{% url 'walk_delete' walk.reservation_id %}" class="btn btn-primary">Cancel</a>
                                 {% endif %}
