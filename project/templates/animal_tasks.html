@@ -21,6 +21,7 @@
                             <th>Planned time</th>
                             <th>Assigned veterinarian (ID)</th>
                             <th>Done</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -41,6 +42,9 @@
                                     ({{ task.veterinarian.user_id }})
                                 </td>
                                 <td>{{ task.is_done }}</td>
+                                <td>
+                                    <a href="{% url 'deletevettask' task.task_id %}" class="btn btn-danger">Delete</a>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
