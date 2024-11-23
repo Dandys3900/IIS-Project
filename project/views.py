@@ -112,7 +112,7 @@ def client_edit_select(request):
         messages.error(request, "Invalid form.")
         return redirect("edituser")
 
-    return redirect("edituser", user_id=form.cleaned_data["user_to_edit"])
+    return redirect("edituser", user_id=form.cleaned_data["user_to_edit"].username)
 
 def client_edit(request, user_id):
     # Security: only admin can view this
@@ -454,7 +454,7 @@ def animal_vetrecord(request, animal_id):
 
     try: # Get animal and its health records
         animal = Animal.objects.get(animal_id=animal_id)
-        animal_tasks = animal.animal_tasks.all()
+        animal_tasks = animal.animal_tasks.all().order_by("reservation__start_time__date")
     except Exception as e:
         messages.error(request, f"Error while getting animal: {e}")
         return redirect("home")
@@ -488,6 +488,22 @@ def animal_vetrecord(request, animal_id):
     # Notify user
     messages.success(request, "Task created succesfully")
     return redirect("animalvettasks", animal_id=animal.animal_id)
+
+def animal_delete_task(request, task_id):
+    # Security: only carer can view this
+    role_required(request, ["carer"])
+
+    try: # Get task to be deleted
+        task = AnimalTask.objects.get(task_id=task_id)
+    except Exception as e:
+        messages.error(request, f"Error while deleting task: {e}")
+        return redirect("animalvettasks", animal_id=task.animal_id.animal_id)
+
+    if task.reservation:
+        task.reservation.delete()
+    task.delete()
+    # Redirect back
+    return redirect("animalvettasks", animal_id=task.animal_id.animal_id)
 
 def animal_update_task(request, task_id):
     # Security: only veterinarian can view this
@@ -792,7 +808,7 @@ def verify_booking(form, request):
         form.data["end_time"] = ""
         return False
 
-    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < MIN_HOUR or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > MAX_HOUR:
+    if form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour < MIN_HOUR or form.cleaned_data["start_time"].replace(tzinfo=timezone.utc).hour > MAX_HOUR or form.cleaned_data["end_time"].replace(tzinfo=timezone.utc).hour > MAX_HOUR:
         messages.error(request, f"Error while booking animal: Shelter is open from {MIN_HOUR}:00 - {MAX_HOUR}:00.")
         # Reset given times and re-render
         form.data = form.data.copy()

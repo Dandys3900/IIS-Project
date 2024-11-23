@@ -29,6 +29,15 @@
         background-color: #212529 !important; /* Match color of navbar*/
         color: white !important;
       }
+
+      .card-text { /* Ensure animal card's text is properly truncated when too long */
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 3;
+        max-height: 4.5rem;
+      }
     </style>
     <!-- Tab icon -->
     <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}">

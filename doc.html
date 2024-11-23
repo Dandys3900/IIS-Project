@@ -16,21 +16,18 @@
 	</head>
 
 	<body>
-		<!-- Zkontrolujte prosím nastavení kódování v hlavièce dokumentu podle pou¾itého editoru -->
-
-		<h1>Zvíøecí útulek</h1> <!-- Nahradte názvem svého zadání -->
-
+		<h1>Zvíøecí útulek</h1>
 		<dl>
 			<dt>Autoøi</dt>
-			<dd>Tomá¹ Daniel <!-- Nahraïte skuteèným jménem a e-mailem autora a popisem èinnosti -->
+			<dd><strong>Tomá¹ Daniel</strong>
 				<a href="mailto:xdanie14@stud.fit.vutbr.cz">xdanie14@stud.fit.vutbr.cz</a> -
 				popis èinnosti v týmu TODO
 			</dd>
-			<dd>Jakub Jan¹ta <!-- Nahraïte skuteèným jménem a e-mailem autora a popisem èinnosti -->
+			<dd>Jakub Jan¹ta
 				<a href="mailto:xjanst02@stud.fit.vutbr.cz">xjanst02@stud.fit.vutbr.cz</a> - 
 				popis èinnosti v týmu TODO
 			</dd>
-		<dd>Milan Vrbas <!-- Nahraïte skuteèným jménem a e-mailem autora a popisem èinnosti -->
+		<dd>Milan Vrbas
 				<a href="mailto:xvrbas01@stud.fit.vutbr.cz">xvrbas01@stud.fit.vutbr.cz</a> - 
 				popis èinnosti v týmu TODO
 			</dd>
@@ -39,7 +36,6 @@
 		</dl>
 
 		<h2>U¾ivatelé systému pro testování</h2>
-		<!-- <p>Uveïte prosím existující zástupce <strong>v¹ech rolí u¾ivatelù</strong>.</p> -->
 		<table>
 			<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
 
@@ -51,8 +47,6 @@
 			<tr><td>jnovak</td><td>Heslo123</td><td>Dobrovolník</td></tr>
 			<tr><td>ekralova</td><td>Kralova@</td><td>Dobrovolník</td></tr>
 		</table>
-
-		<!-- <p> (Diagram pøípadù u¾ití není nutné vkládat, pokud IS implementuje role a pøípady u¾ití definované zadáním.) --- MÁME </p> -->
 
 		<h3>Video</h3>
 
@@ -85,6 +79,10 @@
 
 			<li><i>project/forms.py</i> - definice formuláøù pro zadávání nebo úpravu dat jednotlivými u¾ivateli</li>
 
+			<li><i>project/logout.py</i> - zaji¹»uje automatické odhlá¹ení neèinného u¾ivatele po uplynutí 5 minut</li>
+
+			<li><i>project/backends.py</i> - obsahuje vlastní implementaci autentizaèní logiky</li>
+
 			<li><i>project/templates</i> - tato slo¾ka obsahuje HTML ¹ablony, které zobrazují data u¾ivatelùm</li>
 		</ul>
 
@@ -95,13 +93,6 @@
 		</div>
 
 		<h2>Instalace</h2>
-
-		<!-- Struènì popi¹te: 
-		<ul>
-		<li>postup instalace na server,</li>
-		<li>softwarové po¾adavky (verze PHP apod.),</li>
-		<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
-		</ul> -->
 
 		<h3>Postup instalace na server</h3>
 		<ol>
@@ -130,15 +121,12 @@
 		</ul>
 	
 		<h3>Postup konfigurace databáze</h3>
-		<!-- TODO --> TODO
+		Databáze je hostována na externí platformì Aiven, pøièem¾ systém se k ní pouze pøipojuje. Pro opìtovnou inicializaci databáze staèí v koøenovém adresáøi spustit pøíkaz:
+		<p><code>python manage.py migrate</code> </p>
+		Tímto zpùsobem se databáze naplní výchozími inicializaèními daty.
 
 		<h2>Známé problémy</h2>
-		V souèasné verzi aplikace jsme pøi testování nenarazili na ¾ádné zásadní problémy. 
+		V souèasné verzi aplikace jsme pøi testování nenarazili na ¾ádné problémy. 
 		Ve¹keré po¾adavky ze zadání byly splnìny a aplikace byla dùkladnì otestována.
-
-		<!-- <p>Zde popi¹te, které body zadání nejsou implementovány a z jakého dùvodu. Napø. &bdquo;Z èasových dùvodù nebyla 
-			implementována správa u¾ivatelù.&rdquo; Pomù¾ete tím zrychlit hodnocení, kdy¾ neimplementované 
-			funkce nebudeme muset dlouze hledat.</p> -->
-
 	</body>
 </html>

@@ -64,6 +64,9 @@ class CustomUser(AbstractBaseUser):
     def userName(self):
         return self.username
 
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.username})"
+
 class Animal(models.Model):
     # Define fields for animal
     animal_id    = models.AutoField(primary_key=True,      db_column="animalID")
