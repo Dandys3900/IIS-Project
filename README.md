@@ -57,12 +57,6 @@ pip install -r requirements.txt
 python manage.py runserver
 ```
 
----
-### Testovací uživatel
-Pro účely vývoje jsem vytvořil mock uživatele, přes registrační formulář na webu jde udělat libovolně jiných.
-- Username: devUser
-- Password: mock123456
----
 
 ### Hosting projektu
 Projekt je hostován na platformě **Koyeb.com**
@@ -79,7 +73,7 @@ MySQL databáze je hostována na platformě Aiven, konfigurační a přihlašova
 * Password: `AVNS_nKlEyXmnpYpTucczgnZ`
 
 ## Vzdálený přístup k databázi
-Ověřeno a funknční s nástrojem [MySQL WorkBench](https://dev.mysql.com/downloads/workbench/).
+Ověřeno a funkční s nástrojem [MySQL WorkBench](https://dev.mysql.com/downloads/workbench/).
 
 Postup připojení:
 
