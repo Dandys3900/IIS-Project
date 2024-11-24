@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.db.models import Q
 from django.db.models import Max, Min
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 
 # Manager for custom user creation
@@ -241,10 +241,26 @@ class AnimalTask(models.Model):
         # Specify table for storing animal task for veterinarians
         db_table = "Task"
 
-
 @receiver(pre_delete, sender=Reservation)
 def reservation_pre_delete_handler(sender, instance, **kwargs):
     if instance.type != "walk":
+        return
+    if instance.confirmation == "approved":
+        return
+    # Give the availability back
+    replacement_reservation = Reservation.create_reservation_from(instance)
+    replacement_reservation.type = "availability"
+    replacement_reservation.confirmation = "available"
+    carers = CustomUser.objects.filter(userrole="carer")
+    if carers.exists():
+        replacement_reservation.owner = carers.first()
+    replacement_reservation.save()
+
+@receiver(post_delete, sender=Reservation)
+def reservation_post_delete_handler(sender, instance, **kwargs):
+    if instance.type != "walk":
+        return
+    if instance.confirmation != "approved":
         return
     # Give the availability back
     replacement_reservation = Reservation.create_reservation_from(instance)
