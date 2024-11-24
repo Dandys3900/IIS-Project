@@ -355,8 +355,6 @@ VALUES
 
 -- Future Reservation for Lola (Králík, ID 8) - ('Prohlídka blech', FALSE, 8, 2, 36) not yet created
 
-
-
 -- ----------------------------------- INSERT INTO TASK ------------------------------------ --
 
 INSERT INTO Task (detail, isDone, animalID, veterinarianID, reservationID)
