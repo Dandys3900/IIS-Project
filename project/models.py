@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.db.models import Q
 from django.db.models import Max, Min
-from django.db.models import Max, Min
+from copy import deepcopy
 
 # Manager for custom user creation
 class CustomUserManager(BaseUserManager):
@@ -169,8 +169,8 @@ class Reservation(models.Model):
     def split_by_reservation(self, reservation):
         # Create duplicates before deleting the original reservation to be modified later.
         # If the original reservation is not deleted beforehand, it would be automatically merged
-        new_reservation_left = Reservation.create_reservation_from(self)
-        new_reservation_right = Reservation.create_reservation_from(self)
+        new_reservation_left = deepcopy(self)
+        new_reservation_right = deepcopy(self)
         # Delete this original availability that is replaced with up to two new ones
         self.delete()
         # Modify and save the duplicates
@@ -180,16 +180,6 @@ class Reservation(models.Model):
         if new_reservation_right.end_time > reservation.end_time: # After walk - right
             new_reservation_right.start_time = reservation.end_time
             new_reservation_right.save()
-    
-    def create_reservation_from(reservation):
-        new_reservation = Reservation()
-        new_reservation.owner = reservation.owner
-        new_reservation.animal = reservation.animal
-        new_reservation.type = reservation.type
-        new_reservation.confirmation = reservation.confirmation
-        new_reservation.start_time = reservation.start_time
-        new_reservation.end_time = reservation.end_time
-        return new_reservation
     
     # Call this before calling save() to retreive the error
     def can_be_saved(self):
@@ -217,7 +207,7 @@ class Reservation(models.Model):
                 if containing_availability:
                     containing_availability.split_by_reservation(self)
             elif self.confirmation == "declined": # Give the availability back
-                replacement_reservation = Reservation.create_reservation_from(self)
+                replacement_reservation = deepcopy(self)
                 replacement_reservation.type = "availability"
                 replacement_reservation.confirmation = "available"
                 if "decliner" in kwargs:

@@ -549,7 +549,8 @@ def delete_task_reservation(request, task_id):
 
     try: # Get task
         task = AnimalTask.objects.get(task_id=task_id)
-        task.reservation.delete()
+        if task:
+            task.reservation.delete()
     except Exception as e:
         messages.error(request, f"Error while getting task: {e}")
         return redirect("animalslist")
@@ -604,7 +605,7 @@ def animal_book(request, animal_id):
         messages.error(request, f"Error while booking animal: {e}")
         return redirect("home")
 
-    form = BookAnimalForm(animal=animal, user=request.user) if request.user.is_authenticated else None
+    form = BookAnimalForm(animal=animal, user=request.user)
     timetable = create_timetable(animal, MIN_HOUR, MAX_HOUR)
     if request.method == "GET":
         # Render page
