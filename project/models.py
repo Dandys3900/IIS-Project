@@ -2,7 +2,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.db.models import Q
 from django.db.models import Max, Min
-from copy import deepcopy
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 # Manager for custom user creation
 class CustomUserManager(BaseUserManager):
@@ -169,8 +170,8 @@ class Reservation(models.Model):
     def split_by_reservation(self, reservation):
         # Create duplicates before deleting the original reservation to be modified later.
         # If the original reservation is not deleted beforehand, it would be automatically merged
-        new_reservation_left = deepcopy(self)
-        new_reservation_right = deepcopy(self)
+        new_reservation_left = Reservation.create_reservation_from(self)
+        new_reservation_right = Reservation.create_reservation_from(self)
         # Delete this original availability that is replaced with up to two new ones
         self.delete()
         # Modify and save the duplicates
@@ -193,6 +194,17 @@ class Reservation(models.Model):
             if self.has_conflict(["approved", "available", "pending"]):
                 return (False, "Could not create checkup reservation due to conflicting schedules.")
         return (True, "") # ok, no error
+    
+    # Do not use copy.deepcopy() - python management does not create multiple distinct instances, if they are created right after each other
+    def create_reservation_from(reservation):
+        new_reservation = Reservation()
+        new_reservation.owner = reservation.owner
+        new_reservation.animal = reservation.animal
+        new_reservation.type = reservation.type
+        new_reservation.confirmation = reservation.confirmation
+        new_reservation.start_time = reservation.start_time
+        new_reservation.end_time = reservation.end_time
+        return new_reservation
 
     def save(self, *args, **kwargs):
         can_be_saved, _ = self.can_be_saved()
@@ -207,14 +219,13 @@ class Reservation(models.Model):
                 if containing_availability:
                     containing_availability.split_by_reservation(self)
             elif self.confirmation == "declined": # Give the availability back
-                replacement_reservation = deepcopy(self)
+                replacement_reservation = Reservation.create_reservation_from(self)
                 replacement_reservation.type = "availability"
                 replacement_reservation.confirmation = "available"
                 if "decliner" in kwargs:
                     replacement_reservation.owner = kwargs.pop("decliner")
 
                 replacement_reservation.save()
-
 
         return super(Reservation, self).save(*args, **kwargs)
 
@@ -229,3 +240,17 @@ class AnimalTask(models.Model):
     class Meta:
         # Specify table for storing animal task for veterinarians
         db_table = "Task"
+
+
+@receiver(pre_delete, sender=Reservation)
+def reservation_pre_delete_handler(sender, instance, **kwargs):
+    if instance.type != "walk":
+        return
+    # Give the availability back
+    replacement_reservation = Reservation.create_reservation_from(instance)
+    replacement_reservation.type = "availability"
+    replacement_reservation.confirmation = "available"
+    carers = CustomUser.objects.filter(userrole="carer")
+    if carers.exists():
+        replacement_reservation.owner = carers.first()
+    replacement_reservation.save()
