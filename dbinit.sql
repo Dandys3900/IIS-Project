@@ -73,8 +73,8 @@ CREATE TABLE HealthRecord (
     FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE,
         -- when the animal is deleted, its health records are deleted too
 
-    veterinarianID INT not NULL, -- references userID from User (Veterinarian)
-    FOREIGN KEY(veterinarianID) REFERENCES User(userID)
+    veterinarianID INT NULL, -- references userID from User (Veterinarian)
+    FOREIGN KEY(veterinarianID) REFERENCES User(userID) ON DELETE SET NULL
         -- do not delete records if the veterinarian is deleted
 );
 
@@ -94,7 +94,7 @@ CREATE TABLE Reservation (
      -- link to Animal, delete reservation if the animal is deleted
 
     ownerID INT not NULL,
-    FOREIGN KEY(ownerID) REFERENCES User(userID),
+    FOREIGN KEY(ownerID) REFERENCES User(userID) ON DELETE CASCADE,
     -- link to User, reservation remains even if the owner is deleted
 
     confirmation VARCHAR(9) not NULL -- pending/declined/approved/available...
@@ -113,8 +113,8 @@ CREATE TABLE Task (
     FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE,
         -- when the animal is deleted, its tasks are deleted too
 
-    veterinarianID INT not NULL, -- references userID from User (Veterinarian)
-    FOREIGN KEY(veterinarianID) REFERENCES User(userID),
+    veterinarianID INT NULL, -- references userID from User (Veterinarian)
+    FOREIGN KEY(veterinarianID) REFERENCES User(userID) ON DELETE SET NULL,
         -- do not delete records if the veterinarian is deleted
 
     reservationID INT NULL, -- when Task is created, Reservation won't exist (yet)

@@ -20,7 +20,7 @@
 					<tr>
 						<td>{{ day }}</td>
 						{% for hour_state in hours %}
-							<td style="background-color: {% if hour_state == 'approved' %} red {% elif hour_state == 'pending' %} orange {% else %} green {% endif %};">
+							<td style="background-color: {% if hour_state == 'approved' %} red {% elif hour_state == 'pending' %} orange {% elif hour_state == 'available'%} green {% else %} gray {% endif %};">
 							</td>
 						{% endfor %}
 					</tr>
@@ -31,7 +31,7 @@
 		<!-- Legend -->
 		<div class="mt-4">
 			<ul class="list-unstyled">
-				<li><span class="badge bg-success">&nbsp;&nbsp;</span> Free</li>
+				<li><span class="badge bg-success">&nbsp;&nbsp;</span> Free for volunteer walks</li>
 				<li><span class="badge bg-warning">&nbsp;&nbsp;</span> Requested, not confirmed</li>
 				<li><span class="badge bg-danger">&nbsp;&nbsp;</span> Confirmed, booked</li>
 			</ul>

@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.forms import inlineformset_factory
 from django import forms
 from .models import *
+from django.db.models import Max, Min
 from datetime import datetime, timezone, date
 
 ROLE_CHOICES = [
@@ -113,6 +114,15 @@ class CreateUserForm(SignUpForm):
 class EditUserSelectForm(forms.Form):
     user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
 
+    def __init__(self, *args, **kwargs):
+        # Retrieve current user
+        self.user = kwargs.pop("user")
+        super(EditUserSelectForm, self).__init__(*args, **kwargs)
+
+        if self.user:
+            # Exclude current user from the queryset
+            self.fields["user_to_edit"].queryset = CustomUser.objects.exclude(user_id=self.user.user_id)
+
 class EditUserForm(forms.ModelForm):
     first_name = createField(255, "first_name", "Firstname")
     last_name = createField(255, "last_name", "Lastname")
@@ -156,6 +166,15 @@ class EditUserForm(forms.ModelForm):
 class DeleteUserForm(forms.Form):
     user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
+
+    def __init__(self, *args, **kwargs):
+        # Retrieve current user
+        self.user = kwargs.pop("user")
+        super(DeleteUserForm, self).__init__(*args, **kwargs)
+
+        if self.user:
+            # Exclude current user from the queryset
+            self.fields["user_to_delete"].queryset = CustomUser.objects.exclude(user_id=self.user.user_id)
 
 class UserInfoForm(forms.ModelForm):
     first_name = createField(255, "first_name", "Firstname")
@@ -328,9 +347,10 @@ class BookAnimalForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        self.error = ""
         self.animal = kwargs.pop("animal") # Retrieve animal being booked
         self.user = kwargs.pop("user") # Retrieve volunteer
-        self.type = kwargs.pop("type") if "type" in kwargs else "walk" # Retrieve confirmation
+        self.task_id = kwargs.pop("task_id") if "task_id" in kwargs else None
         super().__init__(*args, **kwargs)
 
     class Meta:
@@ -338,23 +358,36 @@ class BookAnimalForm(forms.Form):
         fields = ()
 
     def save(self, commit=True):
-        reservation = Reservation()
         # Combine date and time into datetime
         date = self.cleaned_data["date"]
-        start_time = self.cleaned_data["start_time"]
-        end_time = self.cleaned_data["end_time"]
-        # Set fields
+        start_time = datetime.combine(date, self.cleaned_data["start_time"]).replace(tzinfo=timezone.utc)
+        end_time = datetime.combine(date, self.cleaned_data["end_time"]).replace(tzinfo=timezone.utc)
+        # Create reservation
+        reservation = Reservation()
         reservation.owner = self.user
         reservation.animal = self.animal
-        reservation.type = self.type
-        reservation.start_time = datetime.combine(date, start_time).replace(tzinfo=timezone.utc)
-        reservation.end_time = datetime.combine(date, end_time).replace(tzinfo=timezone.utc)
-        reservation.confirmation = "pending" if self.type == "walk" else "approved"
+        if self.user.userrole == "volunteer":
+            reservation.type = "walk"
+            reservation.confirmation = "pending"
+        elif self.user.userrole == "carer":
+            reservation.type = "availability"
+            reservation.confirmation = "available"
+        elif self.user.userrole == "vet":
+            reservation.type = "checkup"
+            reservation.confirmation = "approved"
+        reservation.start_time = start_time
+        reservation.end_time = end_time
 
-        if reservation.has_conflict():
+        can_be_saved, self.error = reservation.can_be_saved()
+        if not can_be_saved:
             return None
+
         if commit:
             reservation.save()
+            if reservation.type == "checkup":
+                task = AnimalTask.objects.get(task_id=self.task_id)
+                task.reservation = reservation
+                task.save()
         return reservation
 
 class AnimalSearchForm(forms.Form):

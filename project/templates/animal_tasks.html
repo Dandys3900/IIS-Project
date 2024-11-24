@@ -10,7 +10,9 @@
                 <h4>Breed:</h4> {{ animal.breed }}
                 <h4>Description:</h4> {{ animal.description }}
 
-                {% include "timetable.html" %}
+                {% if animal.is_active %}
+                    {% include "timetable.html" %}
+                {% endif %}
 
                 <h2 class="mt-4">Tasks for animal</h2>
                 <table class="table" style="width: auto;">
@@ -37,9 +39,13 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {{ task.veterinarian.first_name }}
-                                    {{ task.veterinarian.last_name }}
-                                    ({{ task.veterinarian.user_id }})
+                                    {% if task.veterinarian %}
+                                        {{ task.veterinarian.first_name }}
+                                        {{ task.veterinarian.last_name }}
+                                        ({{ task.veterinarian.user_id }})
+                                    {% else %}
+                                        Deleted user
+                                    {% endif %}
                                 </td>
                                 <td>{{ task.is_done }}</td>
                                 <td>
@@ -50,21 +56,22 @@
                     </tbody>
                 </table>
             </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title text-center">New task</h3>
-                        <form method="POST" action="{% url 'animalvettasks' animal.animal_id %}">
-                            <!-- Django requires this token for enhanced security -->
-                            {% csrf_token %}
-                            <!-- Render form -->
-                            {{ animal_task_form.as_p }}
-                            {{ book_animal_form.as_p }}
-                            <button type="submit" class="btn btn-primary btn-block">Create</button>
-                        </form>
+            {% if animal.is_active %}
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title text-center">New task</h3>
+                            <form method="POST" action="{% url 'animalvettasks' animal.animal_id %}">
+                                <!-- Django requires this token for enhanced security -->
+                                {% csrf_token %}
+                                <!-- Render form -->
+                                {{ animal_task_form.as_p }}
+                                <button type="submit" class="btn btn-primary btn-block">Create</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 

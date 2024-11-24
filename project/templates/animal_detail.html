@@ -3,7 +3,7 @@
 {% block content %}
     <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-md-7">
+            <div class="col-md-6">
                 <h1 class="mt-4">{{ animal.name }}</h1>
                 <h4>ID:</h4> {{ animal.animal_id }}
                 <h4>Species:</h4> {{ animal.species }}
@@ -28,9 +28,13 @@
                                 <td>{{ record.name }}</td>
                                 <td>{{ record.detail }}</td>
                                 <td>
-                                    {{ record.veterinarian.first_name }}
-                                    {{ record.veterinarian.last_name }}
-                                    ({{ record.veterinarian.user_id }})
+                                    {% if record.veterinarian %}
+                                        {{ record.veterinarian.first_name }}
+                                        {{ record.veterinarian.last_name }}
+                                        ({{ record.veterinarian.user_id }})
+                                    {% else %}
+                                        Deleted user
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <button class="btn btn-primary" onclick="triggerEditForm({{ record.record_id }})">Edit</button>
@@ -64,10 +68,19 @@
                                     {% if task.reservation %}
                                         {{ task.reservation.start_time.date }} ({{ task.reservation.start_time.time }}-{{ task.reservation.end_time.time }})
                                     {% else %}
-                                        Not booked yet
+                                        Not booked
                                     {% endif %}
                                 </td>
                                 <td>
+                                    {% if task.is_done == False %}
+                                        {% if task.reservation and task.reservation.start_time.date >= current_date %}
+                                            <a href="{% url 'delete_task_reservation' task.task_id %}" class="btn btn-primary">
+                                                Delete reservation
+                                            </a>
+                                        {% elif not task.reservation and animal.is_active %}
+                                            <button class="btn btn-primary btn-block" onclick="triggerBookForm({{ task.task_id }})">Make a reservation</button>
+                                        {% endif %}
+                                    {% endif %}
                                     <a href="{% url 'updatetaskstatus' task.task_id %}" class="btn btn-primary">
                                         {% if task.is_done == False %}
                                             Mark done
@@ -114,6 +127,25 @@
                     </div>
                 </div>
             {% endfor %}
+            {% for task_id, form in book_forms.items %}
+                <div class="col-md-5" id="bookform-{{ task_id }}" style="display: none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title text-center">Make a reservation for checkup</h3>
+                            <button type="button" class="btn-close" aria-label="Close" style="position: absolute; right: 5px; top: 5px;" onclick="triggerBookForm({{ task_id }})"></button>
+                            <form method="POST" action="{% url 'create_task_reservation' task_id %}">
+                                <!-- Django requires this token for enhanced security -->
+                                {% csrf_token %}
+                                <!-- Render form -->
+                                {{ form.as_p }}
+                                <input type="hidden" name="task_id" value="{{ task_id }}">
+                                <button type="submit" class="btn btn-primary btn-block">Save</button>
+                            </form>
+                            {% include "timetable.html" %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
 
@@ -147,6 +179,30 @@
                         document.getElementById(formShownID).style.display = "none";
                     formShownID = "editform-" + formID;
                 }
+            }
+
+            function triggerBookForm(formID) {
+                var book_form = document.getElementById("bookform-" + formID);
+                if (book_form.style.display === "block") {
+                    book_form.style.display = "none";
+                    formShownID = null;
+                } else {
+                    book_form.style.display = "block";
+                    if (formShownID)
+                        document.getElementById(formShownID).style.display = "none";
+                    formShownID = "bookform-" + formID;
+
+                    parent = document.getElementById(formShownID);
+                    var today = new Date().toISOString().split("T")[0];
+                    parent.querySelector("#date_input").setAttribute("min", today);
+                    parent.querySelector("#start_time").addEventListener("input", reset_minutes);
+                    parent.querySelector("#end_time").addEventListener("input", reset_minutes);
+                }
+            }
+            // timeslot has a scale of 1h
+            function reset_minutes(e) {
+                let hour = e.target.value.split(":")[0];
+                e.target.value = `${hour}:00`;
             }
         </script>
     {% endblock extra_js %}

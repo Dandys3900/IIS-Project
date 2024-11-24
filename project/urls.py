@@ -41,6 +41,10 @@ urlpatterns = [
     path('deletevettask/<int:task_id>', views.animal_delete_task, name='deletevettask'),
     # Setting task to done
     path('updatetaskstatus/<int:task_id>', views.animal_update_task, name='updatetaskstatus'),
+	# Creating task reservations
+    path('create_task_reservation/<int:task_id>', views.create_task_reservation, name='create_task_reservation'),
+	# Deleting task reservations
+    path('delete_task_reservation/<int:task_id>', views.delete_task_reservation, name='delete_task_reservation'),
     # Deleting animal health record
     path('deletehealthrecord/<int:record_id>', views.animal_delete_record, name='deletehealthrecord'),
     # Getting list of yet not verified volunteers
@@ -51,6 +55,10 @@ urlpatterns = [
     path('bookanimal/<int:animal_id>/', views.animal_book, name='bookanimal'),
 	# Manage walk bookings
 	path('walklist/', views.walk_list, name='walklist'),
+	# Manage walk availabilities
+	path('walk_availability_list/', views.walk_availability_list, name='walk_availability_list'),
+	# Delete walk availabilities
+	path('delete_walk_availability/<int:availability_id>/', views.delete_walk_availability, name='delete_walk_availability'),
 	# Change booking confirmation
 	path('walklist/<int:walk_id>/<str:desired_confirmation>/', views.walk_change_confirmation, name='walk_change_confirmation'),
     # Delete booking confirmation
