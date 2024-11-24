@@ -64,16 +64,18 @@
                                     {% if task.reservation %}
                                         {{ task.reservation.start_time.date }} ({{ task.reservation.start_time.time }}-{{ task.reservation.end_time.time }})
                                     {% else %}
-                                        Not booked yet
+                                        Not booked
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if task.reservation %}
-                                        <a href="{% url 'delete_task_reservation' task.task_id %}" class="btn btn-primary">
-                                            Delete reservation
-                                        </a>
-                                    {% else %}
-                                        <button class="btn btn-primary btn-block" onclick="triggerBookForm({{ task.task_id }})">Make a reservation</button>
+                                    {% if task.is_done == False %}
+                                        {% if task.reservation and task.reservation.start_time.date >= current_date %}
+                                            <a href="{% url 'delete_task_reservation' task.task_id %}" class="btn btn-primary">
+                                                Delete reservation
+                                            </a>
+                                        {% elif not task.reservation and animal.is_active %}
+                                            <button class="btn btn-primary btn-block" onclick="triggerBookForm({{ task.task_id }})">Make a reservation</button>
+                                        {% endif %}
                                     {% endif %}
                                     <a href="{% url 'updatetaskstatus' task.task_id %}" class="btn btn-primary">
                                         {% if task.is_done == False %}

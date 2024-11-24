@@ -141,7 +141,7 @@ class Reservation(models.Model):
             end_time__gte = self.end_time, # Existing ends after or at the same time as this
             confirmation__in = reservations_with_confirmation # For some reason, this cannot be a tuple
         ).exclude(reservation_id=self.reservation_id).first()  # Return the first matching reservation
-    
+
     def get_combineable_reservations(self, reservations_with_confirmation=["available"]):
         return Reservation.objects.filter(
             animal_id = self.animal_id,
@@ -151,7 +151,7 @@ class Reservation(models.Model):
             Q(start_time__lte = self.end_time, end_time__gte=self.end_time) | # Overlaps from the right
             Q(start_time__gte = self.start_time, end_time__lte=self.end_time) # Fully contained
         ) # Do not exclude self - it itself has to be combined
-    
+
     def combine_neighboring_reservations(self):
         combineable_reservations = self.get_combineable_reservations([self.confirmation])
         if combineable_reservations.count():
@@ -165,7 +165,7 @@ class Reservation(models.Model):
             self.end_time = result['max_time'] if self.end_time < result['max_time'] else self.end_time
         # Delete all rows from the query except this combined reservation
         combineable_reservations.exclude(reservation_id=self.reservation_id).delete()
-    
+
     def split_by_reservation(self, reservation):
         # Create duplicates before deleting the original reservation to be modified later.
         # If the original reservation is not deleted beforehand, it would be automatically merged
@@ -180,7 +180,7 @@ class Reservation(models.Model):
         if new_reservation_right.end_time > reservation.end_time: # After walk - right
             new_reservation_right.start_time = reservation.end_time
             new_reservation_right.save()
-    
+
     def create_reservation_from(reservation):
         new_reservation = Reservation()
         new_reservation.owner = reservation.owner
@@ -190,7 +190,7 @@ class Reservation(models.Model):
         new_reservation.start_time = reservation.start_time
         new_reservation.end_time = reservation.end_time
         return new_reservation
-    
+
     # Call this before calling save() to retreive the error
     def can_be_saved(self):
         if self.type == "walk" and self.confirmation == "pending" and self.pk == None: # Allow walks to be created only inside availability reservations - any modification after is allowed
@@ -208,7 +208,7 @@ class Reservation(models.Model):
         can_be_saved, _ = self.can_be_saved()
         if not can_be_saved:
             return None
-        
+
         if self.type == "availability":
             self.combine_neighboring_reservations()
         elif self.type == "walk":
@@ -222,10 +222,10 @@ class Reservation(models.Model):
                 replacement_reservation.confirmation = "available"
                 if "decliner" in kwargs:
                     replacement_reservation.owner = kwargs.pop("decliner")
-                
+
                 replacement_reservation.save()
-            
-        
+
+
         return super(Reservation, self).save(*args, **kwargs)
 
 class AnimalTask(models.Model):
