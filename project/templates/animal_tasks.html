@@ -39,9 +39,13 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {{ task.veterinarian.first_name }}
-                                    {{ task.veterinarian.last_name }}
-                                    ({{ task.veterinarian.user_id }})
+                                    {% if task.veterinarian %}
+                                        {{ task.veterinarian.first_name }}
+                                        {{ task.veterinarian.last_name }}
+                                        ({{ task.veterinarian.user_id }})
+                                    {% else %}
+                                        Deleted user
+                                    {% endif %}
                                 </td>
                                 <td>{{ task.is_done }}</td>
                                 <td>

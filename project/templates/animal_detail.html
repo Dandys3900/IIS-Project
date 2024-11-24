@@ -28,9 +28,13 @@
                                 <td>{{ record.name }}</td>
                                 <td>{{ record.detail }}</td>
                                 <td>
-                                    {{ record.veterinarian.first_name }}
-                                    {{ record.veterinarian.last_name }}
-                                    ({{ record.veterinarian.user_id }})
+                                    {% if record.veterinarian %}
+                                        {{ record.veterinarian.first_name }}
+                                        {{ record.veterinarian.last_name }}
+                                        ({{ record.veterinarian.user_id }})
+                                    {% else %}
+                                        Deleted user
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <button class="btn btn-primary" onclick="triggerEditForm({{ record.record_id }})">Edit</button>

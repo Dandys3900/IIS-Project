@@ -100,7 +100,7 @@ class HealthRecord(models.Model):
     name         = models.CharField(max_length=255, db_column="name")
     detail       = models.TextField(db_column="detail")
     animal_id    = models.ForeignKey(Animal, related_name="med_records", on_delete=models.CASCADE, db_column="animalID")
-    veterinarian = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, db_column="veterinarianID")
+    veterinarian = models.ForeignKey(CustomUser, null=True, on_delete=models.SET_NULL, db_column="veterinarianID")
 
     class Meta:
         # Specify table for storing animal medical records
@@ -233,7 +233,7 @@ class AnimalTask(models.Model):
     detail       = models.TextField(db_column="detail")
     is_done      = models.BooleanField(default=False, db_column="isDone")
     animal_id    = models.ForeignKey(Animal, related_name="animal_tasks", on_delete=models.CASCADE, db_column="animalID")
-    veterinarian = models.ForeignKey(CustomUser, related_name="assigned_tasks", on_delete=models.DO_NOTHING, db_column="veterinarianID")
+    veterinarian = models.ForeignKey(CustomUser, related_name="assigned_tasks", null=True, on_delete=models.SET_NULL, db_column="veterinarianID")
     reservation  = models.ForeignKey(Reservation, null=True, blank=True, on_delete=models.SET_NULL, db_column="reservationID")
 
     class Meta:

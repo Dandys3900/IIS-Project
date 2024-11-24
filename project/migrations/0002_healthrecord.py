@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(db_column='name', max_length=255)),
                 ('detail', models.TextField(db_column='detail')),
                 ('animal_id', models.ForeignKey(db_column='animalID', on_delete=django.db.models.deletion.CASCADE, related_name='med_records', to='project.animal')),
-                ('veterinarian', models.ForeignKey(db_column='veterinarianID', on_delete=django.db.models.deletion.DO_NOTHING, to=settings.AUTH_USER_MODEL)),
+                ('veterinarian', models.ForeignKey(db_column='veterinarianID', null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'HealthRecord',
