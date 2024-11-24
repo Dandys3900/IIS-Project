@@ -101,13 +101,13 @@ def client_edit_select(request):
     role_required(request, ["admin"])
 
     if request.method == "GET":
-        form = EditUserSelectForm()
+        form = EditUserSelectForm(user=request.user)
         # Render form
         return render(request, "edit_user.html", {
             "form" : form
         })
 
-    form = EditUserSelectForm(request.POST)
+    form = EditUserSelectForm(request.POST, user=request.user)
     if not form.is_valid():
         messages.error(request, "Invalid form.")
         return redirect("edituser")
@@ -152,19 +152,19 @@ def client_delete(request):
     role_required(request, ["admin"])
 
     if request.method == "GET":
-        form = DeleteUserForm()
+        form = DeleteUserForm(user=request.user)
         # Render form
         return render(request, "delete_user.html", {
             "form" : form
         })
 
-    form = DeleteUserForm(request.POST)
+    form = DeleteUserForm(request.POST, user=request.user)
     if not form.is_valid():
         messages.error(request, "Invalid form.")
         return redirect("deleteuser")
 
     try:
-        user_to_delete_id = form.cleaned_data["user_to_delete"]
+        user_to_delete_id = form.cleaned_data["user_to_delete"].username
         # Try to find and delete requested user in database
         user_to_delete = CustomUser.objects.get(username=user_to_delete_id)
         user_to_delete.delete()
@@ -414,6 +414,8 @@ def animal_medrecord(request, animal_id):
     edit_forms = {record.record_id: EditMedicalRecordForm(instance=record) for record in health_records}
     book_forms = {task.task_id: BookAnimalForm(animal=animal_id, user=request.user, task_id=task.task_id) for task in animal_tasks}
 
+    current_date = datetime.today().date()
+
     if request.method == "GET":
         # Render page
         return render(request, "animal_detail.html", {
@@ -424,6 +426,7 @@ def animal_medrecord(request, animal_id):
             "edit_forms"     : edit_forms,
             "book_forms"     : book_forms,
             "timetable"      : create_timetable(animal, MIN_HOUR, MAX_HOUR),
+            "current_date"   : current_date
         })
 
     record_id = request.POST.get("record_id")
@@ -640,9 +643,12 @@ def animal_book(request, animal_id):
 
 def walk_list(request):
     role_required(request, ["carer", "volunteer"])
-    walks = Reservation.objects.all().filter(type="walk", start_time__date__gte=date.today()).order_by("start_time__date")
+    walks = Reservation.objects.all().filter(type="walk").order_by("start_time__date")
     if request.user.userrole == "volunteer":
+        # Provide whole history of his walks
         walks = walks.filter(owner=request.user.user_id)
+    else:
+        walks = walks.filter(start_time__date__gte=date.today(), animal__is_active=True)
     return render(request, "walk_list.html", {
         "walks" : walks,
         "mode": "walklist",
@@ -650,7 +656,7 @@ def walk_list(request):
 
 def walk_availability_list(request):
     role_required(request, ["carer"])
-    walk_availabilities = Reservation.objects.all().filter(type="availability", start_time__date__gte=date.today()).order_by("start_time__date")
+    walk_availabilities = Reservation.objects.all().filter(type="availability", start_time__date__gte=date.today(), animal__is_active=True).order_by("start_time__date")
     return render(request, "walk_list.html", {
         "walks" : walk_availabilities,
         "mode": "walk_availability_list",
