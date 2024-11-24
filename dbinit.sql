@@ -87,7 +87,7 @@ CREATE TABLE Reservation (
     start DATETIME not NULL, -- date + time
     end DATETIME not NULL, -- date + time
 
-    type VARCHAR(16) not NULL, -- walk/checkup/...
+    type VARCHAR(16) not NULL, -- walk/checkup/availability...
 
     animalID INT not NULL,
     FOREIGN KEY(animalID) REFERENCES Animal(animalID) ON DELETE CASCADE,
@@ -97,7 +97,7 @@ CREATE TABLE Reservation (
     FOREIGN KEY(ownerID) REFERENCES User(userID),
     -- link to User, reservation remains even if the owner is deleted
 
-    confirmation VARCHAR(9) not NULL -- pending/declined/approved/...
+    confirmation VARCHAR(9) not NULL -- pending/declined/approved/available...
 );
 
 -- ------------------------------------- CREATE TASK --------------------------------------- --
@@ -271,7 +271,7 @@ VALUES
 
 -- ----------------------------- Future checkup reservations ------------------------------- --
 -- Max (Pes, ID 1)
-('2024-12-20 09:00:00', '2024-12-20 10:00:00', 'checkup', 1, 2, 'pending'), -- Reservation ID 11
+('2024-12-20 09:00:00', '2024-12-20 10:00:00', 'checkup', 1, 2, 'approved'), -- Reservation ID 11
 
 -- Bella (Pes, ID 2)
 ('2024-12-24 11:00:00', '2024-12-24 13:00:00', 'checkup', 2, 2, 'approved'), -- Reservation ID 12
@@ -312,37 +312,50 @@ VALUES
 
 -- ------------------------------- Future walk reservations -------------------------------- --
 -- Max (Pes, ID 1)
-('2024-12-20 15:00:00', '2024-12-20 18:00:00', 'walk', 1, 6, 'pending'), -- Reservation ID 26
+('2024-12-20 10:00:00', '2024-12-20 18:00:00', 'availability', 1, 3, 'available'), -- Reservation ID 26
+('2024-12-20 15:00:00', '2024-12-20 18:00:00', 'walk', 1, 6, 'pending'), -- Reservation ID 27
 
 -- Bella (Pes, ID 2)
-('2025-02-01 11:00:00', '2025-02-01 13:00:00', 'walk', 2, 6, 'pending'), -- Reservation ID 27
+('2024-12-25 08:00:00', '2024-12-25 18:00:00', 'availability', 2, 7, 'available'), -- Reservation ID 28
+('2024-12-24 13:00:00', '2024-12-24 18:00:00', 'availability', 2, 7, 'available'), -- Reservation ID 29
+('2024-12-25 11:00:00', '2024-12-25 13:00:00', 'walk', 2, 6, 'pending'), -- Reservation ID 30
 
 -- Rex (Pes, ID 3)
-('2025-03-15 12:00:00', '2025-03-15 15:00:00', 'walk', 3, 1, 'declined'), -- Reservation ID 28
+('2024-12-26 08:00:00', '2024-12-26 18:00:00', 'availability', 3, 3, 'available'), -- Reservation ID 31
+('2024-12-26 12:00:00', '2024-12-26 15:00:00', 'walk', 3, 1, 'declined'), -- Reservation ID 32
 
 -- Molly (Kočka, ID 4)
-('2024-11-30 13:00:00', '2024-11-30 16:00:00', 'walk', 4, 1, 'approved'), -- Reservation ID 29
+('2024-12-21 08:00:00', '2024-12-21 17:00:00', 'availability', 4, 3, 'available'), -- Reservation ID 33
+('2024-12-21 13:00:00', '2024-12-21 16:00:00', 'walk', 4, 1, 'approved'), -- Reservation ID 34
 
 -- Jerry (Kočka, ID 5)
-('2025-02-20 09:00:00', '2025-02-20 14:00:00', 'walk', 5, 1, 'pending'), -- Reservation ID 30
+('2025-01-02 08:00:00', '2025-01-02 18:00:00', 'availability', 5, 3, 'available'), -- Reservation ID 35
+('2025-01-01 08:00:00', '2025-01-01 18:00:00', 'availability', 5, 3, 'available'), -- Reservation ID 36
+('2025-01-02 09:00:00', '2025-01-02 14:00:00', 'walk', 5, 1, 'pending'), -- Reservation ID 37
 
 -- Kotěnka (Kočka, ID 6)
-('2025-03-01 11:00:00', '2025-03-01 13:00:00', 'walk', 6, 1, 'pending'), -- Reservation ID 31
+('2025-01-01 11:00:00', '2025-01-01 18:00:00', 'availability', 6, 7, 'available'), -- Reservation ID 38
+('2025-01-01 11:00:00', '2025-01-01 13:00:00', 'walk', 6, 1, 'pending'), -- Reservation ID 39
 
 -- Simba (Kočka, ID 7)
-('2024-12-10 09:00:00', '2024-12-10 12:00:00', 'walk', 7, 1, 'approved'), -- Reservation ID 32
+('2024-12-27 08:00:00', '2024-12-27 14:00:00', 'availability', 7, 3, 'available'), -- Reservation ID 40
+('2024-12-27 09:00:00', '2024-12-27 12:00:00', 'walk', 7, 1, 'approved'), -- Reservation ID 41
 
 -- Lola (Králík, ID 8)
-('2024-11-15 09:00:00', '2024-11-15 18:00:00', 'walk', 8, 1, 'pending'), -- Reservation ID 33
+('2024-12-28 08:00:00', '2024-12-28 18:00:00', 'availability', 8, 7, 'available'), -- Reservation ID 42
+('2024-12-28 09:00:00', '2024-12-28 18:00:00', 'walk', 8, 1, 'pending'), -- Reservation ID 43
 
 -- Charlie (Králík, ID 9)
-('2024-11-18 09:00:00', '2024-11-18 18:00:00', 'walk', 9, 1, 'approved'), -- Reservation ID 34
+('2024-12-29 08:00:00', '2024-12-29 18:00:00', 'availability', 9, 3, 'available'), -- Reservation ID 44
+('2024-12-29 09:00:00', '2024-12-29 18:00:00', 'walk', 9, 1, 'approved'), -- Reservation ID 45
 
 -- Bublinka (Morče, ID 10)
-('2025-01-25 09:00:00', '2025-01-25 10:00:00', 'walk', 10, 6, 'approved'); -- Reservation ID 35
-
+('2024-12-30 08:00:00', '2024-12-30 15:00:00', 'availability', 10, 3, 'available'), -- Reservation ID 46
+('2024-12-30 09:00:00', '2024-12-30 14:00:00', 'walk', 10, 6, 'approved'); -- Reservation ID 47
 
 -- Future Reservation for Lola (Králík, ID 8) - ('Prohlídka blech', FALSE, 8, 2, 36) not yet created
+
+
 
 -- ----------------------------------- INSERT INTO TASK ------------------------------------ --
 
