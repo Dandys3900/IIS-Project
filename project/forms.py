@@ -50,22 +50,23 @@ def getTextWidget(elementName, placeholderText):
     })
 
 # Function for constructing charFields
-def createField(max_length, elementName, placeholderText, required=True, validators=[]):
+def createField(max_length, elementName, labelText, required=True, validators=[], placeholderText=""):
     return forms.CharField(
         required   = required,
         max_length = max_length,
-        label      = "",
+        label      = labelText,
         validators = validators,
         widget     = getTextWidget(elementName, placeholderText)
     )
 
 # Singup form class
 class SignUpForm(UserCreationForm):
+    required_css_class = "required"
     # Get new user information
     first_name   = createField(255, "first_name", "Enter firstname")
     last_name    = createField(255, "last_name", "Enter lastname")
-    email        = createField(255, "email", "Enter email (account@server.domain)", validators=[email_regex])
-    phone_number = createField(13, "phone_number", "Enter phone number (+420XXXYYYZZZ)", validators=[phone_regex])
+    email        = createField(255, "email", "Email", validators=[email_regex], placeholderText="account@server.domain")
+    phone_number = createField(13, "phone_number", "Phone number", validators=[phone_regex], placeholderText="+420XXXYYYZZZ")
 
     # New user model class
     class Meta:
@@ -87,17 +88,20 @@ class SignUpForm(UserCreationForm):
 
         # Setup pre-defined fields of UserCreationForm class
         self.fields["username"].widget.attrs["class"] = "form-control"
-        self.fields["username"].widget.attrs["placeholder"] = "Enter username"
-        self.fields["username"].label     = ""
+        self.fields["username"].widget.attrs["placeholder"] = ""
+        self.fields["username"].label     = "Username"
+        self.fields["username"].required = True
 
         self.fields["password1"].widget.attrs["class"] = "form-control"
-        self.fields["password1"].widget.attrs["placeholder"] = "Enter password"
-        self.fields["password1"].label     = ""
+        self.fields["password1"].widget.attrs["placeholder"] = ""
+        self.fields["password1"].label     = "Password"
+        self.fields["password1"].required = True
 
         self.fields["password2"].widget.attrs["class"] = "form-control"
-        self.fields["password2"].widget.attrs["placeholder"] = "Enter password again"
-        self.fields["password2"].label     = ""
+        self.fields["password2"].widget.attrs["placeholder"] = ""
+        self.fields["password2"].label     = "Re-enter password"
         self.fields["password2"].help_text = ""
+        self.fields["password2"].required = True
 
 class CreateUserForm(SignUpForm):
     # Add dropdown menu to select role for new user
@@ -112,6 +116,7 @@ class CreateUserForm(SignUpForm):
         super(CreateUserForm, self).__init__(*args, **kwargs)
 
 class EditUserSelectForm(forms.Form):
+    required_css_class = "required"
     user_to_edit = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to edit", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
 
     def __init__(self, *args, **kwargs):
@@ -124,6 +129,7 @@ class EditUserSelectForm(forms.Form):
             self.fields["user_to_edit"].queryset = CustomUser.objects.exclude(user_id=self.user.user_id)
 
 class EditUserForm(forms.ModelForm):
+    required_css_class = "required"
     first_name = createField(255, "first_name", "Firstname")
     last_name = createField(255, "last_name", "Lastname")
     email = createField(255, "email", "Email (account@server.domain)", validators=[email_regex])
@@ -164,6 +170,7 @@ class EditUserForm(forms.ModelForm):
         self.user.save()
 
 class DeleteUserForm(forms.Form):
+    required_css_class = "required"
     user_to_delete = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Select a user to delete", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     confirm = forms.BooleanField(label="Are you sure you want to delete this account? (No undo)", required=True)
 
@@ -177,6 +184,7 @@ class DeleteUserForm(forms.Form):
             self.fields["user_to_delete"].queryset = CustomUser.objects.exclude(user_id=self.user.user_id)
 
 class UserInfoForm(forms.ModelForm):
+    required_css_class = "required"
     first_name = createField(255, "first_name", "Firstname")
     last_name = createField(255, "last_name", "Lastname")
     email = createField(255, "email", "Email (account@server.domain)", validators=[email_regex])
@@ -212,19 +220,19 @@ class UserInfoForm(forms.ModelForm):
         self.fields["phone_number"].initial = self.instance.phone_number
 
 class UserPasswordChangeForm(PasswordChangeForm):
+    required_css_class = "required"
     def __init__(self, *args, **kwargs):
         super(PasswordChangeForm, self).__init__(*args, **kwargs)
         self.fields["old_password"].widget.attrs["class"] = "form-control"
-        self.fields["old_password"].label= ""
-        self.fields["old_password"].widget.attrs["placeholder"] = "Current password"
+        self.fields["old_password"].label= "Current password"
 
         self.fields["new_password1"].widget.attrs["class"] = "form-control"
-        self.fields["new_password1"].label= ""
-        self.fields["new_password1"].widget.attrs["placeholder"] = "New password"
+        self.fields["new_password1"].label= "New password"
+        self.fields["new_password1"].required = True
 
         self.fields["new_password2"].widget.attrs["class"] = "form-control"
-        self.fields["new_password2"].label= ""
-        self.fields["new_password2"].widget.attrs["placeholder"] = "Confirm new password"
+        self.fields["new_password2"].label= "Confirm new password"
+        self.fields["new_password2"].required = True
 
 class UploadImageForm(forms.ModelForm):
     image = forms.ImageField(widget=forms.FileInput())
@@ -236,6 +244,7 @@ class UploadImageForm(forms.ModelForm):
         )
 
 class CreateAnimalForm(forms.ModelForm):
+    required_css_class = "required"
     name         = createField(255, "name", "Enter animal name")
     species      = createField(255, "species", "Enter specie")
     breed        = createField(255, "breed", "Enter animal breed")
@@ -298,6 +307,7 @@ class EditAnimalForm(CreateAnimalForm):
         self.fields["description"].initial = self.animal.description
 
 class CreateMedicalRecordForm(forms.ModelForm):
+    required_css_class = "required"
     name   = createField(255, "name", "Enter record name")
     detail = forms.CharField(widget=forms.Textarea(attrs={
         "class" : "form-control"
@@ -320,6 +330,7 @@ class EditMedicalRecordForm(CreateMedicalRecordForm):
         self.fields["detail"].initial = self.instance.detail
 
 class CreateAnimalTaskForm(forms.ModelForm):
+    required_css_class = "required"
     target_vet = forms.ModelChoiceField(queryset=CustomUser.objects.filter(userrole="vet"), label="Assign task to", required=True, widget=forms.Select(attrs=SELECT_FORM_STYLE))
     detail = forms.CharField(widget=forms.Textarea(attrs={
         "class" : "form-control"
@@ -333,17 +344,21 @@ class CreateAnimalTaskForm(forms.ModelForm):
         )
 
 class BookAnimalForm(forms.Form):
+    required_css_class = "required"
     date = forms.DateField(
         widget=forms.DateInput(attrs={"type": "date", "id": "date_input"}),
         label="Date",
+        required=True
     )
     start_time = forms.TimeField(
         widget=forms.TimeInput(attrs={"type": "time", "id": "start_time"}),
         label="Start time",
+        required=True
     )
     end_time = forms.TimeField(
         widget=forms.TimeInput(attrs={"type": "time", "id": "end_time"}),
         label="End time",
+        required=True
     )
 
     def __init__(self, *args, **kwargs):
