@@ -38,6 +38,11 @@
         -webkit-line-clamp: 3;
         max-height: 4.5rem;
       }
+
+      label.required::after {
+        content: ' *';
+        color: red;
+      }
     </style>
     <!-- Tab icon -->
     <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}">

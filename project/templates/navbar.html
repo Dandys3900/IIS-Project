@@ -158,7 +158,9 @@
 
             // Initially hide reset password hint text
             document.addEventListener("DOMContentLoaded", function() {
-                document.getElementById("pwchangeform").style.display = "none";
+                element = document.getElementById("pwchangeform");
+                if (element)
+                    element.style.display = "none";
             });
         </script>
     {% endblock extra_js %}
