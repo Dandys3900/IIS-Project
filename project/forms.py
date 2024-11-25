@@ -344,17 +344,21 @@ class CreateAnimalTaskForm(forms.ModelForm):
         )
 
 class BookAnimalForm(forms.Form):
+    required_css_class = "required"
     date = forms.DateField(
         widget=forms.DateInput(attrs={"type": "date", "id": "date_input"}),
         label="Date",
+        required=True
     )
     start_time = forms.TimeField(
         widget=forms.TimeInput(attrs={"type": "time", "id": "start_time"}),
         label="Start time",
+        required=True
     )
     end_time = forms.TimeField(
         widget=forms.TimeInput(attrs={"type": "time", "id": "end_time"}),
         label="End time",
+        required=True
     )
 
     def __init__(self, *args, **kwargs):
